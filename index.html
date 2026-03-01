@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gladiator Manager</title>
+    <link rel="stylesheet" href="style.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Inter:wght@300;400;600&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+    <div id="startOverlay" class="start-overlay">
+        <h2>Click to Enter Arena</h2>
+    </div>
+
+    <div class="pan-background" id="panBackground" style="background-image: url('colosseum.png');"></div>
+
+    <div class="main-container" id="mainContainer">
+        <header class="game-header">
+            <h1 class="game-title">Gladiator Manager</h1>
+            <p class="game-subtitle">Forge Your Legacy in the Arena</p>
+        </header>
+
+        <nav class="main-menu" id="mainMenu">
+            <button class="menu-btn" data-action="continue">
+                <span class="btn-text">Continue</span>
+                <div class="btn-glow"></div>
+            </button>
+            <button class="menu-btn primary" data-action="new-game">
+                <span class="btn-text">New Game</span>
+                <div class="btn-glow"></div>
+            </button>
+            <button class="menu-btn" data-action="settings">
+                <span class="btn-text">Settings</span>
+                <div class="btn-glow"></div>
+            </button>
+            <button class="menu-btn danger" data-action="exit">
+                <span class="btn-text">Exit</span>
+                <div class="btn-glow"></div>
+            </button>
+        </nav>
+    </div>
+
+    <!-- Team Selection Screen -->
+    <div class="team-selection-screen hidden" id="teamSelectionScreen">
+        <header class="game-header">
+            <h1 class="game-title" style="font-size: 3rem;">Choose Your City</h1>
+            <p class="game-subtitle">Select the team you will lead to glory</p>
+        </header>
+        <div class="team-grid" id="teamGrid">
+            <!-- Team buttons populated by JS -->
+        </div>
+        <button class="menu-btn danger" id="cancelTeamSelectBtn" style="margin-top: 2rem;">
+            <span class="btn-text">Back</span>
+            <div class="btn-glow"></div>
+        </button>
+    </div>
+
+    <!-- Home Screen -->
+    <div id="homeScreen" class="home-screen hidden" style="background-image: url('colosseum_interior.png');">
+        <header class="home-header">
+            <h2 class="home-title">Gladiator Manager</h2>
+            <div class="header-stats">
+                <span class="stat-item" id="goldDisplay"><span class="stat-icon">💰</span> 1000 G</span>
+                <span class="stat-item" id="fameDisplay"><span class="stat-icon">🏆</span> Fame: 0</span>
+            </div>
+        </header>
+        <div class="widget-toggles">
+            <button class="toggle-btn active" data-target="teamSection">Lineup</button>
+            <button class="toggle-btn active" data-target="calendarSection">Calendar</button>
+            <button class="toggle-btn active" data-target="newsfeedSection">Newsfeed</button>
+        </div>
+
+        <main class="home-content">
+            <section id="teamSection" class="team-section panel">
+                <h3>Team Lineup</h3>
+                <div class="roster-grid">
+                    <div class="roster-slot empty">
+                        <span>+ Recruit</span>
+                    </div>
+                </div>
+                <button class="action-btn">Edit Lineup</button>
+            </section>
+
+            <section id="calendarSection" class="calendar-section panel">
+                <h3>Calendar</h3>
+                <div class="calendar-display">
+                    <p class="current-date" id="currentDateDisplay">Year 1, Month 1, Week 1</p>
+                    <p class="upcoming-event" id="upcomingEventDisplay">No Events Scheduled</p>
+                    <div id="calendarGrid" class="calendar-grid"></div>
+                </div>
+                <button class="action-btn primary" style="margin-top: 1rem;">Advance Week</button>
+            </section>
+
+            <section id="newsfeedSection" class="newsfeed-section panel">
+                <h3>Newsfeed</h3>
+                <div class="news-list" id="newsList">
+                    <div class="news-item">
+                        <p>Welcome to Gladiator Manager! Prepare your team for glory.</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="constants.js"></script>
+    <script src="gladiator_generation.js"></script>
+    <script src="home_screen.js"></script>
+    <script src="main_menu.js"></script>
+</body>
+
+</html>
