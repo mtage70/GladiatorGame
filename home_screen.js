@@ -199,4 +199,116 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     });
+
+    setupAdvanceTimeBtn();
 });
+
+function setupAdvanceTimeBtn() {
+    const advanceBtn = document.getElementById('advanceTimeBtn');
+    if (!advanceBtn) return;
+
+    const saveContext = JSON.parse(localStorage.getItem('gladiatorSaveContext'));
+    if (!saveContext || !saveContext.schedule) return;
+
+    const dayOfWeek = saveContext.day % 7;
+    const totalDaysElapsed = ((saveContext.year - 1) * 12 * 28) + ((saveContext.month - 1) * 28) + (saveContext.day - 1);
+    const currentWeekIndex = Math.floor(totalDaysElapsed / 7);
+
+    let isMatchDay = false;
+    if (dayOfWeek === 0 && currentWeekIndex < saveContext.schedule.length) {
+        const weekMatches = saveContext.schedule[currentWeekIndex];
+        isMatchDay = !!weekMatches.find(m => m.home === saveContext.teamId || m.away === saveContext.teamId);
+    }
+
+    if (isMatchDay) {
+        advanceBtn.textContent = "Begin Match";
+        advanceBtn.style.background = "linear-gradient(to bottom, #4a2f32 0%, #2a1a1d 100%)";
+        advanceBtn.style.borderColor = "#70474b";
+        advanceBtn.onclick = () => {
+            if (typeof initializeMatchScreen === 'function') {
+                initializeMatchScreen(saveContext);
+            } else {
+                alert("Match system script not loaded properly!");
+            }
+        };
+    } else {
+        advanceBtn.textContent = "Advance Time";
+        advanceBtn.style.background = ""; // Reset to CSS default class
+        advanceBtn.style.borderColor = "";
+        advanceBtn.onclick = () => advanceTime(saveContext);
+    }
+}
+
+function advanceTime(saveContext) {
+    const advanceBtn = document.getElementById('advanceTimeBtn');
+    if (advanceBtn) {
+        advanceBtn.disabled = true;
+        advanceBtn.textContent = "Advancing...";
+    }
+
+    let daysAdvanced = 0;
+
+    function tickDay() {
+        if (daysAdvanced >= 7) {
+            finishAdvancing(saveContext, daysAdvanced);
+            return;
+        }
+
+        saveContext.day += 1;
+        if (saveContext.day > 28) {
+            saveContext.day = 1;
+            saveContext.month += 1;
+            if (saveContext.month > 12) {
+                saveContext.month = 1;
+                saveContext.year += 1;
+            }
+        }
+        daysAdvanced++;
+
+        // Render UI for current iterative day
+        localStorage.setItem('gladiatorSaveContext', JSON.stringify(saveContext));
+        renderCalendar(saveContext);
+
+        // Stop if the new day is a match day for this team
+        const dayOfWeek = saveContext.day % 7; // Sunday = 0
+        let isMatchDay = false;
+        if (dayOfWeek === 0) {
+            const totalDaysElapsed = ((saveContext.year - 1) * 12 * 28) + ((saveContext.month - 1) * 28) + (saveContext.day - 1);
+            const currentWeekIndex = Math.floor(totalDaysElapsed / 7);
+            if (saveContext.schedule && currentWeekIndex < saveContext.schedule.length) {
+                const weekMatches = saveContext.schedule[currentWeekIndex];
+                if (weekMatches.find(m => m.home === saveContext.teamId || m.away === saveContext.teamId)) {
+                    isMatchDay = true;
+                }
+            }
+        }
+
+        if (isMatchDay) {
+            finishAdvancing(saveContext, daysAdvanced);
+            return;
+        }
+
+        setTimeout(tickDay, 1000);
+    }
+
+    tickDay();
+}
+
+function finishAdvancing(saveContext, daysAdvanced) {
+    const advanceBtn = document.getElementById('advanceTimeBtn');
+    if (advanceBtn) advanceBtn.disabled = false;
+
+    // Create a newsfeed event to make time progression feel alive
+    const newsList = document.getElementById('newsList');
+    if (newsList && daysAdvanced > 0) {
+        const newsItem = document.createElement('div');
+        newsItem.className = 'news-item';
+        newsItem.style.borderLeftColor = 'var(--color-text-muted)';
+        newsItem.innerHTML = `<p><em>Time passes... Your gladiators trained and rested for ${daysAdvanced} days.</em></p>`;
+        newsList.insertBefore(newsItem, newsList.firstChild);
+    }
+
+    localStorage.setItem('gladiatorSaveContext', JSON.stringify(saveContext));
+    renderCalendar(saveContext);
+    setupAdvanceTimeBtn();
+}

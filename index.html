@@ -92,7 +92,7 @@
                     <p class="upcoming-event" id="upcomingEventDisplay">No Events Scheduled</p>
                     <div id="calendarGrid" class="calendar-grid"></div>
                 </div>
-                <button class="action-btn primary" style="margin-top: 1rem;">Advance Week</button>
+                <button id="advanceTimeBtn" class="action-btn primary" style="margin-top: 1rem;">Advance Time</button>
             </section>
 
             <section id="newsfeedSection" class="newsfeed-section panel">
@@ -106,11 +106,62 @@
         </main>
     </div>
 
+    <!-- Match Screen (Preparation & Combat) -->
+    <div id="matchScreen" class="match-screen hidden">
+        <div id="matchHeader" class="match-header panel">
+            <h2>Match Day!</h2>
+            <h3 id="matchupTitle">Player Team vs. Opponent Team</h3>
+        </div>
+        <div class="match-main"
+            style="display: flex; flex-direction: row; gap: 2rem; flex: 1; overflow: hidden; height: 100%;">
+            <div class="roster-sidebar panel"
+                style="width: 350px; display: flex; flex-direction: column; overflow-y: auto;">
+                <h3>Available Gladiators</h3>
+                <p style="font-size: 0.9rem; margin-bottom: 1rem;">Click to assign to your formation.</p>
+                <div id="matchRosterList" class="gladiator-list-vertical"
+                    style="display: flex; flex-direction: column; gap: 0.5rem;"></div>
+            </div>
+
+            <div class="match-content" style="flex: 1;">
+                <div class="team-side player-side panel">
+                    <h3>Your Formation</h3>
+                    <div class="formation-grid" id="playerFormation">
+                        <!-- 5 slots for assigned gladiators -->
+                        <div class="formation-slot" data-slot="0"></div>
+                        <div class="formation-slot" data-slot="1"></div>
+                        <div class="formation-slot" data-slot="2"></div>
+                        <div class="formation-slot" data-slot="3"></div>
+                        <div class="formation-slot" data-slot="4"></div>
+                    </div>
+                </div>
+
+                <div class="versus-divider">
+                    <h1>VS</h1>
+                    <button id="startCombatBtn" class="action-btn danger">START COMBAT</button>
+                    <button id="retreatBtn" class="action-btn">Retreat</button>
+                </div>
+
+                <div class="team-side opponent-side panel" style="border-image-source: url('ui_border_red.png');">
+                    <h3>Opponent Formation</h3>
+                    <div class="formation-grid" id="opponentFormation">
+                        <!-- 5 slots for assigned opponents -->
+                        <div class="formation-slot" data-slot="0"></div>
+                        <div class="formation-slot" data-slot="1"></div>
+                        <div class="formation-slot" data-slot="2"></div>
+                        <div class="formation-slot" data-slot="3"></div>
+                        <div class="formation-slot" data-slot="4"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Scripts -->
     <script src="constants.js"></script>
     <script src="gladiator_generation.js"></script>
     <script src="home_screen.js"></script>
     <script src="main_menu.js"></script>
+    <script src="match_screen.js"></script>
 </body>
 
 </html>

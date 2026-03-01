@@ -98,7 +98,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     roster: generateInitialRoster(),
                     teamId: team.id,
                     teamName: team.name,
-                    schedule: generateSeasonSchedule()
+                    schedule: generateSeasonSchedule(),
+                    opposingRosters: generateOpposingRosters(team.id)
                 }));
                 teamSelectionScreen.classList.add('hidden');
                 transitionToHome();

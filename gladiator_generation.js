@@ -72,6 +72,20 @@ function generateInitialRoster() {
     return roster;
 }
 
+function generateOpposingRosters(playerTeamId) {
+    const opposingRosters = {};
+    TEAMS.forEach(team => {
+        if (team.id !== playerTeamId) {
+            const roster = [];
+            for (let i = 0; i < 10; i++) {
+                roster.push(generateGladiator());
+            }
+            opposingRosters[team.id] = roster;
+        }
+    });
+    return opposingRosters;
+}
+
 function generateSeasonSchedule() {
     // Generate a double round-robin schedule for all teams
     const teamIds = TEAMS.map(t => t.id);
