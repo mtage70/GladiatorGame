@@ -204,7 +204,9 @@ function renderMatchRoster() {
             });
         }
 
-        let portraitImg = glad.portrait ? `<img src="${glad.portrait}" alt="portrait" />` : `<div style="width:48px;height:48px;background:#333;border-radius:4px;"></div>`;
+        let portraitImg = glad.portrait
+            ? `<div style="position:relative;width:48px;height:48px;flex-shrink:0;"><img src="${glad.portrait}" alt="portrait" style="width:48px;height:48px;border-radius:4px;object-fit:cover;" />${glad.battles > 0 ? `<div class="battles-badge">${glad.battles}</div>` : ''}</div>`
+            : `<div style="position:relative;width:48px;height:48px;background:#333;border-radius:4px;flex-shrink:0;">${glad.battles > 0 ? `<div class="battles-badge">${glad.battles}</div>` : ''}</div>`;
 
         const maxHp = glad.maxHp || (30 + (glad.stats.str * 2));
         const currentHp = glad.hp !== undefined ? glad.hp : maxHp;

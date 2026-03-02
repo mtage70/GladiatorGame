@@ -64,6 +64,8 @@ function generateGladiator() {
         class: charClass,
         portrait: portrait,
         stats: { str, dex, int, wis },
+        baseStats: { str, dex, int, wis },
+        battles: 0,
         maxHp: maxHp,
         hp: maxHp
     };

@@ -14,8 +14,15 @@ function renderRoster() {
 
     const goldDisplay = document.getElementById('goldDisplay');
     const fameDisplay = document.getElementById('fameDisplay');
+    const recordDisplay = document.getElementById('recordDisplay');
     if (goldDisplay) goldDisplay.innerHTML = `<span class="stat-icon">💰</span> ${saveContext.gold} G`;
     if (fameDisplay) fameDisplay.innerHTML = `<span class="stat-icon">🏆</span> Fame: ${saveContext.fame}`;
+
+    // Compute and display player W/L record
+    const matchResults = saveContext.matchResults || [];
+    const wins = matchResults.filter(r => r.won).length;
+    const losses = matchResults.filter(r => !r.won).length;
+    if (recordDisplay) recordDisplay.innerHTML = `<span class="stat-icon">⚔️</span> ${wins}W - ${losses}L`;
 
     grid.innerHTML = ''; // Clear current grid
 
@@ -23,8 +30,8 @@ function renderRoster() {
         const slot = document.createElement('div');
         slot.className = 'roster-slot filled';
         const portraitHtml = glad.portrait
-            ? `<div class="glad-portrait"><img src="${glad.portrait}" alt="${glad.name}" /></div>`
-            : `<div class="glad-portrait blank"></div>`;
+            ? `<div class="glad-portrait" style="position:relative;"><img src="${glad.portrait}" alt="${glad.name}" />${glad.battles > 0 ? `<div class="battles-badge">${glad.battles}</div>` : ''}</div>`
+            : `<div class="glad-portrait blank" style="position:relative;">${glad.battles > 0 ? `<div class="battles-badge">${glad.battles}</div>` : ''}</div>`;
         const displayMaxHp = glad.maxHp || (50 + (glad.stats.str * 5));
         const displayHp = glad.hp !== undefined ? glad.hp : displayMaxHp;
 
@@ -106,6 +113,7 @@ function renderRoster() {
     }
 
     renderCalendar(saveContext);
+    renderStandings(saveContext);
 }
 
 function renderCalendar(saveContext) {
@@ -210,6 +218,49 @@ function renderCalendar(saveContext) {
             calendarGrid.appendChild(dayDiv);
         }
     }
+}
+
+function renderStandings(saveContext) {
+    const tbody = document.getElementById('standingsBody');
+    if (!tbody) return;
+
+    // Build records for all teams
+    const allTeams = TEAMS.map(team => {
+        let wins = 0, losses = 0;
+
+        if (team.id === saveContext.teamId) {
+            // Player team: use matchResults
+            const results = saveContext.matchResults || [];
+            wins = results.filter(r => r.won).length;
+            losses = results.filter(r => !r.won).length;
+        } else {
+            // AI team: derive from schedule results stored in opposingRosters
+            const aiData = saveContext.opposingRosters && saveContext.opposingRosters[team.id];
+            wins = (aiData && aiData.wins) || 0;
+            losses = (aiData && aiData.losses) || 0;
+        }
+
+        const played = wins + losses;
+        const pct = played > 0 ? (wins / played) : 0;
+        return { team, wins, losses, played, pct, isPlayer: team.id === saveContext.teamId };
+    });
+
+    // Sort: most wins first, then fewest losses
+    allTeams.sort((a, b) => b.wins - a.wins || a.losses - b.losses);
+
+    tbody.innerHTML = '';
+    allTeams.forEach((entry, i) => {
+        const tr = document.createElement('tr');
+        if (entry.isPlayer) tr.classList.add('standings-player-row');
+        tr.innerHTML = `
+            <td>${i + 1}</td>
+            <td>${entry.team.name}${entry.isPlayer ? ' <span class="standings-you">(You)</span>' : ''}</td>
+            <td>${entry.wins}</td>
+            <td>${entry.losses}</td>
+            <td>${entry.played > 0 ? (entry.pct * 100).toFixed(0) + '%' : '—'}</td>
+        `;
+        tbody.appendChild(tr);
+    });
 }
 
 function transitionToHome() {

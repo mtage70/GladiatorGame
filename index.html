@@ -66,12 +66,14 @@
             <div class="header-stats">
                 <span class="stat-item" id="goldDisplay"><span class="stat-icon">💰</span> 1000 G</span>
                 <span class="stat-item" id="fameDisplay"><span class="stat-icon">🏆</span> Fame: 0</span>
+                <span class="stat-item" id="recordDisplay"><span class="stat-icon">⚔️</span> 0-0</span>
             </div>
         </header>
         <div class="widget-toggles">
             <button class="toggle-btn active" data-target="teamSection">Lineup</button>
             <button class="toggle-btn active" data-target="calendarSection">Calendar</button>
             <button class="toggle-btn active" data-target="newsfeedSection">Newsfeed</button>
+            <button class="toggle-btn active" data-target="standingsSection">Standings</button>
         </div>
 
         <main class="home-content">
@@ -105,6 +107,23 @@
                         <p>Welcome to Gladiator Manager! Prepare your team for glory.</p>
                     </div>
                 </div>
+            </section>
+
+            <section id="standingsSection" class="standings-section panel">
+                <h3>League Standings</h3>
+                <table class="standings-table" id="standingsTable">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Team</th>
+                            <th>W</th>
+                            <th>L</th>
+                            <th>Win %</th>
+                        </tr>
+                    </thead>
+                    <tbody id="standingsBody">
+                    </tbody>
+                </table>
             </section>
         </main>
     </div>

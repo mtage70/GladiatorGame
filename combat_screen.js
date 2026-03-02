@@ -90,6 +90,7 @@ function setupCombatant(glad, side) {
 // Utility function to build the square formation widget (used here and in Match Prep)
 function buildSquareGladiatorCard(glad, prefix = '') {
     let portraitImg = glad.portrait ? `<img src="${glad.portrait}" alt="portrait" />` : `<div style="width:100%;height:100%;background:#333;border-radius:4px;"></div>`;
+    const battlesBadge = (glad.battles > 0) ? `<div class="battles-badge">${glad.battles}</div>` : '';
 
     // We only need maxHp if it's already calculated, otherwise just show stats.
     const hasHp = glad.hp !== undefined && glad.maxHp !== undefined;
@@ -102,6 +103,7 @@ function buildSquareGladiatorCard(glad, prefix = '') {
 
     return `
         ${portraitImg}
+        ${battlesBadge}
         <div class="combat-card-hover-stats">
             <div>STR: ${glad.stats.str}</div>
             <div>DEX: ${glad.stats.dex}</div>
@@ -498,6 +500,26 @@ function finishCombatTransition() {
         }
     });
 
+    // Award Battle XP to all player gladiators who survived (still in roster)
+    const participantIds = new Set(combatState.combatants.filter(c => c.side === 'player').map(c => c.id));
+    combatState.saveContext.roster.forEach(glad => {
+        if (!participantIds.has(glad.id)) return; // didn't fight
+        // Ensure baseStats exists for legacy gladiators
+        if (!glad.baseStats) {
+            glad.baseStats = { str: glad.stats.str, dex: glad.stats.dex, int: glad.stats.int, wis: glad.stats.wis };
+        }
+        glad.battles = (glad.battles || 0) + 1;
+        // Recalculate stats: baseStats + battles bonus
+        const b = glad.battles;
+        glad.stats = {
+            str: glad.baseStats.str + b,
+            dex: glad.baseStats.dex + b,
+            int: glad.baseStats.int + b,
+            wis: glad.baseStats.wis + b,
+        };
+        //glad.maxHP = 30 + (glad.stats.str * 2);
+    });
+
     // Display Casualties Modal if present
     if (permadeaths.length > 0) {
         const casualtiesModal = document.getElementById('casualtiesModal');
@@ -731,7 +753,7 @@ function simulateAIMatch(teamAId, teamBId, saveContext) {
         }
     });
 
-    // Handle AI Rewards
+    // Handle AI Rewards and Track Wins/Losses
     if (teamAData && teamAData.gold !== undefined && teamBData && teamBData.gold !== undefined) {
         // Did teamA wipe?
         let aliveA = combatants.filter(c => c.side === 'A' && !c.isDead).length;
@@ -739,10 +761,14 @@ function simulateAIMatch(teamAId, teamBId, saveContext) {
             // Team A Won
             teamAData.gold += 1000;
             teamBData.gold += 250;
+            teamAData.wins = (teamAData.wins || 0) + 1;
+            teamBData.losses = (teamBData.losses || 0) + 1;
         } else {
             // Team B Won
             teamBData.gold += 1000;
             teamAData.gold += 250;
+            teamBData.wins = (teamBData.wins || 0) + 1;
+            teamAData.losses = (teamAData.losses || 0) + 1;
         }
     }
 }

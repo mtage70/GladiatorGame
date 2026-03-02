@@ -844,6 +844,78 @@ body {
     color: var(--color-text-body);
 }
 
+/* Battles Badge */
+.battles-badge {
+    position: absolute;
+    top: 3px;
+    right: 3px;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 4px;
+    background: var(--color-gold-primary);
+    color: #1a1a1a;
+    font-family: var(--font-title);
+    font-size: 0.65rem;
+    font-weight: 900;
+    border-radius: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.7);
+    pointer-events: none;
+    z-index: 10;
+    line-height: 1;
+}
+
+/* Standings Section */
+.standings-section {
+    min-width: 280px;
+}
+
+.standings-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+}
+
+.standings-table th {
+    text-align: left;
+    padding: 0.4rem 0.6rem;
+    color: var(--color-gold-primary);
+    font-family: var(--font-title);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-bottom: 1px solid rgba(212, 175, 55, 0.3);
+}
+
+.standings-table td {
+    padding: 0.35rem 0.6rem;
+    color: var(--color-text-body);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.standings-table tr:last-child td {
+    border-bottom: none;
+}
+
+.standings-table tbody tr:hover td {
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.standings-player-row td {
+    color: var(--color-gold-light) !important;
+    font-weight: 600;
+    background: rgba(212, 175, 55, 0.08);
+}
+
+.standings-you {
+    font-size: 0.75rem;
+    color: var(--color-gold-primary);
+    opacity: 0.8;
+}
+
 /* Match Screen */
 .match-screen {
     display: flex;
