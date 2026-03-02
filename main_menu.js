@@ -89,7 +89,7 @@ document.addEventListener('DOMContentLoaded', () => {
             `;
             btn.addEventListener('click', () => {
                 localStorage.setItem('gladiatorSaveContext', JSON.stringify({
-                    gold: 1000,
+                    gold: 5000,
                     fame: 0,
                     year: 1,
                     month: 1,

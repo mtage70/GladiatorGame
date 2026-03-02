@@ -614,6 +614,9 @@ body {
     border-radius: 4px;
     background: rgba(0, 0, 0, 0.5);
     margin-bottom: 0.25rem;
+    display: inline-block;
+    width: max-content;
+    align-self: center;
 }
 
 /* Class Colors */
@@ -814,6 +817,28 @@ body {
     color: var(--color-text-muted);
 }
 
+.newsfeed-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.news-list {
+    flex: 1;
+    overflow-y: auto;
+    padding-right: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.news-item {
+    background: rgba(0, 0, 0, 0.4);
+    border-left: 3px solid var(--color-accent-primary);
+    padding: 0.75rem;
+    border-radius: 0 4px 4px 0;
+}
+
 .news-item p {
     margin: 0;
     color: var(--color-text-body);
@@ -954,6 +979,10 @@ body {
     gap: 0.25rem;
 }
 
+.gladiator-card-horizontal .info .glad-class {
+    align-self: flex-start;
+}
+
 .gladiator-card-horizontal .stats {
     font-size: 0.8rem;
     display: flex;
@@ -964,4 +993,287 @@ body {
 .gladiator-card-horizontal.assigned {
     opacity: 0.5;
     pointer-events: none;
+}
+
+.gladiator-list-vertical {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding-right: 0.5rem;
+}
+
+/* Combat Screen */
+.combat-screen {
+    display: flex;
+    flex-direction: column;
+    padding: 2rem;
+    height: 100vh;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+.match-screen.hidden,
+.combat-screen.hidden,
+.modal.hidden {
+    display: none !important;
+}
+
+.combat-main {
+    display: flex;
+    flex-direction: row;
+    gap: 2rem;
+    flex: 1;
+    overflow: hidden;
+}
+
+.combat-formation {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    overflow-y: auto;
+    padding-right: 0.5rem;
+}
+
+.combatant-card {
+    display: flex;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.5);
+    border: 1px solid var(--color-text-muted);
+    border-radius: 4px;
+    padding: 0.5rem;
+    gap: 1rem;
+    transition: all 0.2s ease;
+}
+
+/* Combat Screen overrides for formation slots */
+.combat-screen .formation-slot,
+.match-screen .formation-slot {
+    border: none;
+    background: transparent;
+    position: relative;
+    /* Ensure nested absolute positions are contained */
+}
+
+.combatant-card.full-slot {
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    position: absolute;
+    /* Lock to the explicit size of .formation-slot */
+    top: 0;
+    left: 0;
+    border: 2px solid #505560;
+    overflow: hidden;
+    display: block;
+}
+
+.combatant-card.full-slot img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 0;
+    display: block;
+}
+
+.combat-card-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    padding: 4px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    transition: background 0.2s ease;
+}
+
+.combatant-card.full-slot:hover .combat-card-overlay {
+    background: rgba(0, 0, 0, 0.9);
+}
+
+.combat-card-hover-stats {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: calc(100% - 30px);
+    /* Leave room for the bottom overlay */
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 4px;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    font-size: 0.8rem;
+    color: var(--color-gold-light);
+}
+
+.combatant-card.full-slot:hover .combat-card-hover-stats {
+    opacity: 1;
+}
+
+.combat-card-name {
+    font-size: 0.75rem;
+    font-weight: bold;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.combatant-card.active-turn {
+    border-color: #ffd700;
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.8), inset 0 0 15px rgba(255, 215, 0, 0.4);
+}
+
+.combatant-card.dead {
+    opacity: 0.4;
+    filter: grayscale(100%);
+    border-color: #333;
+}
+
+.combatant-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+.hp-bar-container {
+    width: 100%;
+    background: #333;
+    border-radius: 2px;
+    overflow: hidden;
+    position: relative;
+    border: 1px solid #000;
+}
+
+.hp-fill {
+    height: 100%;
+    background: linear-gradient(to right, #a00, #f00);
+    transition: width 0.3s ease-in-out;
+}
+
+.hp-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    text-align: center;
+    font-size: 0.65rem;
+    color: white;
+    text-shadow: 1px 1px 2px black, -1px -1px 2px black, 1px -1px 2px black, -1px 1px 2px black;
+    font-weight: bold;
+    pointer-events: none;
+    line-height: 1;
+}
+
+.combat-center-panel {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.log-entry {
+    margin-bottom: 0.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 0.25rem;
+}
+
+.log-entry.critical {
+    color: #ffaa00;
+    font-weight: bold;
+}
+
+.log-entry.death {
+    color: #ff4444;
+    font-weight: bold;
+}
+
+/* Combat Animations */
+@keyframes wiggleAttack {
+    0% {
+        transform: translateX(0) scale(1.05);
+    }
+
+    25% {
+        transform: translateX(10px) scale(1.05);
+    }
+
+    50% {
+        transform: translateX(-5px) scale(1.05);
+    }
+
+    75% {
+        transform: translateX(5px) scale(1.05);
+    }
+
+    100% {
+        transform: translateX(0) scale(1);
+    }
+}
+
+@keyframes wiggleHit {
+    0% {
+        transform: translateX(0) scale(0.95);
+    }
+
+    25% {
+        transform: translateX(-8px) rotate(-2deg) scale(0.95);
+    }
+
+    50% {
+        transform: translateX(8px) rotate(2deg) scale(0.95);
+    }
+
+    75% {
+        transform: translateX(-4px) rotate(-1deg) scale(0.95);
+    }
+
+    100% {
+        transform: translateX(0) scale(1);
+    }
+}
+
+.combatant-card.attacking {
+    animation: wiggleAttack 0.4s ease-in-out;
+    z-index: 10;
+}
+
+.combatant-card.taking-damage {
+    animation: wiggleHit 0.4s ease-in-out;
+    border-color: #ff4444 !important;
+    box-shadow: 0 0 15px rgba(255, 68, 68, 0.8) !important;
+    background: rgba(100, 20, 20, 0.7) !important;
+}
+
+@keyframes wiggleHeal {
+    0% {
+        transform: translateY(0) scale(1.0);
+    }
+
+    30% {
+        transform: translateY(-5px) scale(1.02);
+    }
+
+    70% {
+        transform: translateY(-5px) scale(1.02);
+    }
+
+    100% {
+        transform: translateY(0) scale(1.0);
+    }
+}
+
+.combatant-card.receiving-heal {
+    animation: wiggleHeal 0.4s ease-in-out;
+    border-color: #4caf50 !important;
+    box-shadow: 0 0 15px rgba(76, 175, 80, 0.8) !important;
+    background: rgba(20, 100, 20, 0.7) !important;
 }

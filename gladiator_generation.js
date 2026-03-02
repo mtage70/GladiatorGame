@@ -52,7 +52,7 @@ function generateGladiator() {
             int = generateStat(50);
             break;
     }
-
+    const maxHp = 30 + (str * 2);
     return {
         id: 'glad_' + Math.random().toString(36).substr(2, 9),
         name: name,
@@ -60,7 +60,9 @@ function generateGladiator() {
         gender: gender,
         class: charClass,
         portrait: portrait,
-        stats: { str, dex, int, wis }
+        stats: { str, dex, int, wis },
+        maxHp: maxHp,
+        hp: maxHp
     };
 }
 
@@ -80,7 +82,10 @@ function generateOpposingRosters(playerTeamId) {
             for (let i = 0; i < 10; i++) {
                 roster.push(generateGladiator());
             }
-            opposingRosters[team.id] = roster;
+            opposingRosters[team.id] = {
+                roster: roster,
+                gold: 5000 // Initial AI startup cash
+            };
         }
     });
     return opposingRosters;

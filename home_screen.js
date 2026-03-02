@@ -25,40 +25,85 @@ function renderRoster() {
         const portraitHtml = glad.portrait
             ? `<div class="glad-portrait"><img src="${glad.portrait}" alt="${glad.name}" /></div>`
             : `<div class="glad-portrait blank"></div>`;
+        const displayMaxHp = glad.maxHp || (50 + (glad.stats.str * 5));
+        const displayHp = glad.hp !== undefined ? glad.hp : displayMaxHp;
+
         slot.innerHTML = `
             <div class="glad-info">
                 ${portraitHtml}
                 <span class="glad-class ${glad.class.toLowerCase()}">${glad.class}</span>
                 <span class="glad-name" title="${glad.name}">${glad.name} ${glad.surname}</span>
+                <div style="font-size: 0.75rem; color: #ffaaaa; margin-bottom: 2px;">HP: ${displayHp} / ${displayMaxHp}</div>
                 <div class="glad-stats-mini">
                     <span title="Strength">💪${glad.stats.str}</span>
                     <span title="Dexterity">🏃${glad.stats.dex}</span>
                     <span title="Intelligence">🧠${glad.stats.int}</span>
                     <span title="Wisdom">✨${glad.stats.wis}</span>
                 </div>
+                <button class="sell-glad-btn" data-id="${glad.id}" style="margin-top: 0.5rem; background: var(--color-surface); border: 1px solid var(--color-text-muted); color: var(--color-text-muted); border-radius: 4px; padding: 2px 4px; cursor: pointer; font-size: 0.75rem;">Sell (250 G)</button>
             </div>
         `;
         grid.appendChild(slot);
     });
 
-    // Add recruit slot
+    // Attach event listeners for selling
+    document.querySelectorAll('.sell-glad-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const gladId = e.target.getAttribute('data-id');
+            const rosterIndex = saveContext.roster.findIndex(g => g.id === gladId);
+            if (rosterIndex !== -1) {
+                // Sell logic: Remove from roster, grant 250 gold
+                saveContext.roster.splice(rosterIndex, 1);
+                saveContext.gold += 250;
+                localStorage.setItem('gladiatorSaveContext', JSON.stringify(saveContext));
+                renderRoster(); // re-render UI immediately
+
+                // Refresh advance time button closure
+                if (typeof setupAdvanceTimeBtn === 'function') {
+                    setupAdvanceTimeBtn();
+                }
+            }
+        });
+    });
+
+    // Add recruit slot if under capacity
     const recruitSlot = document.createElement('div');
     recruitSlot.className = 'roster-slot empty';
     recruitSlot.innerHTML = `<span>+ Recruit (500 G)</span>`;
     recruitSlot.addEventListener('click', () => {
+        if (saveContext.roster.length >= 10) {
+            // Cannot exceed roster cap
+            recruitSlot.style.animation = 'shake 0.5s';
+            recruitSlot.innerHTML = `<span><strong style="color:var(--color-accent-danger)">Roster Full</strong></span>`;
+            setTimeout(() => {
+                recruitSlot.style.animation = '';
+                recruitSlot.innerHTML = `<span>+ Recruit (500 G)</span>`;
+            }, 1000);
+            return;
+        }
+
         if (saveContext.gold >= 500) {
             // Play a brief sound if implemented, else just deduct
             saveContext.gold -= 500;
             saveContext.roster.push(generateGladiator());
             localStorage.setItem('gladiatorSaveContext', JSON.stringify(saveContext));
             renderRoster();
+
+            // Critical setup: refresh the advance time button closure so it doesn't overwrite with stale data
+            if (typeof setupAdvanceTimeBtn === 'function') {
+                setupAdvanceTimeBtn();
+            }
         } else {
             // Make the slot shake or visually indicate failure
             recruitSlot.style.animation = 'shake 0.5s';
             setTimeout(() => recruitSlot.style.animation = '', 500);
         }
     });
-    grid.appendChild(recruitSlot);
+
+    // Only show recruit slot if roster is not full
+    if (saveContext.roster.length < 10) {
+        grid.appendChild(recruitSlot);
+    }
 
     renderCalendar(saveContext);
 }
@@ -184,6 +229,9 @@ function transitionToHome() {
 
     // Show home screen
     homeScreen.classList.remove('hidden');
+
+    // Setup advance button and render calendar payload based on save
+    setupAdvanceTimeBtn();
 }
 
 // Initialize Widget Toggles
@@ -200,6 +248,57 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    // Modal Events
+    const viewGraveyardBtn = document.getElementById('viewGraveyardBtn');
+    if (viewGraveyardBtn) {
+        viewGraveyardBtn.addEventListener('click', () => {
+            const graveyardModal = document.getElementById('graveyardModal');
+            const graveyardGrid = document.getElementById('graveyardGrid');
+            const saveContext = JSON.parse(localStorage.getItem('gladiatorSaveContext'));
+
+            if (graveyardGrid) {
+                graveyardGrid.innerHTML = '';
+                if (saveContext && saveContext.graveyard && saveContext.graveyard.length > 0) {
+                    saveContext.graveyard.forEach(glad => {
+                        const slot = document.createElement('div');
+                        slot.className = 'roster-slot filled';
+                        slot.style.filter = 'grayscale(100%)';
+
+                        const portraitHtml = glad.portrait
+                            ? `<div class="glad-portrait"><img src="${glad.portrait}" alt="${glad.name}" /></div>`
+                            : `<div class="glad-portrait blank"></div>`;
+
+                        slot.innerHTML = `
+                            <div class="glad-info" style="opacity: 0.8;">
+                                ${portraitHtml}
+                                <span class="glad-class ${glad.class.toLowerCase()}">${glad.class}</span>
+                                <span class="glad-name" title="${glad.name}">${glad.name} <br/> <span style="font-size:0.75rem;">(RIP)</span></span>
+                            </div>
+                        `;
+                        graveyardGrid.appendChild(slot);
+                    });
+                } else {
+                    graveyardGrid.innerHTML = '<div style="color:var(--color-text-muted); width:100%; text-align:center; margin-top: 2rem;">No gladiators have perished yet.</div>';
+                }
+            }
+            if (graveyardModal) graveyardModal.classList.remove('hidden');
+        });
+    }
+
+    const closeGraveyardBtn = document.getElementById('closeGraveyardBtn');
+    if (closeGraveyardBtn) {
+        closeGraveyardBtn.addEventListener('click', () => {
+            document.getElementById('graveyardModal').classList.add('hidden');
+        });
+    }
+
+    const closeCasualtiesBtn = document.getElementById('closeCasualtiesBtn');
+    if (closeCasualtiesBtn) {
+        closeCasualtiesBtn.addEventListener('click', () => {
+            document.getElementById('casualtiesModal').classList.add('hidden');
+        });
+    }
+
     setupAdvanceTimeBtn();
 });
 
@@ -209,6 +308,9 @@ function setupAdvanceTimeBtn() {
 
     const saveContext = JSON.parse(localStorage.getItem('gladiatorSaveContext'));
     if (!saveContext || !saveContext.schedule) return;
+
+    // Ensure the calendar's initial state is correctly rendered and highlighted
+    renderCalendar(saveContext);
 
     const dayOfWeek = saveContext.day % 7;
     const totalDaysElapsed = ((saveContext.year - 1) * 12 * 28) + ((saveContext.month - 1) * 28) + (saveContext.day - 1);
@@ -265,9 +367,48 @@ function advanceTime(saveContext) {
         }
         daysAdvanced++;
 
+        // Process daily healing
+        let healedAnyone = false;
+
+        // Heal Player Roster
+        saveContext.roster.forEach(glad => {
+            const maxHp = glad.maxHp || (30 + (glad.stats.str * 2));
+            if (glad.hp < maxHp) {
+                glad.hp = Math.min(glad.hp + 10, maxHp);
+                healedAnyone = true;
+            }
+        });
+
+        // Heal Opponent Rosters and Process Recruitment
+        if (saveContext.opposingRosters) {
+            Object.values(saveContext.opposingRosters).forEach(aiTeamData => {
+                // Fallback for pre-patch saves
+                const roster = aiTeamData.roster || aiTeamData;
+
+                // Healing
+                roster.forEach(glad => {
+                    const maxHp = glad.maxHp || (30 + (glad.stats.str * 2));
+                    if (glad.hp < maxHp) {
+                        glad.hp = Math.min(glad.hp + 10, maxHp);
+                    }
+                });
+
+                // Recruitment
+                if (aiTeamData.gold !== undefined) {
+                    while (roster.length < 5 && aiTeamData.gold >= 500) {
+                        aiTeamData.gold -= 500;
+                        if (typeof generateGladiator === 'function') {
+                            roster.push(generateGladiator());
+                        }
+                    }
+                }
+            });
+        }
+
         // Render UI for current iterative day
         localStorage.setItem('gladiatorSaveContext', JSON.stringify(saveContext));
         renderCalendar(saveContext);
+        if (healedAnyone) renderRoster();
 
         // Stop if the new day is a match day for this team
         const dayOfWeek = saveContext.day % 7; // Sunday = 0
@@ -288,7 +429,7 @@ function advanceTime(saveContext) {
             return;
         }
 
-        setTimeout(tickDay, 1000);
+        setTimeout(tickDay, 500);
     }
 
     tickDay();
