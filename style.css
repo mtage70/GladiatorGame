@@ -948,6 +948,25 @@ body {
     background: rgba(42, 63, 84, 0.3);
 }
 
+.formation-slot.next-slot-highlight {
+    border-color: var(--color-gold-primary) !important;
+    background: rgba(212, 175, 55, 0.15) !important;
+    box-shadow: 0 0 12px rgba(212, 175, 55, 0.5), inset 0 0 8px rgba(212, 175, 55, 0.2);
+    animation: pulse-slot 1s ease-in-out infinite;
+}
+
+@keyframes pulse-slot {
+
+    0%,
+    100% {
+        box-shadow: 0 0 8px rgba(212, 175, 55, 0.4), inset 0 0 6px rgba(212, 175, 55, 0.1);
+    }
+
+    50% {
+        box-shadow: 0 0 18px rgba(212, 175, 55, 0.8), inset 0 0 12px rgba(212, 175, 55, 0.3);
+    }
+}
+
 .gladiator-card-horizontal {
     display: flex;
     align-items: center;

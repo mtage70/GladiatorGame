@@ -13,9 +13,18 @@ function initializeMatchScreen(saveContext) {
     const freshContext = JSON.parse(localStorage.getItem('gladiatorSaveContext')) || saveContext;
 
     currentMatchState.saveContext = freshContext;
-    currentMatchState.playerFormation = [null, null, null, null, null];
     currentMatchState.opponentFormation = [null, null, null, null, null];
     currentMatchState.selectedGladiatorId = null;
+
+    // Restore saved formation, leaving slots blank if gladiator is dead/missing
+    if (freshContext.savedFormation && freshContext.savedFormation.length === 5) {
+        currentMatchState.playerFormation = freshContext.savedFormation.map(id => {
+            if (!id) return null;
+            return freshContext.roster.find(g => g.id === id) || null;
+        });
+    } else {
+        currentMatchState.playerFormation = [null, null, null, null, null];
+    }
 
     // Hide home screen, show match screen
     document.getElementById('homeScreen').classList.add('hidden');
@@ -67,24 +76,24 @@ function initializeMatchScreen(saveContext) {
         tanks.sort((a, b) => (b.maxHp || 0) - (a.maxHp || 0));
         squishies.sort((a, b) => (a.maxHp || 0) - (b.maxHp || 0));
 
-        // Opponent Formation:
-        // Index 0: Frontline
-        // Index 1: Backline
-        // Index 2, 3, 4: Midline
+        // Opponent Formation (right side — player attacks them from the left):
+        // Slot 1 (left col)  = Frontline  → tanks go here
+        // Slot 2 (right col) = Backline   → squishies go here
+        // Slots 0, 3, 4     = Midline
 
-        // 1. Assign Frontline (highest HP tank, or flexible, or anyone)
-        if (tanks.length > 0) currentMatchState.opponentFormation[0] = tanks.shift();
-        else if (flexible.length > 0) currentMatchState.opponentFormation[0] = flexible.shift();
-        else currentMatchState.opponentFormation[0] = squishies.shift();
-
-        // 2. Assign Backline (lowest HP squishy, or flexible, or anyone)
-        if (squishies.length > 0) currentMatchState.opponentFormation[1] = squishies.shift();
+        // 1. Assign Frontline — slot 1
+        if (tanks.length > 0) currentMatchState.opponentFormation[1] = tanks.shift();
         else if (flexible.length > 0) currentMatchState.opponentFormation[1] = flexible.shift();
-        else currentMatchState.opponentFormation[1] = tanks.shift();
+        else currentMatchState.opponentFormation[1] = squishies.shift();
 
-        // 3. Assign Midline (everyone else)
+        // 2. Assign Backline — slot 2
+        if (squishies.length > 0) currentMatchState.opponentFormation[2] = squishies.shift();
+        else if (flexible.length > 0) currentMatchState.opponentFormation[2] = flexible.shift();
+        else currentMatchState.opponentFormation[2] = tanks.shift();
+
+        // 3. Assign Midline — slots 0, 3, 4
         let remaining = [...tanks, ...flexible, ...squishies];
-        currentMatchState.opponentFormation[2] = remaining.shift() || null;
+        currentMatchState.opponentFormation[0] = remaining.shift() || null;
         currentMatchState.opponentFormation[3] = remaining.shift() || null;
         currentMatchState.opponentFormation[4] = remaining.shift() || null;
     }
@@ -104,6 +113,14 @@ function renderOpponentFormation() {
     slots.forEach((slot, index) => {
         const glad = currentMatchState.opponentFormation[index];
         slot.innerHTML = glad ? buildGladiatorCardSmall(glad) : 'Empty';
+    });
+}
+
+function updateNextSlotHighlight() {
+    const slots = document.getElementById('playerFormation').querySelectorAll('.formation-slot');
+    const nextEmptyIndex = currentMatchState.playerFormation.findIndex(g => g === null);
+    slots.forEach((slot, i) => {
+        slot.classList.toggle('next-slot-highlight', i === nextEmptyIndex);
     });
 }
 
@@ -157,6 +174,8 @@ function renderPlayerFormation() {
             }
         });
     });
+
+    updateNextSlotHighlight();
 }
 
 function renderMatchRoster() {
@@ -282,6 +301,10 @@ function startCombat() {
         alert("Combat script not loaded!");
         return;
     }
+
+    // Save formation (as IDs) to persist for next match
+    currentMatchState.saveContext.savedFormation = currentMatchState.playerFormation.map(g => g ? g.id : null);
+    localStorage.setItem('gladiatorSaveContext', JSON.stringify(currentMatchState.saveContext));
 
     // Attach formationIndex to gladiators so combat knows where to place them
     const pForm = currentMatchState.playerFormation.map((g, i) => {

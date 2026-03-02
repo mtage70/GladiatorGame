@@ -395,7 +395,7 @@ function advanceTime(saveContext) {
 
                 // Recruitment
                 if (aiTeamData.gold !== undefined) {
-                    while (roster.length < 5 && aiTeamData.gold >= 500) {
+                    while (roster.length < 10 && aiTeamData.gold >= 500) {
                         aiTeamData.gold -= 500;
                         if (typeof generateGladiator === 'function') {
                             roster.push(generateGladiator());

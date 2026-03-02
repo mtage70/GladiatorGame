@@ -52,7 +52,10 @@ function generateGladiator() {
             int = generateStat(50);
             break;
     }
-    const maxHp = 30 + (str * 2);
+    const baseHp = 30 + (str * 2);
+    const maxHp = charClass === 'Warrior' ? Math.floor(baseHp * 0.7)
+        : charClass === 'Rogue' ? Math.floor(baseHp * 0.7)
+            : baseHp;
     return {
         id: 'glad_' + Math.random().toString(36).substr(2, 9),
         name: name,

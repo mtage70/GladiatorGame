@@ -81,7 +81,10 @@ function setupCombatant(glad, side) {
     }
 
     // Base damage scaling factor reduced for longer fights
-    glad.baseDamage = Math.floor(primaryStat * 1.0);
+    // Rogues deal slightly less base damage but can crit
+    // Hunters deal less damage to offset their free targeting ability
+    const damageScale = (glad.class === 'Rogue' || glad.class === 'Hunter') ? 0.7 : 1.0;
+    glad.baseDamage = Math.floor(primaryStat * damageScale);
 }
 
 // Utility function to build the square formation widget (used here and in Match Prep)
@@ -236,7 +239,10 @@ function executeTurn() {
     }
 
     // Apply structured targeting priority for attack
-    const validTargets = getValidTargets(attacker, combatState.combatants);
+    // Hunters can target any living enemy (bypass frontline priority)
+    const validTargets = (attacker.class === 'Hunter')
+        ? combatState.combatants.filter(c => c.side === targetSide && !c.isDead)
+        : getValidTargets(attacker, combatState.combatants);
 
     // Determine Action
     let actionType = 'attack';
@@ -262,6 +268,12 @@ function executeTurn() {
         const variance = (0.8 + (Math.random() * 0.4));
         effectAmount = Math.floor(attacker.baseDamage * variance);
         if (effectAmount < 1) effectAmount = 1;
+
+        // Rogue: 20% chance to land a critical hit for double damage
+        if (attacker.class === 'Rogue' && Math.random() < 0.20) {
+            effectAmount *= 2;
+            actionType = 'rogue_crit';
+        }
 
         // Mage unique mechanical override: Splash damage across adjacent formation slots
         if (attacker.class === 'Mage') {
@@ -383,7 +395,11 @@ function executeTurn() {
                 if (targetCard) targetCard.classList.add('taking-damage');
 
                 target.hp -= effectAmount;
-                logCombat(`<strong>${attacker.name}</strong> attacks <strong>${target.name}</strong> for ${effectAmount} damage!`);
+                if (actionType === 'rogue_crit') {
+                    logCombat(`<strong>${attacker.name}</strong> <span style="color:#ffd700">CRITICAL STRIKES</span> <strong>${target.name}</strong> for <span style="color:#ff6666">${effectAmount} damage</span>!`, 'critical');
+                } else {
+                    logCombat(`<strong>${attacker.name}</strong> attacks <strong>${target.name}</strong> for ${effectAmount} damage!`);
+                }
 
                 if (target.hp <= 0) {
                     target.hp = 0;
@@ -457,8 +473,8 @@ function finishCombatTransition() {
         // Find the gladiator in the current roster
         const rosterIndex = combatState.saveContext.roster.findIndex(g => g.id === combatant.id);
         if (rosterIndex !== -1) {
-            // 50% chance to die permanently
-            if (Math.random() < 0.5) {
+            // 25% chance to die permanently
+            if (Math.random() < 0.25) {
                 const fallenGlad = combatState.saveContext.roster.splice(rosterIndex, 1)[0];
                 combatState.saveContext.graveyard.push(fallenGlad);
                 permadeaths.push(fallenGlad);
@@ -546,7 +562,7 @@ function simulateAIMatch(teamAId, teamBId, saveContext) {
 
     if (rosterA.length === 0 || rosterB.length === 0) return;
 
-    const selectSmartFormation = (roster) => {
+    const selectSmartFormation = (roster, side) => {
         let sortedRoster = roster.slice().sort((a, b) => {
             const hpA = a.maxHp || (30 + a.stats.str * 2);
             const hpB = b.maxHp || (30 + b.stats.str * 2);
@@ -567,27 +583,30 @@ function simulateAIMatch(teamAId, teamBId, saveContext) {
 
         let formation = [null, null, null, null, null];
 
-        // 0: Frontline
-        if (tanks.length > 0) formation[0] = tanks.shift();
-        else if (flexible.length > 0) formation[0] = flexible.shift();
-        else formation[0] = squishies.shift();
+        // Side 'B' (right side): player/A attacks slot 1 first → tank in slot 1, squishy in slot 2
+        // Side 'A' (left side): opponent/B attacks slot 2 first → tank in slot 2, squishy in slot 1
+        const frontSlot = (side === 'B') ? 1 : 2;
+        const backSlot = (side === 'B') ? 2 : 1;
 
-        // 1: Backline
-        if (squishies.length > 0) formation[1] = squishies.shift();
-        else if (flexible.length > 0) formation[1] = flexible.shift();
-        else formation[1] = tanks.shift();
+        if (tanks.length > 0) formation[frontSlot] = tanks.shift();
+        else if (flexible.length > 0) formation[frontSlot] = flexible.shift();
+        else formation[frontSlot] = squishies.shift();
 
-        // 2, 3, 4: Midline
+        if (squishies.length > 0) formation[backSlot] = squishies.shift();
+        else if (flexible.length > 0) formation[backSlot] = flexible.shift();
+        else formation[backSlot] = tanks.shift();
+
+        // Midline: slots 0, 3, 4
         let remaining = [...tanks, ...flexible, ...squishies];
-        formation[2] = remaining.shift() || null;
+        formation[0] = remaining.shift() || null;
         formation[3] = remaining.shift() || null;
         formation[4] = remaining.shift() || null;
 
         return formation;
     };
 
-    const formationA = selectSmartFormation(rosterA);
-    const formationB = selectSmartFormation(rosterB);
+    const formationA = selectSmartFormation(rosterA, 'A');
+    const formationB = selectSmartFormation(rosterB, 'B');
 
     let combatants = [];
     formationA.forEach((glad, i) => {
@@ -618,7 +637,10 @@ function simulateAIMatch(teamAId, teamBId, saveContext) {
         for (let attacker of combatants) {
             if (attacker.isDead) continue;
 
-            let opponents = getValidTargets(attacker, combatants);
+            // Hunters can target any living enemy
+            let opponents = (attacker.class === 'Hunter')
+                ? combatants.filter(c => c.side !== attacker.side && !c.isDead)
+                : getValidTargets(attacker, combatants);
             if (opponents.length === 0) break;
 
             let target = opponents[Math.floor(Math.random() * opponents.length)];
@@ -637,12 +659,18 @@ function simulateAIMatch(teamAId, teamBId, saveContext) {
                 let effectAmount = Math.floor(attacker.baseDamage * variance);
                 if (effectAmount < 1) effectAmount = 1;
 
+                // Rogue: 20% chance to crit for double damage
+                if (attacker.class === 'Rogue' && Math.random() < 0.20) {
+                    effectAmount *= 2;
+                }
+
                 if (attacker.class === 'Cleric') {
                     if (Math.random() < 0.5) {
                         let allies = attacker.side === 'A' ? combatants.filter(c => c.side === 'A' && !c.isDead && c.hp < c.maxHp) : combatants.filter(c => c.side === 'B' && !c.isDead && c.hp < c.maxHp);
                         if (allies.length > 0) {
                             let healTarget = allies[0];
-                            healTarget.hp += Math.floor(attacker.baseDamage * 2.0 * variance);
+                            healTarget.hp += Math.floor(attacker.baseDamage * 1.0
+                                * variance);
                             if (healTarget.hp > healTarget.maxHp) healTarget.hp = healTarget.maxHp;
                             continue; // skip attack
                         }
