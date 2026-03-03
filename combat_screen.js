@@ -84,7 +84,7 @@ function setupCombatant(glad, side) {
     // Paladins deal less damage to enforce their role as pure tanks
     // Rogues deal slightly less base damage but can crit
     // Hunters deal less damage to offset their free targeting ability
-    const damageScale = (glad.class === 'Paladin' || glad.class === 'Rogue' || glad.class === 'Hunter') ? 0.7 : 1.0;
+    const damageScale = (glad.class === 'Paladin' || glad.class === 'Rogue') ? 0.7 : 1.0;
     glad.baseDamage = Math.floor(primaryStat * damageScale);
 }
 

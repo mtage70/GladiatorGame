@@ -6,6 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gladiator Manager</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#222">
+    <link rel="apple-touch-icon" href="icon-192.png">
     <link
         href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Inter:wght@300;400;600&display=swap"
         rel="stylesheet">
@@ -74,8 +77,7 @@
                 <div id="tab-lineup" class="tab-content">
                     <section id="teamSection" class="team-section panel"
                         style="display: flex; flex-direction: column; flex: 1;">
-                        <div
-                            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
                             <h3 style="margin: 0;">Team Lineup</h3>
                             <div style="display: flex; gap: 1rem;">
                                 <button class="action-btn success" id="recruitBtn">Recruit (500 G)</button>
@@ -146,7 +148,7 @@
                     </section>
 
                     <section id="standingsSection" class="standings-section panel"
-                        style="flex: 1; display: flex; flex-direction: column; overflow-y: auto; max-height: 60vh;">
+                        style="flex: 1; display: flex; flex-direction: column; overflow-y: auto;">
                         <h3>League Standings</h3>
                         <table class="standings-table" id="standingsTable">
                             <thead>
@@ -197,7 +199,6 @@
     <!-- Match Screen (Preparation & Combat) -->
     <div id="matchScreen" class="match-screen hidden">
         <div id="matchHeader" class="match-header panel">
-            <h2>Match Day!</h2>
             <h3 id="matchupTitle">Player Team vs. Opponent Team</h3>
         </div>
         <div class="match-main"
@@ -240,7 +241,6 @@
     <!-- Combat Screen -->
     <div id="combatScreen" class="combat-screen hidden">
         <div class="match-header panel" style="margin-bottom: 1rem;">
-            <h2>BATTLE IN THE ARENA</h2>
             <h3 id="combatMatchupTitle">Player Team vs. Opponent Team</h3>
         </div>
 
@@ -386,6 +386,15 @@
     <script src="main_menu.js"></script>
     <script src="match_screen.js"></script>
     <script src="combat_screen.js"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('service-worker.js')
+                    .then(reg => console.log('Service worker registered', reg))
+                    .catch(err => console.log('Service worker registration failed', err));
+            });
+        }
+    </script>
 </body>
 
 </html>
