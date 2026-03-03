@@ -47,17 +47,17 @@ function initializeMatchScreen(saveContext) {
 
     const isHome = myMatch.home === saveContext.teamId;
     document.getElementById('matchPlayerHeader').innerHTML = `
-        <span class="team-header-container">
-            <img src="${saveContext.teamLogo}" class="team-logo-small" alt="${saveContext.teamName} Logo">
-            ${saveContext.teamName}
-        </span>
+        <div class="team-header-vertical">
+            <img src="${saveContext.teamLogo}" class="team-logo-large" alt="${saveContext.teamName} Logo">
+            <span>${saveContext.teamName}</span>
+        </div>
     `;
 
     document.getElementById('matchOpponentHeader').innerHTML = `
-        <span class="team-header-container" style="color: var(--color-accent-danger);">
-            <img src="${opponentTeamInfo.logo}" class="team-logo-small" alt="${opponentTeamInfo.name} Logo">
-            ${opponentTeamInfo.name}
-        </span>
+        <div class="team-header-vertical" style="color: var(--color-accent-danger);">
+            <img src="${opponentTeamInfo.logo}" class="team-logo-large" alt="${opponentTeamInfo.name} Logo">
+            <span>${opponentTeamInfo.name}</span>
+        </div>
     `;
 
     const oppTeamData = saveContext.opposingRosters[opponentId];
@@ -131,6 +131,11 @@ function initializeMatchScreen(saveContext) {
     document.getElementById('startCombatBtn').onclick = startCombat;
     document.getElementById('retreatBtn').onclick = retreatFromMatch;
 
+    const autoFillBtn = document.getElementById('autoFillBtn');
+    if (autoFillBtn) {
+        autoFillBtn.onclick = autoFillPlayerFormation;
+    }
+
     // Table Sorting Event Listeners for Match Prep Moved to DOMContentLoaded
 
     // Roster Modal Close buttons
@@ -140,6 +145,77 @@ function initializeMatchScreen(saveContext) {
             document.getElementById('rosterSelectionModal').classList.add('hidden');
         };
     }
+}
+
+function autoFillPlayerFormation() {
+    // Clear current formation
+    currentMatchState.playerFormation = [null, null, null, null, null];
+
+    // Get living roster members
+    let availableRoster = currentMatchState.saveContext.roster.filter(g => g.hp > 0);
+
+    if (availableRoster.length === 0) {
+        alert("You have no living gladiators able to fight!");
+        return;
+    }
+
+    // Sort logic heavily mirroring the AI
+    let sortedRoster = availableRoster.slice().sort((a, b) => {
+        const hpA = a.hp !== undefined ? a.hp : (a.maxHp || (30 + a.stats.str * 2));
+        const hpB = b.hp !== undefined ? b.hp : (b.maxHp || (30 + b.stats.str * 2));
+        const maxHpA = a.maxHp || (30 + a.stats.str * 2);
+        const maxHpB = b.maxHp || (30 + b.stats.str * 2);
+
+        const scoreA = getPrimaryStat(a) * (hpA / maxHpA);
+        const scoreB = getPrimaryStat(b) * (hpB / maxHpB);
+
+        return scoreB - scoreA;
+    });
+
+    let activeFighters = sortedRoster.slice(0, 5);
+
+    let tanks = [];
+    let squishies = [];
+    let flexible = [];
+
+    activeFighters.forEach(g => {
+        if (g.class === 'Mage' || g.class === 'Cleric') {
+            squishies.push(g);
+        } else if (g.class === 'Warrior' || g.class === 'Paladin') {
+            tanks.push(g);
+        } else {
+            flexible.push(g);
+        }
+    });
+
+    tanks.sort((a, b) => (b.hp !== undefined ? b.hp : (b.maxHp || 0)) - (a.hp !== undefined ? a.hp : (a.maxHp || 0)));
+    squishies.sort((a, b) => (a.hp !== undefined ? a.hp : (a.maxHp || 0)) - (b.hp !== undefined ? b.hp : (b.maxHp || 0)));
+
+    // Player Formation Indices (Left attacking Right):
+    // Slot 2 (right col) = Frontline
+    // Slot 1 (left col)  = Backline
+    // Slots 0, 3, 4     = Midline
+
+    // 1. Assign Frontline — slot 2
+    if (tanks.length > 0) currentMatchState.playerFormation[2] = tanks.shift();
+    else if (flexible.length > 0) currentMatchState.playerFormation[2] = flexible.shift();
+    else currentMatchState.playerFormation[2] = squishies.shift();
+
+    // 2. Assign Backline — slot 1
+    if (squishies.length > 0) currentMatchState.playerFormation[1] = squishies.shift();
+    else if (flexible.length > 0) currentMatchState.playerFormation[1] = flexible.shift();
+    else currentMatchState.playerFormation[1] = tanks.shift();
+
+    // 3. Assign Midline
+    let remaining = [...tanks, ...flexible, ...squishies];
+    currentMatchState.playerFormation[0] = remaining.shift() || null;
+    currentMatchState.playerFormation[3] = remaining.shift() || null;
+    currentMatchState.playerFormation[4] = remaining.shift() || null;
+
+    currentMatchState.highlightedSlotIndex = currentMatchState.playerFormation.findIndex(g => g === null);
+
+    renderPlayerFormation();
+    renderMatchRoster(); // disable assigned ones in the roster UI below
 }
 
 function renderOpponentFormation() {

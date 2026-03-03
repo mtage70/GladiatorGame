@@ -26,17 +26,17 @@ function initializeCombat(playerFormation, opponentFormation, saveContext, oppon
     combatScreen.style.backgroundPosition = 'center';
 
     document.getElementById('combatPlayerHeader').innerHTML = `
-        <span class="team-header-container">
-            <img src="${saveContext.teamLogo}" class="team-logo-small" alt="${saveContext.teamName} Logo">
-            ${saveContext.teamName}
-        </span>
+        <div class="team-header-vertical">
+            <img src="${saveContext.teamLogo}" class="team-logo-large" alt="${saveContext.teamName} Logo">
+            <span>${saveContext.teamName}</span>
+        </div>
     `;
 
     document.getElementById('combatOpponentHeader').innerHTML = `
-        <span class="team-header-container" style="color: var(--color-accent-danger);">
-            <img src="${opponentTeamInfo.logo}" class="team-logo-small" alt="${opponentTeamInfo.name} Logo">
-            ${opponentTeamInfo.name}
-        </span>
+        <div class="team-header-vertical" style="color: var(--color-accent-danger);">
+            <img src="${opponentTeamInfo.logo}" class="team-logo-large" alt="${opponentTeamInfo.name} Logo">
+            <span>${opponentTeamInfo.name}</span>
+        </div>
     `;
     document.getElementById('combatLog').innerHTML = ''; // clear previous logs
 
