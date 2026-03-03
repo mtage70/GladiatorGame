@@ -47,7 +47,6 @@ body {
     background-size: cover;
     background-position: center 0%;
     background-repeat: no-repeat;
-    image-rendering: pixelated;
     z-index: 1;
 }
 
@@ -319,7 +318,6 @@ body {
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
-    image-rendering: pixelated;
 
     display: flex;
     flex-direction: column;
@@ -372,7 +370,6 @@ body {
     height: 100%;
     object-fit: cover;
     display: block;
-    image-rendering: auto;
 }
 
 /* When there's no portrait, just the base dark background of .glad-portrait shows */
@@ -402,9 +399,19 @@ body {
 }
 
 .home-content {
+    width: 100%;
+    position: relative;
+}
+
+.tab-content {
     display: flex;
-    gap: 2rem;
     flex: 1;
+    gap: 2rem;
+    width: 100%;
+}
+
+.tab-content.hidden {
+    display: none !important;
 }
 
 /* Widget Toggles */
@@ -415,7 +422,7 @@ body {
     justify-content: center;
 }
 
-.toggle-btn {
+.tab-btn {
     background: linear-gradient(to bottom, #2a2d36 0%, #1a1c23 100%);
     border: 2px solid #505560;
     border-radius: 4px;
@@ -426,12 +433,12 @@ body {
     transition: all var(--transition-fast);
 }
 
-.toggle-btn:hover {
+.tab-btn:hover {
     color: var(--color-gold-light);
     border-color: var(--color-gold-dark);
 }
 
-.toggle-btn.active {
+.tab-btn.active {
     background: linear-gradient(to bottom, #45402f 0%, #2a261a 100%);
     border-color: var(--color-gold-primary);
     color: var(--color-text-main);
@@ -529,7 +536,6 @@ body {
     width: 24px;
     height: 24px;
     object-fit: contain;
-    image-rendering: pixelated;
     filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.8));
 }
 
@@ -553,56 +559,62 @@ body {
     font-size: 0.9rem;
 }
 
-.roster-grid {
-    display: grid;
-    grid-template-columns: repeat(5, minmax(100px, 1.5fr));
-    gap: 1rem;
-    margin-bottom: 2rem;
-    flex: 1;
-}
-
-.roster-slot {
-    height: 200px;
+.roster-table {
+    width: 100%;
+    border-collapse: collapse;
     background: rgba(0, 0, 0, 0.4);
-    border: 2px dashed #505560;
-    border-radius: 8px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    color: var(--color-text-muted);
-    cursor: pointer;
-    transition: all var(--transition-fast);
-    padding: 0.5rem;
-    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5);
+    border: 1px solid #333;
+    border-radius: 4px;
+    overflow: hidden;
 }
 
-.roster-slot.empty:hover {
+.roster-table th {
+    background: rgba(212, 175, 55, 0.1);
+    color: var(--color-gold-light);
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    padding: 0.75rem 0.5rem;
+    border-bottom: 2px solid var(--color-gold-dark);
+}
+
+.roster-table th[data-sort] {
+    transition: background var(--transition-fast);
+}
+
+.roster-table th[data-sort]:hover {
+    background: rgba(212, 175, 55, 0.2);
+}
+
+.roster-row {
+    border-bottom: 1px solid #3a3f47;
+    background: linear-gradient(to right, #2a2d36 0%, #1a1c23 100%);
+    transition: all var(--transition-fast);
+}
+
+.roster-row:hover {
+    background: linear-gradient(to right, #343842 0%, #20232c 100%);
+    box-shadow: inset 0 0 10px rgba(212, 175, 55, 0.1);
+}
+
+.roster-row td {
+    vertical-align: middle;
+}
+
+.roster-row.empty-row {
+    background: rgba(0, 0, 0, 0.4);
+    border-top: 2px dashed #505560;
+}
+
+.roster-row.empty-row:hover {
     border-color: var(--color-gold-light);
     color: var(--color-gold-light);
     background: rgba(212, 175, 55, 0.1);
 }
 
-.roster-slot.filled {
-    border-style: solid;
-    border-color: #3a3f47;
-    background: linear-gradient(to bottom, #2a2d36 0%, #1a1c23 100%);
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.4), inset 0 2px 4px rgba(255, 255, 255, 0.05);
-}
-
-.roster-slot.filled:hover {
-    border-color: var(--color-gold-primary);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.6), inset 0 2px 4px rgba(255, 255, 255, 0.1);
-}
-
-.glad-info {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    align-items: center;
-    text-align: center;
+.roster-row.assigned {
+    opacity: 0.5;
+    filter: grayscale(100%);
 }
 
 .glad-class {
@@ -1367,4 +1379,82 @@ body {
     border-color: #4caf50 !important;
     box-shadow: 0 0 15px rgba(76, 175, 80, 0.8) !important;
     background: rgba(20, 100, 20, 0.7) !important;
+}
+
+/* Team Logo Styling */
+.team-logo-small,
+.team-logo-tiny {
+    height: 1.5em;
+    width: 1.5em;
+    margin-right: 0.4em;
+    border-radius: 50%;
+    border: 1px solid var(--color-primary-dark);
+    object-fit: contain;
+}
+
+.team-header-container {
+    display: inline-flex;
+    align-items: center;
+    vertical-align: middle;
+}
+
+/* Gladiator Context Menu */
+.gladiator-context-menu {
+    position: fixed;
+    z-index: 1000;
+    width: 200px;
+    background: var(--color-bg-base);
+    border: 1px solid var(--color-gold-dark);
+    border-radius: 4px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.8), 0 0 10px rgba(212, 175, 55, 0.2);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.gladiator-context-menu.hidden {
+    display: none;
+}
+
+.gladiator-context-menu .menu-header {
+    background: rgba(212, 175, 55, 0.1);
+    color: var(--color-gold-light);
+    font-weight: bold;
+    font-size: 0.9rem;
+    padding: 0.5rem;
+    text-align: center;
+    border-bottom: 1px solid #333;
+}
+
+.gladiator-context-menu .menu-actions {
+    display: flex;
+    flex-direction: column;
+    padding: 0.25rem 0;
+}
+
+.gladiator-context-menu .context-btn {
+    background: transparent;
+    border: none;
+    color: var(--color-text-main);
+    text-align: left;
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.gladiator-context-menu .context-btn:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--color-gold-light);
+}
+
+.gladiator-context-menu .context-btn:disabled {
+    color: var(--color-text-muted);
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.gladiator-context-menu .context-btn.danger-btn:hover:not(:disabled) {
+    background: rgba(255, 85, 85, 0.1);
+    color: #ffaaaa;
 }

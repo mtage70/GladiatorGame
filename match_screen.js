@@ -5,7 +5,10 @@ let currentMatchState = {
     opponentTeam: null,
     playerFormation: [null, null, null, null, null],
     opponentFormation: [null, null, null, null, null],
-    selectedGladiatorId: null
+    selectedGladiatorId: null,
+    highlightedSlotIndex: -1,
+    sortBy: 'ovr',
+    sortAscending: false
 };
 
 function initializeMatchScreen(saveContext) {
@@ -26,6 +29,8 @@ function initializeMatchScreen(saveContext) {
         currentMatchState.playerFormation = [null, null, null, null, null];
     }
 
+    currentMatchState.highlightedSlotIndex = currentMatchState.playerFormation.findIndex(g => g === null);
+
     // Hide home screen, show match screen
     document.getElementById('homeScreen').classList.add('hidden');
     document.getElementById('matchScreen').classList.remove('hidden');
@@ -40,7 +45,18 @@ function initializeMatchScreen(saveContext) {
     const opponentTeamInfo = TEAMS.find(t => t.id === opponentId);
     currentMatchState.opponentTeam = opponentTeamInfo;
 
-    document.getElementById('matchupTitle').textContent = `${saveContext.teamName} vs ${opponentTeamInfo.name}`;
+    const isHome = myMatch.home === saveContext.teamId;
+    document.getElementById('matchupTitle').innerHTML = `
+        <span class="team-header-container">
+            <img src="${isHome ? saveContext.teamLogo : opponentTeamInfo.logo}" class="team-logo-small" alt="${isHome ? saveContext.teamName : opponentTeamInfo.name} Logo">
+            ${isHome ? saveContext.teamName : opponentTeamInfo.name}
+        </span>
+        <span style="margin: 0 15px;">vs</span>
+        <span class="team-header-container">
+            <img src="${!isHome ? saveContext.teamLogo : opponentTeamInfo.logo}" class="team-logo-small" alt="${!isHome ? saveContext.teamName : opponentTeamInfo.name} Logo">
+            ${!isHome ? saveContext.teamName : opponentTeamInfo.name}
+        </span>
+    `;
 
     const oppTeamData = saveContext.opposingRosters[opponentId];
     // Fallback for pre-patch saves that still use raw arrays
@@ -106,6 +122,16 @@ function initializeMatchScreen(saveContext) {
     // Setup action buttons
     document.getElementById('startCombatBtn').onclick = startCombat;
     document.getElementById('retreatBtn').onclick = retreatFromMatch;
+
+    // Table Sorting Event Listeners for Match Prep Moved to DOMContentLoaded
+
+    // Roster Modal Close buttons
+    const closeRosterBtn = document.getElementById('closeRosterModalBtn');
+    if (closeRosterBtn) {
+        closeRosterBtn.onclick = () => {
+            document.getElementById('rosterSelectionModal').classList.add('hidden');
+        };
+    }
 }
 
 function renderOpponentFormation() {
@@ -118,9 +144,19 @@ function renderOpponentFormation() {
 
 function updateNextSlotHighlight() {
     const slots = document.getElementById('playerFormation').querySelectorAll('.formation-slot');
-    const nextEmptyIndex = currentMatchState.playerFormation.findIndex(g => g === null);
+
+    // Safety check: if highlighted index is out of bounds or filled, reset to first empty
+    if (currentMatchState.highlightedSlotIndex < 0 ||
+        currentMatchState.highlightedSlotIndex >= 5 ||
+        currentMatchState.playerFormation[currentMatchState.highlightedSlotIndex] !== null) {
+
+        currentMatchState.highlightedSlotIndex = currentMatchState.playerFormation.findIndex(g => g === null);
+    }
+
+    const highlightIndex = currentMatchState.highlightedSlotIndex;
+
     slots.forEach((slot, i) => {
-        slot.classList.toggle('next-slot-highlight', i === nextEmptyIndex);
+        slot.classList.toggle('next-slot-highlight', i === highlightIndex && highlightIndex !== -1);
     });
 }
 
@@ -131,120 +167,139 @@ function renderPlayerFormation() {
         slot.innerHTML = glad ? buildGladiatorCardSmall(glad) : 'Drag or Click to Assign';
 
         slot.onclick = () => {
-            // Remove from formation
             if (currentMatchState.playerFormation[index]) {
+                // Remove from formation
                 currentMatchState.playerFormation[index] = null;
+                // Since this slot is now empty, make it the explicitly highlighted slot
+                currentMatchState.highlightedSlotIndex = index;
                 renderPlayerFormation();
                 renderMatchRoster(); // re-enable in roster
+            } else {
+                // Manually select an empty slot and open the modal
+                currentMatchState.highlightedSlotIndex = index;
+                renderPlayerFormation();
+                document.getElementById('rosterSelectionModal').classList.remove('hidden');
             }
         };
 
-        // Drag and Drop Event Listeners
-        slot.addEventListener('dragover', (e) => {
-            e.preventDefault(); // Allow dropping
-            slot.style.borderColor = 'var(--color-gold-primary)';
-        });
-
-        slot.addEventListener('dragleave', () => {
-            slot.style.borderColor = ''; // Reset on leave
-        });
-
-        slot.addEventListener('drop', (e) => {
-            e.preventDefault();
-            slot.style.borderColor = ''; // Reset border
-
-            const gladId = e.dataTransfer.getData('text/plain');
-            if (gladId) {
-                // Find gladiator in context roster
-                const contextGlad = currentMatchState.saveContext.roster.find(g => g.id === gladId);
-
-                if (contextGlad) {
-                    // Check if already in another slot and remove them from it first
-                    const existingIndex = currentMatchState.playerFormation.findIndex(g => g && g.id === gladId);
-                    if (existingIndex !== -1) {
-                        currentMatchState.playerFormation[existingIndex] = null;
-                    }
-
-                    // Assign to this new slot
-                    currentMatchState.playerFormation[index] = contextGlad;
-
-                    renderPlayerFormation();
-                    renderMatchRoster();
-                }
-            }
-        });
     });
 
     updateNextSlotHighlight();
 }
 
 function renderMatchRoster() {
-    const list = document.getElementById('matchRosterList');
+    const list = document.getElementById('matchRosterBody');
     if (!list) return; // just in case
     list.innerHTML = '';
 
-    // Sort or filter roster if needed. For now, show all.
-    currentMatchState.saveContext.roster.forEach(glad => {
+    // Clone array so we don't permute the save data order, just visual
+    let sortedRoster = [...currentMatchState.saveContext.roster];
+
+    sortedRoster.sort((a, b) => {
+        let valA, valB;
+        switch (currentMatchState.sortBy) {
+            case 'hp':
+                valA = a.hp !== undefined ? a.hp : (a.maxHp || Math.floor(50 + ((a.stats.con || 25) * 2)));
+                valB = b.hp !== undefined ? b.hp : (b.maxHp || Math.floor(50 + ((b.stats.con || 25) * 2)));
+                break;
+            case 'ovr':
+                valA = getPrimaryStat(a);
+                valB = getPrimaryStat(b);
+                break;
+            case 'con': valA = a.stats.con || 25; valB = b.stats.con || 25; break;
+            case 'str': valA = a.stats.str; valB = b.stats.str; break;
+            case 'dex': valA = a.stats.dex; valB = b.stats.dex; break;
+            case 'int': valA = a.stats.int; valB = b.stats.int; break;
+            case 'wis': valA = a.stats.wis; valB = b.stats.wis; break;
+            case 'class': valA = a.class; valB = b.class; break;
+            case 'name':
+            default:
+                valA = a.name.toLowerCase();
+                valB = b.name.toLowerCase();
+                break;
+        }
+
+        if (valA < valB) return currentMatchState.sortAscending ? -1 : 1;
+        if (valA > valB) return currentMatchState.sortAscending ? 1 : -1;
+        // tie breaker: name
+        if (currentMatchState.sortBy !== 'name') {
+            const nameA = a.name.toLowerCase();
+            const nameB = b.name.toLowerCase();
+            if (nameA < nameB) return -1;
+            if (nameA > nameB) return 1;
+        }
+        return 0;
+    });
+
+    // Update header visual indicators to show current sort
+    const matchTableHeaders = document.querySelectorAll('#matchRosterTable th[data-sort]');
+    matchTableHeaders.forEach(th => {
+        const sortKey = th.getAttribute('data-sort');
+        if (sortKey === currentMatchState.sortBy) {
+            th.innerHTML = `${th.textContent.replace(/ [↓↑]/, '')} ${currentMatchState.sortAscending ? '↑' : '↓'}`;
+        } else {
+            th.innerHTML = th.textContent.replace(/ [↓↑]/, '');
+        }
+    });
+
+    sortedRoster.forEach(glad => {
         // Check if already in formation
         const inFormation = currentMatchState.playerFormation.find(g => g && g.id === glad.id);
 
-        const card = document.createElement('div');
-        card.className = `gladiator-card-horizontal ${inFormation ? 'assigned' : ''}`;
-
-        // Enable dragging if not in formation
-        if (!inFormation) {
-            card.draggable = true;
-            card.addEventListener('dragstart', (e) => {
-                e.dataTransfer.setData('text/plain', glad.id);
-                e.dataTransfer.effectAllowed = 'move';
-                card.style.opacity = '0.5'; // Visual feedback while dragging
-            });
-            card.addEventListener('dragend', () => {
-                card.style.opacity = '1';
-            });
-        }
+        const row = document.createElement('tr');
+        row.className = `roster-row ${inFormation ? 'assigned' : ''}`;
+        row.style.cursor = inFormation ? 'default' : 'pointer';
 
         let portraitImg = glad.portrait
-            ? `<div style="position:relative;width:48px;height:48px;flex-shrink:0;"><img src="${glad.portrait}" alt="portrait" style="width:48px;height:48px;border-radius:4px;object-fit:cover;" />${glad.battles > 0 ? `<div class="battles-badge">${glad.battles}</div>` : ''}</div>`
-            : `<div style="position:relative;width:48px;height:48px;background:#333;border-radius:4px;flex-shrink:0;">${glad.battles > 0 ? `<div class="battles-badge">${glad.battles}</div>` : ''}</div>`;
+            ? `<div style="position:relative;width:32px;height:32px;flex-shrink:0;overflow:hidden;border-radius:4px;"><img src="${glad.portrait}" alt="portrait" style="width:100%;height:100%;object-fit:cover;display:block;" />${glad.battles > 0 ? `<div class="battles-badge-small" style="position:absolute; bottom:-4px; right:-4px; background:var(--color-accent-danger); border-radius:50%; width:14px; height:14px; font-size:9px; display:flex; align-items:center; justify-content:center;">${glad.battles}</div>` : ''}</div>`
+            : `<div style="position:relative;width:32px;height:32px;background:#333;border-radius:4px;flex-shrink:0;">${glad.battles > 0 ? `<div class="battles-badge-small" style="position:absolute; bottom:-4px; right:-4px; background:var(--color-accent-danger); border-radius:50%; width:14px; height:14px; font-size:9px; display:flex; align-items:center; justify-content:center;">${glad.battles}</div>` : ''}</div>`;
 
         const maxHp = glad.maxHp || (30 + (glad.stats.str * 2));
         const currentHp = glad.hp !== undefined ? glad.hp : maxHp;
         const hpPercent = Math.max(0, Math.floor((currentHp / maxHp) * 100));
 
-        card.innerHTML = `
-            ${portraitImg}
-            <div class="info">
-                <div style="font-weight:bold">${glad.name} <span style="font-size:0.8rem;font-weight:normal;">${glad.surname}</span></div>
-                <span class="glad-class ${glad.class.toLowerCase()}" style="margin: 4px 0;">${glad.class}</span>
-                <div class="hp-bar-container" style="height: 12px; width: 100%; margin-top: 4px;">
+        row.innerHTML = `
+            <td style="padding: 0.25rem; font-weight:bold; color: var(--color-gold); font-size: 0.85rem;">${getPrimaryStat(glad)}</td>
+            <td style="padding: 0.25rem;"><span class="glad-class ${glad.class.toLowerCase()}" style="font-size:0.65rem;">${glad.class.substring(0, 3).toUpperCase()}</span></td>
+            <td style="padding: 0.25rem;">${portraitImg}</td>
+            <td style="padding: 0.25rem; font-weight:bold; font-size:0.85rem;">${glad.name.substring(0, 10)}</td>
+            <td style="padding: 0.25rem;">
+                <div class="hp-bar-container" style="height: 10px; width: 100%; min-width: 50px;">
                     <div class="hp-fill" style="width: ${hpPercent}%"></div>
-                    <div class="hp-text">${currentHp} / ${maxHp}</div>
+                    <div class="hp-text" style="font-size: 0.65rem; line-height: 10px;">${currentHp}/${maxHp}</div>
                 </div>
-                <div class="stats" style="margin-top: 4px;">
-                    <span title="Strength">💪 ${glad.stats.str}</span>
-                    <span title="Dexterity">🏃 ${glad.stats.dex}</span>
-                    <span title="Intelligence">🧠 ${glad.stats.int}</span>
-                    <span title="Wisdom">✨ ${glad.stats.wis}</span>
-                </div>
-            </div>
+            </td>
+            <td style="padding: 0.25rem; font-size:0.85rem;">${glad.stats.con || 25}</td>
+            <td style="padding: 0.25rem; font-size:0.85rem;">${glad.stats.str}</td>
+            <td style="padding: 0.25rem; font-size:0.85rem;">${glad.stats.dex}</td>
+            <td style="padding: 0.25rem; font-size:0.85rem;">${glad.stats.int}</td>
+            <td style="padding: 0.25rem; font-size:0.85rem;">${glad.stats.wis}</td>
         `;
 
         if (!inFormation) {
-            card.onclick = () => {
-                // Assign to first empty slot
-                const emptySlotIndex = currentMatchState.playerFormation.findIndex(g => g === null);
-                if (emptySlotIndex !== -1) {
-                    currentMatchState.playerFormation[emptySlotIndex] = glad;
+            row.onclick = () => {
+                // Ensure a valid highlighted slot exists
+                if (currentMatchState.highlightedSlotIndex !== -1) {
+                    const targetIndex = currentMatchState.highlightedSlotIndex;
+
+                    // Assign to the currently highlighted slot
+                    currentMatchState.playerFormation[targetIndex] = glad;
+
+                    // Advance to next available empty slot
+                    currentMatchState.highlightedSlotIndex = currentMatchState.playerFormation.findIndex(g => g === null);
+
                     renderPlayerFormation();
                     renderMatchRoster();
+
+                    // Close modal after selection
+                    document.getElementById('rosterSelectionModal').classList.add('hidden');
                 } else {
-                    alert("Formation is full! Click a slot to remove a gladiator first.");
+                    alert("Formation is full! Click a slot to remove a gladiator first or explicitly click an empty slot.");
                 }
             };
         }
 
-        list.appendChild(card);
+        list.appendChild(row);
     });
 }
 
@@ -257,7 +312,8 @@ function buildGladiatorCardSmall(glad) {
         // Fallback if combat script isn't loaded for some reason
         let portraitImg = '';
         if (glad.portrait) {
-            portraitImg = `<img src="${glad.portrait}" style="width: 48px; border-radius: 4px; margin-bottom: 5px;" />`;
+            const battlesBadge = (glad.battles > 0) ? `<div class="battles-badge-small" style="position:absolute; bottom:-4px; right:-4px; background:var(--color-accent-danger); border-radius:50%; width:14px; height:14px; font-size:9px; display:flex; align-items:center; justify-content:center;">${glad.battles}</div>` : '';
+            portraitImg = `<div style="position:relative;display:inline-block;"><img src="${glad.portrait}" style="width: 48px; border-radius: 4px; margin-bottom: 5px; display:block;" />${battlesBadge}</div>`;
         }
         innerContent = `
             <div style="text-align: center; font-size: 0.8rem; height: 100%; display: flex; flex-direction: column; justify-content: center;">
@@ -288,7 +344,7 @@ function buildGladiatorCardMarkup(glad) {
             <span>🧠 ${glad.stats.int}</span>
             <span>✨ ${glad.stats.wis}</span>
         </div>
-    `;
+                `;
 }
 
 function startCombat() {
@@ -334,3 +390,22 @@ function retreatFromMatch() {
     // We didn't actually fight, so technically we should advance past the match day or handle consequences.
     // For now, we'll just go back.
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+    // Table Sorting Event Listeners for Match Prep
+    const matchTableHeaders = document.querySelectorAll('#matchRosterTable th[data-sort]');
+    matchTableHeaders.forEach(th => {
+        th.addEventListener('click', () => {
+            const sortKey = th.getAttribute('data-sort');
+            if (currentMatchState.sortBy === sortKey) {
+                // Toggle order if clicking same header
+                currentMatchState.sortAscending = !currentMatchState.sortAscending;
+            } else {
+                // Set new sort key, default to descending for stats/hp, ascending for text
+                currentMatchState.sortBy = sortKey;
+                currentMatchState.sortAscending = (sortKey === 'name' || sortKey === 'class');
+            }
+            renderMatchRoster();
+        });
+    });
+});

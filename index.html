@@ -69,63 +69,129 @@
                 <span class="stat-item" id="recordDisplay"><span class="stat-icon">⚔️</span> 0-0</span>
             </div>
         </header>
-        <div class="widget-toggles">
-            <button class="toggle-btn active" data-target="teamSection">Lineup</button>
-            <button class="toggle-btn active" data-target="calendarSection">Calendar</button>
-            <button class="toggle-btn active" data-target="newsfeedSection">Newsfeed</button>
-            <button class="toggle-btn active" data-target="standingsSection">Standings</button>
+        <div style="display: flex; gap: 2rem; overflow: hidden; height: calc(100vh - 120px);">
+            <main class="home-content" style="flex: 1; overflow-y: auto;">
+                <div id="tab-lineup" class="tab-content">
+                    <section id="teamSection" class="team-section panel"
+                        style="display: flex; flex-direction: column; flex: 1;">
+                        <div
+                            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                            <h3 style="margin: 0;">Team Lineup</h3>
+                            <div style="display: flex; gap: 1rem;">
+                                <button class="action-btn success" id="recruitBtn">Recruit (500 G)</button>
+                                <button class="action-btn danger" id="viewGraveyardBtn">View Graveyard</button>
+                            </div>
+                        </div>
+                        <div
+                            style="flex: 1; position: relative; overflow-y: auto; overflow-x: hidden; border-radius: 4px; border: 1px solid #333; margin-bottom: 1rem;">
+                            <table class="roster-table" id="homeRosterTable"
+                                style="width: 100%; border-collapse: collapse; margin: 0;">
+                                <thead style="position: sticky; top: 0; z-index: 10; background: var(--color-bg-base);">
+                                    <tr style="text-align: left; border-bottom: 2px solid var(--color-gold-dark);">
+                                        <th data-sort="ovr"
+                                            style="cursor: pointer; padding: 0.5rem; background: rgba(212, 175, 55, 0.1);">
+                                            OVR
+                                        </th>
+                                        <th data-sort="class"
+                                            style="cursor: pointer; padding: 0.5rem; background: rgba(212, 175, 55, 0.1);">
+                                            Class
+                                        </th>
+                                        <th style="padding: 0.5rem; background: rgba(212, 175, 55, 0.1);">Portrait</th>
+                                        <th data-sort="name"
+                                            style="cursor: pointer; padding: 0.5rem; background: rgba(212, 175, 55, 0.1);">
+                                            Name
+                                        </th>
+                                        <th data-sort="hp"
+                                            style="cursor: pointer; padding: 0.5rem; background: rgba(212, 175, 55, 0.1);">
+                                            HP
+                                        </th>
+                                        <th data-sort="con"
+                                            style="cursor: pointer; padding: 0.5rem; background: rgba(212, 175, 55, 0.1);">
+                                            CON
+                                        </th>
+                                        <th data-sort="str"
+                                            style="cursor: pointer; padding: 0.5rem; background: rgba(212, 175, 55, 0.1);">
+                                            STR
+                                        </th>
+                                        <th data-sort="dex"
+                                            style="cursor: pointer; padding: 0.5rem; background: rgba(212, 175, 55, 0.1);">
+                                            DEX
+                                        </th>
+                                        <th data-sort="int"
+                                            style="cursor: pointer; padding: 0.5rem; background: rgba(212, 175, 55, 0.1);">
+                                            INT
+                                        </th>
+                                        <th data-sort="wis"
+                                            style="cursor: pointer; padding: 0.5rem; background: rgba(212, 175, 55, 0.1);">
+                                            WIS
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody id="homeRosterBody">
+                                    <!-- Populated by JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+                </div>
+
+                <div id="tab-calendar" class="tab-content hidden"
+                    style="display: flex; flex-direction: row; gap: 1rem;">
+                    <section id="calendarSection" class="calendar-section panel" style="flex: 1.5;">
+                        <h3>Calendar</h3>
+                        <div class="calendar-display">
+                            <p class="upcoming-event" id="upcomingEventDisplay">No Events Scheduled</p>
+                            <div id="calendarGrid" class="calendar-grid"></div>
+                        </div>
+                    </section>
+
+                    <section id="standingsSection" class="standings-section panel"
+                        style="flex: 1; display: flex; flex-direction: column; overflow-y: auto; max-height: 60vh;">
+                        <h3>League Standings</h3>
+                        <table class="standings-table" id="standingsTable">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Team</th>
+                                    <th>W</th>
+                                    <th>L</th>
+                                    <th>Win %</th>
+                                </tr>
+                            </thead>
+                            <tbody id="standingsBody">
+                            </tbody>
+                        </table>
+                    </section>
+                </div>
+
+                <div id="tab-news" class="tab-content hidden">
+                    <section id="newsfeedSection" class="newsfeed-section panel">
+                        <h3>Newsfeed</h3>
+                        <div class="news-list" id="newsList">
+                            <div class="news-item">
+                                <p>Welcome to Gladiator Manager! Prepare your team for glory.</p>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </main>
+
+            <div class="widget-toggles"
+                style="display: flex; flex-direction: column; width: 16rem; flex-shrink: 0; justify-content: flex-start; margin-bottom: 0;">
+                <button class="tab-btn active" data-target="tab-lineup">Lineup</button>
+                <button class="tab-btn" data-target="tab-calendar">Calendar</button>
+                <button class="tab-btn" data-target="tab-news">News Hub</button>
+
+                <div
+                    style="margin-top: auto; display: flex; flex-direction: column; gap: 0.5rem; background: var(--color-bg-light); border: 1px solid var(--color-gold-dark); border-radius: 4px; padding: 1rem; text-align: center;">
+                    <p class="current-date" id="currentDateDisplay"
+                        style="margin: 0; font-family: var(--font-title); color: var(--color-gold-light); font-size: 1.1rem; border-bottom: 1px solid rgba(212, 175, 55, 0.3); padding-bottom: 0.5rem; margin-bottom: 0.5rem;">
+                        Year 1, Month 1, Week 1</p>
+                    <button id="advanceTimeBtn" class="action-btn primary"
+                        style="width: 100%; font-size: 1.1rem; padding: 0.75rem;">Advance Time</button>
+                </div>
+            </div>
         </div>
-
-        <main class="home-content">
-            <section id="teamSection" class="team-section panel">
-                <h3>Team Lineup</h3>
-                <div class="roster-grid">
-                    <div class="roster-slot empty">
-                        <span>+ Recruit</span>
-                    </div>
-                </div>
-                <div style="display: flex; gap: 1rem; margin-top: 1rem;">
-                    <button class="action-btn">Edit Lineup</button>
-                    <button class="action-btn danger" id="viewGraveyardBtn">View Graveyard</button>
-                </div>
-            </section>
-
-            <section id="calendarSection" class="calendar-section panel">
-                <h3>Calendar</h3>
-                <div class="calendar-display">
-                    <p class="current-date" id="currentDateDisplay">Year 1, Month 1, Week 1</p>
-                    <p class="upcoming-event" id="upcomingEventDisplay">No Events Scheduled</p>
-                    <div id="calendarGrid" class="calendar-grid"></div>
-                </div>
-                <button id="advanceTimeBtn" class="action-btn primary" style="margin-top: 1rem;">Advance Time</button>
-            </section>
-
-            <section id="newsfeedSection" class="newsfeed-section panel">
-                <h3>Newsfeed</h3>
-                <div class="news-list" id="newsList">
-                    <div class="news-item">
-                        <p>Welcome to Gladiator Manager! Prepare your team for glory.</p>
-                    </div>
-                </div>
-            </section>
-
-            <section id="standingsSection" class="standings-section panel">
-                <h3>League Standings</h3>
-                <table class="standings-table" id="standingsTable">
-                    <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Team</th>
-                            <th>W</th>
-                            <th>L</th>
-                            <th>Win %</th>
-                        </tr>
-                    </thead>
-                    <tbody id="standingsBody">
-                    </tbody>
-                </table>
-            </section>
-        </main>
     </div>
 
     <!-- Match Screen (Preparation & Combat) -->
@@ -136,15 +202,8 @@
         </div>
         <div class="match-main"
             style="display: flex; flex-direction: row; gap: 2rem; flex: 1; overflow: hidden; height: 100%;">
-            <div class="roster-sidebar panel"
-                style="width: 350px; display: flex; flex-direction: column; overflow-y: auto;">
-                <h3>Available Gladiators</h3>
-                <p style="font-size: 0.9rem; margin-bottom: 1rem;">Click to assign to your formation.</p>
-                <div id="matchRosterList" class="gladiator-list-vertical"
-                    style="display: flex; flex-direction: column; gap: 0.5rem;"></div>
-            </div>
 
-            <div class="match-content" style="flex: 1;">
+            <div class="match-content" style="flex: 1; width: 100%; display: flex; justify-content: space-around;">
                 <div class="team-side player-side panel">
                     <h3>Your Formation</h3>
                     <div class="formation-grid" id="playerFormation">
@@ -222,6 +281,62 @@
         </div>
     </div>
 
+    <!-- Roster Selection Modal (Match Prep) -->
+    <div id="rosterSelectionModal" class="modal hidden"
+        style="position: absolute; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.8); z-index: 200; display: flex; justify-content: center; align-items: center;">
+        <div class="panel roster-sidebar"
+            style="width: 800px; max-height: 80vh; display: flex; flex-direction: column;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <h2 style="color: var(--color-text-title); margin: 0;">Select a Gladiator</h2>
+                <button id="closeRosterModalBtn" class="action-btn"
+                    style="padding: 0.25rem 0.5rem; border: none; background: transparent; color: var(--color-text-muted); font-size: 1.5rem; line-height: 1; cursor: pointer;">&times;</button>
+            </div>
+
+            <p style="font-size: 0.9rem; margin-bottom: 1rem;">Click to assign to your highlighted formation slot.</p>
+            <div style="flex: 1; overflow-y: auto; overflow-x: hidden; border-radius: 4px; border: 1px solid #333;">
+                <table class="roster-table match-roster-table" id="matchRosterTable"
+                    style="width: 100%; border-collapse: collapse; margin: 0;">
+                    <thead style="position: sticky; top: 0; z-index: 10; background: var(--color-bg-base);">
+                        <tr
+                            style="text-align: left; border-bottom: 2px solid var(--color-gold-dark); font-size: 0.9rem;">
+                            <th data-sort="ovr"
+                                style="cursor: pointer; padding: 0.5rem; background: rgba(212, 175, 55, 0.1);">OVR
+                            </th>
+                            <th data-sort="class"
+                                style="cursor: pointer; padding: 0.5rem; background: rgba(212, 175, 55, 0.1);">Cls
+                            </th>
+                            <th style="padding: 0.5rem; background: rgba(212, 175, 55, 0.1);">Pic</th>
+                            <th data-sort="name"
+                                style="cursor: pointer; padding: 0.5rem; background: rgba(212, 175, 55, 0.1);">Name
+                            </th>
+                            <th data-sort="hp"
+                                style="cursor: pointer; padding: 0.5rem; background: rgba(212, 175, 55, 0.1);">HP
+                            </th>
+                            <th data-sort="con"
+                                style="cursor: pointer; padding: 0.5rem; background: rgba(212, 175, 55, 0.1);">CON
+                            </th>
+                            <th data-sort="str"
+                                style="cursor: pointer; padding: 0.5rem; background: rgba(212, 175, 55, 0.1);">STR
+                            </th>
+                            <th data-sort="dex"
+                                style="cursor: pointer; padding: 0.5rem; background: rgba(212, 175, 55, 0.1);">DEX
+                            </th>
+                            <th data-sort="int"
+                                style="cursor: pointer; padding: 0.5rem; background: rgba(212, 175, 55, 0.1);">INT
+                            </th>
+                            <th data-sort="wis"
+                                style="cursor: pointer; padding: 0.5rem; background: rgba(212, 175, 55, 0.1);">WIS
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody id="matchRosterBody">
+                        <!-- Populated by JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
     <!-- Casualties Modal -->
     <div id="casualtiesModal" class="modal hidden"
         style="position: absolute; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.8); z-index: 200; display: flex; justify-content: center; align-items: center;">
@@ -246,6 +361,21 @@
             <div style="text-align: center; margin-top: 1rem;">
                 <button id="closeGraveyardBtn" class="action-btn">Close</button>
             </div>
+        </div>
+    </div>
+
+    <!-- Context Menu Template -->
+    <div id="gladiatorContextMenu" class="gladiator-context-menu hidden">
+        <div class="menu-header" style="display: flex; justify-content: space-between; align-items: center;">
+            <span id="contextMenuHeader">Gladiator Name</span>
+            <button id="closeContextBtn"
+                style="background:none; border:none; color:var(--color-text-muted); cursor:pointer; font-size:1.1rem; line-height:1; padding:0 4px;">&times;</button>
+        </div>
+        <div class="menu-actions">
+            <!-- Details disabled to focus on the sell requirement, but left as a placeholder for later -->
+            <button class="context-btn" disabled title="Coming soon">View Details</button>
+            <button class="context-btn stat-btn" disabled title="Coming soon">Train Stat</button>
+            <button class="context-btn danger-btn" id="contextSellBtn">Sell (250 G)</button>
         </div>
     </div>
 

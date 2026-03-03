@@ -84,7 +84,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const btn = document.createElement('button');
             btn.className = 'team-btn';
             btn.innerHTML = `
-                <h3>${team.name}</h3>
+                <div class="team-header-container" style="justify-content: center;">
+                    <img src="${team.logo}" class="team-logo-small" alt="${team.name} Logo">
+                    <h3>${team.name}</h3>
+                </div>
                 <p>Mascot: ${team.mascot} | ${team.theme}</p>
             `;
             btn.addEventListener('click', () => {
@@ -98,6 +101,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     roster: generateInitialRoster(),
                     teamId: team.id,
                     teamName: team.name,
+                    teamLogo: team.logo,
                     schedule: generateSeasonSchedule(),
                     opposingRosters: generateOpposingRosters(team.id)
                 }));

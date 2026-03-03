@@ -52,9 +52,9 @@ function initializeCombat(playerFormation, opponentFormation, saveContext, oppon
 function setupCombatant(glad, side) {
     glad.side = side;
 
-    // Ensure maxHp is populated even if it wasn't during generation
     if (glad.maxHp === undefined) {
-        glad.maxHp = 50 + (glad.stats.str * 5);
+        // Fallback for older saves
+        glad.maxHp = Math.floor(50 + ((glad.stats.con || 25) * 2));
         glad.hp = glad.maxHp;
     }
 
@@ -81,15 +81,16 @@ function setupCombatant(glad, side) {
     }
 
     // Base damage scaling factor reduced for longer fights
+    // Paladins deal less damage to enforce their role as pure tanks
     // Rogues deal slightly less base damage but can crit
     // Hunters deal less damage to offset their free targeting ability
-    const damageScale = (glad.class === 'Rogue' || glad.class === 'Hunter') ? 0.7 : 1.0;
+    const damageScale = (glad.class === 'Paladin' || glad.class === 'Rogue' || glad.class === 'Hunter') ? 0.7 : 1.0;
     glad.baseDamage = Math.floor(primaryStat * damageScale);
 }
 
 // Utility function to build the square formation widget (used here and in Match Prep)
 function buildSquareGladiatorCard(glad, prefix = '') {
-    let portraitImg = glad.portrait ? `<img src="${glad.portrait}" alt="portrait" />` : `<div style="width:100%;height:100%;background:#333;border-radius:4px;"></div>`;
+    let portraitImg = glad.portrait ? `<img src="${glad.portrait}" alt="portrait" style="width:100%; height:100%; object-fit:cover; display:block; border-radius:4px;" />` : `<div style="width:100%;height:100%;background:#333;border-radius:4px;"></div>`;
     const battlesBadge = (glad.battles > 0) ? `<div class="battles-badge">${glad.battles}</div>` : '';
 
     // We only need maxHp if it's already calculated, otherwise just show stats.
@@ -109,6 +110,7 @@ function buildSquareGladiatorCard(glad, prefix = '') {
             <div>DEX: ${glad.stats.dex}</div>
             <div>INT: ${glad.stats.int}</div>
             <div>WIS: ${glad.stats.wis}</div>
+            <div>CON: ${glad.stats.con || 25}</div>
         </div>
         <div class="combat-card-overlay">
             <div class="combat-card-name">${glad.name}</div>
@@ -261,7 +263,7 @@ function executeTurn() {
             });
             actionType = 'heal';
             const variance = (0.8 + (Math.random() * 0.4));
-            effectAmount = Math.floor(attacker.baseDamage * 2.0 * variance); // Heals a bit more than base damage
+            effectAmount = Math.floor(attacker.baseDamage * 1.0 * variance); // Heals equivalent to base damage
         }
     }
 
@@ -271,8 +273,9 @@ function executeTurn() {
         effectAmount = Math.floor(attacker.baseDamage * variance);
         if (effectAmount < 1) effectAmount = 1;
 
-        // Rogue: 20% chance to land a critical hit for double damage
-        if (attacker.class === 'Rogue' && Math.random() < 0.20) {
+        // Rogue: Critical chance scales with DEX (up to 50%)
+        const critChance = Math.min(0.5, attacker.stats.dex * 0.004);
+        if (attacker.class === 'Rogue' && Math.random() < critChance) {
             effectAmount *= 2;
             actionType = 'rogue_crit';
         }
@@ -393,6 +396,59 @@ function executeTurn() {
                     setTimeout(executeTurn, 800);
                 }, 400);
 
+            } else if (attacker.class === 'Warrior') {
+                // Warrior: Cleave damage vertically across primary target and neighbors
+                let adjacentIndices = [];
+                const tIdx = target.formationIndex;
+                if (tIdx === 0) adjacentIndices = [4];
+                else if (tIdx === 1) adjacentIndices = [];
+                else if (tIdx === 2) adjacentIndices = [];
+                else if (tIdx === 3) adjacentIndices = [4];
+                else if (tIdx === 4) adjacentIndices = [0, 3];
+
+                const cleaveTargets = combatState.combatants.filter(c => c.side === target.side && !c.isDead && adjacentIndices.includes(c.formationIndex));
+                const totalTargetsCaught = 1 + cleaveTargets.length;
+                const splitDamage = Math.max(1, Math.floor(effectAmount / totalTargetsCaught));
+
+                if (cleaveTargets.length > 0) {
+                    logCombat(`<strong>${attacker.name}</strong> <span style="color:#d32f2f">CLEAVES</span> <strong>${target.name}</strong>, striking ${totalTargetsCaught} enemies for ${splitDamage} damage each!`);
+                } else {
+                    logCombat(`<strong>${attacker.name}</strong> attacks <strong>${target.name}</strong> for ${splitDamage} damage!`);
+                }
+
+                // Apply damage to primary
+                if (targetCard) targetCard.classList.add('taking-damage');
+                target.hp -= splitDamage;
+                if (target.hp <= 0) {
+                    target.hp = 0;
+                    target.isDead = true;
+                    logCombat(`--> <strong>${target.name}</strong> has been struck down!`, 'death');
+                }
+                updateCombatantUI(target);
+
+                // Apply damage to secondary targets
+                cleaveTargets.forEach(ct => {
+                    const ctCard = document.getElementById(`combatant-${ct.id}`);
+                    if (ctCard) ctCard.classList.add('taking-damage');
+                    ct.hp -= splitDamage;
+                    if (ct.hp <= 0) {
+                        ct.hp = 0;
+                        ct.isDead = true;
+                        logCombat(`--> <strong>${ct.name}</strong> was caught in the cleave and died!`, 'death');
+                    }
+                    updateCombatantUI(ct);
+
+                    setTimeout(() => {
+                        if (ctCard) ctCard.classList.remove('taking-damage');
+                    }, 400);
+                });
+
+                setTimeout(() => {
+                    if (targetCard) targetCard.classList.remove('taking-damage');
+                    setCardActiveState(null, false);
+                    setTimeout(executeTurn, 800);
+                }, 400);
+
             } else {
                 if (targetCard) targetCard.classList.add('taking-damage');
 
@@ -475,8 +531,9 @@ function finishCombatTransition() {
         // Find the gladiator in the current roster
         const rosterIndex = combatState.saveContext.roster.findIndex(g => g.id === combatant.id);
         if (rosterIndex !== -1) {
-            // 25% chance to die permanently
-            if (Math.random() < 0.25) {
+            // Base 60% chance of permadeath at 25 CON. Paladins (75 CON) drop to 20%.
+            const deathChance = Math.max(0.10, 0.80 - ((combatant.stats.con || 25) * 0.008));
+            if (Math.random() < deathChance) {
                 const fallenGlad = combatState.saveContext.roster.splice(rosterIndex, 1)[0];
                 combatState.saveContext.graveyard.push(fallenGlad);
                 permadeaths.push(fallenGlad);
@@ -506,8 +563,10 @@ function finishCombatTransition() {
         if (!participantIds.has(glad.id)) return; // didn't fight
         // Ensure baseStats exists for legacy gladiators
         if (!glad.baseStats) {
-            glad.baseStats = { str: glad.stats.str, dex: glad.stats.dex, int: glad.stats.int, wis: glad.stats.wis };
+            glad.baseStats = { str: glad.stats.str, dex: glad.stats.dex, int: glad.stats.int, wis: glad.stats.wis, con: glad.stats.con || 25 };
         }
+        if (glad.baseStats.con === undefined) glad.baseStats.con = glad.stats.con || 25;
+
         glad.battles = (glad.battles || 0) + 1;
         // Recalculate stats: baseStats + battles bonus
         const b = glad.battles;
@@ -516,8 +575,10 @@ function finishCombatTransition() {
             dex: glad.baseStats.dex + b,
             int: glad.baseStats.int + b,
             wis: glad.baseStats.wis + b,
+            con: glad.baseStats.con + b
         };
-        //glad.maxHP = 30 + (glad.stats.str * 2);
+        // Recalculate maxHP from new CON
+        glad.maxHp = Math.floor(50 + (glad.stats.con * 2));
     });
 
     // Display Casualties Modal if present
@@ -681,8 +742,9 @@ function simulateAIMatch(teamAId, teamBId, saveContext) {
                 let effectAmount = Math.floor(attacker.baseDamage * variance);
                 if (effectAmount < 1) effectAmount = 1;
 
-                // Rogue: 20% chance to crit for double damage
-                if (attacker.class === 'Rogue' && Math.random() < 0.20) {
+                // Rogue: Critical chance scales with DEX (up to 50%)
+                const critChance = Math.min(0.5, attacker.stats.dex * 0.004);
+                if (attacker.class === 'Rogue' && Math.random() < critChance) {
                     effectAmount *= 2;
                 }
 
@@ -691,8 +753,7 @@ function simulateAIMatch(teamAId, teamBId, saveContext) {
                         let allies = attacker.side === 'A' ? combatants.filter(c => c.side === 'A' && !c.isDead && c.hp < c.maxHp) : combatants.filter(c => c.side === 'B' && !c.isDead && c.hp < c.maxHp);
                         if (allies.length > 0) {
                             let healTarget = allies[0];
-                            healTarget.hp += Math.floor(attacker.baseDamage * 1.0
-                                * variance);
+                            healTarget.hp += Math.floor(attacker.baseDamage * 0.5 * variance);
                             if (healTarget.hp > healTarget.maxHp) healTarget.hp = healTarget.maxHp;
                             continue; // skip attack
                         }
@@ -730,6 +791,42 @@ function simulateAIMatch(teamAId, teamBId, saveContext) {
         }
         turns++;
     }
+    // Award Battle XP to all AI participants
+    const participantIds = new Set(combatants.map(c => c.id));
+    rosterA.forEach(glad => {
+        if (!participantIds.has(glad.id)) return;
+        if (!glad.baseStats) {
+            glad.baseStats = { str: glad.stats.str, dex: glad.stats.dex, int: glad.stats.int, wis: glad.stats.wis, con: glad.stats.con || 25 };
+        }
+        if (glad.baseStats.con === undefined) glad.baseStats.con = glad.stats.con || 25;
+        glad.battles = (glad.battles || 0) + 1;
+        const b = glad.battles;
+        glad.stats = {
+            str: glad.baseStats.str + b,
+            dex: glad.baseStats.dex + b,
+            int: glad.baseStats.int + b,
+            wis: glad.baseStats.wis + b,
+            con: glad.baseStats.con + b
+        };
+        glad.maxHp = Math.floor(50 + (glad.stats.con * 2));
+    });
+    rosterB.forEach(glad => {
+        if (!participantIds.has(glad.id)) return;
+        if (!glad.baseStats) {
+            glad.baseStats = { str: glad.stats.str, dex: glad.stats.dex, int: glad.stats.int, wis: glad.stats.wis, con: glad.stats.con || 25 };
+        }
+        if (glad.baseStats.con === undefined) glad.baseStats.con = glad.stats.con || 25;
+        glad.battles = (glad.battles || 0) + 1;
+        const b = glad.battles;
+        glad.stats = {
+            str: glad.baseStats.str + b,
+            dex: glad.baseStats.dex + b,
+            int: glad.baseStats.int + b,
+            wis: glad.baseStats.wis + b,
+            con: glad.baseStats.con + b
+        };
+        glad.maxHp = Math.floor(50 + (glad.stats.con * 2));
+    });
 
     // Process deaths
     const deadA = combatants.filter(c => c.side === 'A' && c.isDead);

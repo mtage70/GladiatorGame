@@ -24,15 +24,17 @@ function generateGladiator() {
     const name = firstName;
     const portrait = PORTRAITS[`${charClass}_${gender}`] || null;
 
-    let str = generateStat(20), dex = generateStat(20), int = generateStat(20), wis = generateStat(20);
+    let str = generateStat(20), dex = generateStat(20), int = generateStat(20), wis = generateStat(20), con = generateStat(25);
 
     switch (charClass) {
         case 'Warrior':
             str = generateStat(75);
+            con = generateStat(50);
             dex = generateStat(50);
             break;
         case 'Paladin':
-            str = generateStat(75);
+            con = generateStat(75);
+            str = generateStat(50);
             wis = generateStat(50);
             break;
         case 'Rogue':
@@ -50,12 +52,11 @@ function generateGladiator() {
         case 'Cleric':
             wis = generateStat(75);
             int = generateStat(50);
+            con = generateStat(50);
             break;
     }
-    const baseHp = 30 + (str * 2);
-    const maxHp = charClass === 'Warrior' ? Math.floor(baseHp * 0.7)
-        : charClass === 'Rogue' ? Math.floor(baseHp * 0.7)
-            : baseHp;
+    const maxHp = Math.floor(50 + (con * 2));
+
     return {
         id: 'glad_' + Math.random().toString(36).substr(2, 9),
         name: name,
@@ -63,8 +64,8 @@ function generateGladiator() {
         gender: gender,
         class: charClass,
         portrait: portrait,
-        stats: { str, dex, int, wis },
-        baseStats: { str, dex, int, wis },
+        stats: { str, dex, int, wis, con },
+        baseStats: { str, dex, int, wis, con },
         battles: 0,
         maxHp: maxHp,
         hp: maxHp
