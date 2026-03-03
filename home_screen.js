@@ -120,11 +120,11 @@ function renderRoster() {
                     <div class="hp-text" style="font-size: 0.7rem;">${displayHp} / ${displayMaxHp}</div>
                 </div>
             </td>
-            <td style="padding: 0.5rem;">${glad.stats.con || 25}</td>
-            <td style="padding: 0.5rem;">${glad.stats.str}</td>
-            <td style="padding: 0.5rem;">${glad.stats.dex}</td>
-            <td style="padding: 0.5rem;">${glad.stats.int}</td>
-            <td style="padding: 0.5rem;">${glad.stats.wis}</td>
+            <td style="padding: 0.5rem 0.2rem;">${glad.stats.con || 25}</td>
+            <td style="padding: 0.5rem 0.2rem;">${glad.stats.str}</td>
+            <td style="padding: 0.5rem 0.2rem;">${glad.stats.dex}</td>
+            <td style="padding: 0.5rem 0.2rem;">${glad.stats.int}</td>
+            <td style="padding: 0.5rem 0.2rem;">${glad.stats.wis}</td>
         `;
 
         // Row click event to show context menu
@@ -139,10 +139,21 @@ function renderRoster() {
             if (menu && menuHeader && sellBtn) {
                 menuHeader.textContent = glad.name;
 
-                // Position menu near cursor
-                menu.style.left = `${e.clientX}px`;
-                menu.style.top = `${e.clientY}px`;
                 menu.classList.remove('hidden');
+
+                const rect = menu.getBoundingClientRect();
+                let leftPos = e.clientX;
+                let topPos = e.clientY;
+
+                if (leftPos + rect.width > window.innerWidth) {
+                    leftPos = window.innerWidth - rect.width - 10;
+                }
+                if (topPos + rect.height > window.innerHeight) {
+                    topPos = window.innerHeight - rect.height - 10;
+                }
+
+                menu.style.left = `${leftPos}px`;
+                menu.style.top = `${Math.max(10, topPos)}px`;
 
                 // Bind sell logic
                 sellBtn.onclick = () => {
@@ -185,7 +196,20 @@ function renderRoster() {
         }
     });
 
-    // Recruit logic now handled by external button
+    // Update Recruit Button Text based on team size
+    const recruitBtn = document.getElementById('recruitBtn');
+    if (recruitBtn) {
+        if (saveContext.roster.length >= 10) {
+            recruitBtn.textContent = "Full Team";
+            // Optional styling cues to show it's disabled.
+            recruitBtn.style.opacity = '0.5';
+            recruitBtn.style.cursor = 'not-allowed';
+        } else {
+            recruitBtn.textContent = "Recruit (500 G)";
+            recruitBtn.style.opacity = '1';
+            recruitBtn.style.cursor = 'pointer';
+        }
+    }
 
     renderCalendar(saveContext);
     renderStandings(saveContext);
@@ -341,11 +365,17 @@ function renderStandings(saveContext) {
 function transitionToHome() {
     const mainContainer = document.getElementById('mainContainer');
     const panBackground = document.getElementById('panBackground');
+    const homeScreen = document.getElementById('homeScreen');
 
     // Hide main menu and animation background
     mainContainer.classList.remove('show-menu');
     mainContainer.style.display = 'none';
     panBackground.style.display = 'none';
+
+    const saveContext = JSON.parse(localStorage.getItem('gladiatorSaveContext'));
+    if (saveContext && saveContext.teamId) {
+        homeScreen.style.backgroundImage = `url('arenas/arena_${saveContext.teamId}.png')`;
+    }
 
     // Ensure BGM is playing if they click before fanfare ends
     if (typeof playBackgroundMusic === 'function') playBackgroundMusic();
@@ -574,7 +604,7 @@ function advanceTime(saveContext) {
         saveContext.roster.forEach(glad => {
             const maxHp = glad.maxHp || (30 + (glad.stats.str * 2));
             if (glad.hp < maxHp) {
-                glad.hp = Math.min(glad.hp + 10, maxHp);
+                glad.hp = Math.min(glad.hp + Math.max(1, Math.floor(maxHp * 0.1)), maxHp);
                 healedAnyone = true;
             }
         });
@@ -589,7 +619,7 @@ function advanceTime(saveContext) {
                 roster.forEach(glad => {
                     const maxHp = glad.maxHp || (30 + (glad.stats.str * 2));
                     if (glad.hp < maxHp) {
-                        glad.hp = Math.min(glad.hp + 10, maxHp);
+                        glad.hp = Math.min(glad.hp + Math.max(1, Math.floor(maxHp * 0.1)), maxHp);
                     }
                 });
 

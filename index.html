@@ -74,7 +74,7 @@
         </header>
         <div style="display: flex; gap: 2rem; overflow: hidden; height: calc(100vh - 120px);">
             <main class="home-content" style="flex: 1; overflow-y: auto;">
-                <div id="tab-lineup" class="tab-content">
+                <div id="tab-lineup" class="tab-content" style="height:100%">
                     <section id="teamSection" class="team-section panel"
                         style="display: flex; flex-direction: column; flex: 1;">
                         <div style="display: flex; justify-content: space-between; align-items: center;">
@@ -98,7 +98,7 @@
                                             style="cursor: pointer; padding: 0.5rem; background: rgba(212, 175, 55, 0.1);">
                                             Class
                                         </th>
-                                        <th style="padding: 0.5rem; background: rgba(212, 175, 55, 0.1);">Portrait</th>
+                                        <th style="padding: 0.5rem; background: rgba(212, 175, 55, 0.1);">img</th>
                                         <th data-sort="name"
                                             style="cursor: pointer; padding: 0.5rem; background: rgba(212, 175, 55, 0.1);">
                                             Name
@@ -108,23 +108,23 @@
                                             HP
                                         </th>
                                         <th data-sort="con"
-                                            style="cursor: pointer; padding: 0.5rem; background: rgba(212, 175, 55, 0.1);">
+                                            style="cursor: pointer; padding: 0.5rem 0.2rem; background: rgba(212, 175, 55, 0.1);">
                                             CON
                                         </th>
                                         <th data-sort="str"
-                                            style="cursor: pointer; padding: 0.5rem; background: rgba(212, 175, 55, 0.1);">
+                                            style="cursor: pointer; padding: 0.5rem 0.2rem; background: rgba(212, 175, 55, 0.1);">
                                             STR
                                         </th>
                                         <th data-sort="dex"
-                                            style="cursor: pointer; padding: 0.5rem; background: rgba(212, 175, 55, 0.1);">
+                                            style="cursor: pointer; padding: 0.5rem 0.2rem; background: rgba(212, 175, 55, 0.1);">
                                             DEX
                                         </th>
                                         <th data-sort="int"
-                                            style="cursor: pointer; padding: 0.5rem; background: rgba(212, 175, 55, 0.1);">
+                                            style="cursor: pointer; padding: 0.5rem 0.2rem; background: rgba(212, 175, 55, 0.1);">
                                             INT
                                         </th>
                                         <th data-sort="wis"
-                                            style="cursor: pointer; padding: 0.5rem; background: rgba(212, 175, 55, 0.1);">
+                                            style="cursor: pointer; padding: 0.5rem 0.2rem; background: rgba(212, 175, 55, 0.1);">
                                             WIS
                                         </th>
                                     </tr>
@@ -166,7 +166,7 @@
                     </section>
                 </div>
 
-                <div id="tab-news" class="tab-content hidden">
+                <div id="tab-news" class="tab-content hidden" style="height:100%;">
                     <section id="newsfeedSection" class="newsfeed-section panel">
                         <h3>Newsfeed</h3>
                         <div class="news-list" id="newsList">
@@ -198,15 +198,12 @@
 
     <!-- Match Screen (Preparation & Combat) -->
     <div id="matchScreen" class="match-screen hidden">
-        <div id="matchHeader" class="match-header panel">
-            <h3 id="matchupTitle">Player Team vs. Opponent Team</h3>
-        </div>
         <div class="match-main"
             style="display: flex; flex-direction: row; gap: 2rem; flex: 1; overflow: hidden; height: 100%;">
 
             <div class="match-content" style="flex: 1; width: 100%; display: flex; justify-content: space-around;">
-                <div class="team-side player-side panel">
-                    <h3>Your Formation</h3>
+                <div class="team-side player-side">
+                    <h3 id="matchPlayerHeader">Your Formation</h3>
                     <div class="formation-grid" id="playerFormation">
                         <!-- 5 slots for assigned gladiators -->
                         <div class="formation-slot" data-slot="0"></div>
@@ -223,8 +220,8 @@
                     <button id="retreatBtn" class="action-btn">Retreat</button>
                 </div>
 
-                <div class="team-side opponent-side panel" style="border-image-source: url('ui_border_red.png');">
-                    <h3>Opponent Formation</h3>
+                <div class="team-side opponent-side" style="border-image-source: url('ui_border_red.png');">
+                    <h3 id="matchOpponentHeader">Opponent Formation</h3>
                     <div class="formation-grid" id="opponentFormation">
                         <!-- 5 slots for assigned opponents -->
                         <div class="formation-slot" data-slot="0"></div>
@@ -240,14 +237,10 @@
 
     <!-- Combat Screen -->
     <div id="combatScreen" class="combat-screen hidden">
-        <div class="match-header panel" style="margin-bottom: 1rem;">
-            <h3 id="combatMatchupTitle">Player Team vs. Opponent Team</h3>
-        </div>
-
         <div class="combat-main">
             <!-- Left Side: Player Team -->
-            <div class="team-side player-side panel" style="flex: 1;">
-                <h3 style="color: var(--color-accent-primary);">Your Formation</h3>
+            <div class="team-side player-side" style="flex: 1;">
+                <h3 id="combatPlayerHeader" style="color: var(--color-accent-primary);">Your Formation</h3>
                 <div class="formation-grid" id="combatPlayerTeam">
                     <div class="formation-slot" data-slot="0"></div>
                     <div class="formation-slot" data-slot="1"></div>
@@ -268,8 +261,8 @@
             </div>
 
             <!-- Right Side: Opponent Team -->
-            <div class="team-side opponent-side panel" style="flex: 1; border-image-source: url('ui_border_red.png');">
-                <h3 style="color: var(--color-accent-danger);">Opponent Formation</h3>
+            <div class="team-side opponent-side" style="flex: 1; border-image-source: url('ui_border_red.png');">
+                <h3 id="combatOpponentHeader" style="color: var(--color-accent-danger);">Opponent Formation</h3>
                 <div class="formation-grid" id="combatOpponentTeam">
                     <div class="formation-slot" data-slot="0"></div>
                     <div class="formation-slot" data-slot="1"></div>
@@ -340,20 +333,24 @@
     <!-- Casualties Modal -->
     <div id="casualtiesModal" class="modal hidden"
         style="position: absolute; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.8); z-index: 200; display: flex; justify-content: center; align-items: center;">
-        <div class="panel" style="width: 400px; text-align: center;">
+        <div class="panel"
+            style="width: 90vw; max-width: 400px; max-height: 90vh; display: flex; flex-direction: column; text-align: center;">
             <h2 style="color: var(--color-accent-danger); margin-bottom: 1rem;">Casualties Report</h2>
             <p>The following gladiators have died permanently in the arena:</p>
             <div id="casualtiesList"
-                style="margin: 1rem 0; text-align: left; background: rgba(0,0,0,0.5); padding: 1rem; border-radius: 4px;">
+                style="margin: 1rem 0; text-align: left; background: rgba(0,0,0,0.5); padding: 1rem; border-radius: 4px; overflow-y: auto;">
             </div>
-            <button id="closeCasualtiesBtn" class="action-btn primary">Acknowledge</button>
+            <div style="text-align: center; margin-top: auto;">
+                <button id="closeCasualtiesBtn" class="action-btn primary">Acknowledge</button>
+            </div>
         </div>
     </div>
 
     <!-- Graveyard Modal -->
     <div id="graveyardModal" class="modal hidden"
         style="position: absolute; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.8); z-index: 200; display: flex; justify-content: center; align-items: center;">
-        <div class="panel" style="width: 800px; height: 600px; display: flex; flex-direction: column;">
+        <div class="panel"
+            style="width: 95vw; max-width: 800px; height: 90vh; max-height: 600px; display: flex; flex-direction: column;">
             <h2 style="color: var(--color-text-title); text-align: center; margin-bottom: 1rem;">The Graveyard</h2>
             <div id="graveyardGrid" class="roster-grid" style="flex: 1; overflow-y: auto; align-content: start;">
                 <!-- Fallen gladiators injected here -->

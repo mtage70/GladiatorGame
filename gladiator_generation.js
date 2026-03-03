@@ -52,7 +52,7 @@ function generateGladiator() {
         case 'Cleric':
             wis = generateStat(75);
             int = generateStat(50);
-            con = generateStat(50);
+            con = generateStat(25);
             break;
     }
     const maxHp = Math.floor(50 + (con * 2));

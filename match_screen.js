@@ -46,15 +46,17 @@ function initializeMatchScreen(saveContext) {
     currentMatchState.opponentTeam = opponentTeamInfo;
 
     const isHome = myMatch.home === saveContext.teamId;
-    document.getElementById('matchupTitle').innerHTML = `
+    document.getElementById('matchPlayerHeader').innerHTML = `
         <span class="team-header-container">
-            <img src="${isHome ? saveContext.teamLogo : opponentTeamInfo.logo}" class="team-logo-small" alt="${isHome ? saveContext.teamName : opponentTeamInfo.name} Logo">
-            ${isHome ? saveContext.teamName : opponentTeamInfo.name}
+            <img src="${saveContext.teamLogo}" class="team-logo-small" alt="${saveContext.teamName} Logo">
+            ${saveContext.teamName}
         </span>
-        <span style="margin: 0 15px;">vs</span>
-        <span class="team-header-container">
-            <img src="${!isHome ? saveContext.teamLogo : opponentTeamInfo.logo}" class="team-logo-small" alt="${!isHome ? saveContext.teamName : opponentTeamInfo.name} Logo">
-            ${!isHome ? saveContext.teamName : opponentTeamInfo.name}
+    `;
+
+    document.getElementById('matchOpponentHeader').innerHTML = `
+        <span class="team-header-container" style="color: var(--color-accent-danger);">
+            <img src="${opponentTeamInfo.logo}" class="team-logo-small" alt="${opponentTeamInfo.name} Logo">
+            ${opponentTeamInfo.name}
         </span>
     `;
 
@@ -64,9 +66,15 @@ function initializeMatchScreen(saveContext) {
     if (oppRoster && oppRoster.length > 0) {
         // Sort roster by suitability for frontline (highest HP first)
         let sortedRoster = oppRoster.slice().sort((a, b) => {
-            const hpA = a.maxHp || (30 + a.stats.str * 2);
-            const hpB = b.maxHp || (30 + b.stats.str * 2);
-            return hpB - hpA;
+            const hpA = a.hp !== undefined ? a.hp : (a.maxHp || (30 + a.stats.str * 2));
+            const hpB = b.hp !== undefined ? b.hp : (b.maxHp || (30 + b.stats.str * 2));
+            const maxHpA = a.maxHp || (30 + a.stats.str * 2);
+            const maxHpB = b.maxHp || (30 + b.stats.str * 2);
+
+            const scoreA = getPrimaryStat(a) * (hpA / maxHpA);
+            const scoreB = getPrimaryStat(b) * (hpB / maxHpB);
+
+            return scoreB - scoreA;
         });
 
         // Pick top 5 gladiators
@@ -88,9 +96,9 @@ function initializeMatchScreen(saveContext) {
             }
         });
 
-        // Re-sort to prioritize highest HP tank, lowest HP squishy
-        tanks.sort((a, b) => (b.maxHp || 0) - (a.maxHp || 0));
-        squishies.sort((a, b) => (a.maxHp || 0) - (b.maxHp || 0));
+        // Re-sort to prioritize highest current HP tank, lowest current HP squishy
+        tanks.sort((a, b) => (b.hp !== undefined ? b.hp : (b.maxHp || 0)) - (a.hp !== undefined ? a.hp : (a.maxHp || 0)));
+        squishies.sort((a, b) => (a.hp !== undefined ? a.hp : (a.maxHp || 0)) - (b.hp !== undefined ? b.hp : (b.maxHp || 0)));
 
         // Opponent Formation (right side — player attacks them from the left):
         // Slot 1 (left col)  = Frontline  → tanks go here
@@ -138,7 +146,7 @@ function renderOpponentFormation() {
     const slots = document.getElementById('opponentFormation').querySelectorAll('.formation-slot');
     slots.forEach((slot, index) => {
         const glad = currentMatchState.opponentFormation[index];
-        slot.innerHTML = glad ? buildGladiatorCardSmall(glad) : 'Empty';
+        slot.innerHTML = glad ? buildGladiatorCardSmall(glad) : '<img src="empty_slot.png" alt="Empty Slot" style="width:100%;height:100%;object-fit:cover;border-radius:4px;opacity:0.6;">';
     });
 }
 
@@ -164,7 +172,7 @@ function renderPlayerFormation() {
     const slots = document.getElementById('playerFormation').querySelectorAll('.formation-slot');
     slots.forEach((slot, index) => {
         const glad = currentMatchState.playerFormation[index];
-        slot.innerHTML = glad ? buildGladiatorCardSmall(glad) : 'Drag or Click to Assign';
+        slot.innerHTML = glad ? buildGladiatorCardSmall(glad) : '<img src="empty_slot.png" alt="Empty Slot" style="width:100%;height:100%;object-fit:cover;border-radius:4px;opacity:0.6;">';
 
         slot.onclick = () => {
             if (currentMatchState.playerFormation[index]) {

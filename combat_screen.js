@@ -4,7 +4,8 @@ let combatState = {
     combatants: [],
     turnIndex: 0,
     saveContext: null,
-    isCombatActive: false
+    isCombatActive: false,
+    opponentTeamId: null
 };
 
 function initializeCombat(playerFormation, opponentFormation, saveContext, opponentTeamInfo) {
@@ -12,12 +13,31 @@ function initializeCombat(playerFormation, opponentFormation, saveContext, oppon
     combatState.combatants = [];
     combatState.turnIndex = 0;
     combatState.isCombatActive = true;
+    combatState.opponentTeamId = opponentTeamInfo.id;
 
     // Hide Match Screen, Show Combat Screen
     document.getElementById('matchScreen').classList.add('hidden');
-    document.getElementById('combatScreen').classList.remove('hidden');
+    const combatScreen = document.getElementById('combatScreen');
+    combatScreen.classList.remove('hidden');
 
-    document.getElementById('combatMatchupTitle').textContent = `${saveContext.teamName} vs ${opponentTeamInfo.name}`;
+    // Set dynamic combat background based on opponent team
+    combatScreen.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('arenas/arena_${opponentTeamInfo.id}.png')`;
+    combatScreen.style.backgroundSize = 'cover';
+    combatScreen.style.backgroundPosition = 'center';
+
+    document.getElementById('combatPlayerHeader').innerHTML = `
+        <span class="team-header-container">
+            <img src="${saveContext.teamLogo}" class="team-logo-small" alt="${saveContext.teamName} Logo">
+            ${saveContext.teamName}
+        </span>
+    `;
+
+    document.getElementById('combatOpponentHeader').innerHTML = `
+        <span class="team-header-container" style="color: var(--color-accent-danger);">
+            <img src="${opponentTeamInfo.logo}" class="team-logo-small" alt="${opponentTeamInfo.name} Logo">
+            ${opponentTeamInfo.name}
+        </span>
+    `;
     document.getElementById('combatLog').innerHTML = ''; // clear previous logs
 
     document.getElementById('finishCombatBtn').classList.add('hidden');
@@ -125,9 +145,9 @@ function buildSquareGladiatorCard(glad, prefix = '') {
 function renderCombatSide(side) {
     const container = document.getElementById(side === 'player' ? 'combatPlayerTeam' : 'combatOpponentTeam');
 
-    // Clear all slots first
+    // Clear all slots first (set to empty slot graphic)
     const slots = container.querySelectorAll('.formation-slot');
-    slots.forEach(slot => slot.innerHTML = '');
+    slots.forEach(slot => slot.innerHTML = '<img src="empty_slot.png" alt="Empty Slot" style="width:100%;height:100%;object-fit:cover;border-radius:4px;opacity:0.6;">');
 
     // Get characters for this side
     const sideCombatants = combatState.combatants.filter(c => c.side === side);
@@ -136,6 +156,9 @@ function renderCombatSide(side) {
         // Find the slot this gladiator should be in
         const slotDiv = Array.from(slots).find(s => parseInt(s.getAttribute('data-slot')) === glad.formationIndex);
         if (!slotDiv) return; // Failsafe if something goes wrong with indexing
+
+        // Overwrite the 'empty slot' graphic since a gladiator lives here
+        slotDiv.innerHTML = '';
 
         const card = document.createElement('div');
         card.id = `combatant-${glad.id}`;
@@ -243,8 +266,8 @@ function executeTurn() {
     }
 
     // Apply structured targeting priority for attack
-    // Hunters can target any living enemy (bypass frontline priority)
-    const validTargets = (attacker.class === 'Hunter')
+    // Hunters and Mages can target any living enemy (bypass frontline priority)
+    const validTargets = (attacker.class === 'Hunter' || attacker.class === 'Mage')
         ? combatState.combatants.filter(c => c.side === targetSide && !c.isDead)
         : getValidTargets(attacker, combatState.combatants);
 
@@ -504,8 +527,21 @@ function finishCombatTransition() {
         const lastResult = combatState.saveContext.matchResults[combatState.saveContext.matchResults.length - 1];
 
         // Grant match rewards
-        const reward = lastResult.won ? 1000 : 250;
+        const reward = lastResult.won ? 1000 : 500;
         combatState.saveContext.gold = (combatState.saveContext.gold || 0) + reward;
+
+        // Update opponent team record
+        const oppId = combatState.opponentTeamId;
+        const oppData = combatState.saveContext.opposingRosters && combatState.saveContext.opposingRosters[oppId];
+        if (oppData) {
+            if (lastResult.won) {
+                oppData.losses = (oppData.losses || 0) + 1;
+                oppData.gold = (oppData.gold || 0) + 500;
+            } else {
+                oppData.wins = (oppData.wins || 0) + 1;
+                oppData.gold = (oppData.gold || 0) + 1000;
+            }
+        }
 
         const newsItem = document.createElement('div');
         newsItem.className = 'news-item';
@@ -604,7 +640,7 @@ function finishCombatTransition() {
     combatState.saveContext.day += 1;
     if (combatState.saveContext.day > 28) {
         combatState.saveContext.day = 1;
-        combatState.month += 1;
+        combatState.saveContext.month += 1;
         if (combatState.saveContext.month > 12) {
             combatState.saveContext.month = 1;
             combatState.saveContext.year += 1;
@@ -647,9 +683,15 @@ function simulateAIMatch(teamAId, teamBId, saveContext) {
 
     const selectSmartFormation = (roster, side) => {
         let sortedRoster = roster.slice().sort((a, b) => {
-            const hpA = a.maxHp || (30 + a.stats.str * 2);
-            const hpB = b.maxHp || (30 + b.stats.str * 2);
-            return hpB - hpA;
+            const hpA = a.hp !== undefined ? a.hp : (a.maxHp || (30 + a.stats.str * 2));
+            const hpB = b.hp !== undefined ? b.hp : (b.maxHp || (30 + b.stats.str * 2));
+            const maxHpA = a.maxHp || (30 + a.stats.str * 2);
+            const maxHpB = b.maxHp || (30 + b.stats.str * 2);
+
+            const scoreA = getPrimaryStat(a) * (hpA / maxHpA);
+            const scoreB = getPrimaryStat(b) * (hpB / maxHpB);
+
+            return scoreB - scoreA;
         });
 
         let activeFighters = sortedRoster.slice(0, 5);
@@ -661,8 +703,8 @@ function simulateAIMatch(teamAId, teamBId, saveContext) {
             else flexible.push(g);
         });
 
-        tanks.sort((a, b) => (b.maxHp || 0) - (a.maxHp || 0));
-        squishies.sort((a, b) => (a.maxHp || 0) - (b.maxHp || 0));
+        tanks.sort((a, b) => (b.hp !== undefined ? b.hp : (b.maxHp || 0)) - (a.hp !== undefined ? a.hp : (a.maxHp || 0)));
+        squishies.sort((a, b) => (a.hp !== undefined ? a.hp : (a.maxHp || 0)) - (b.hp !== undefined ? b.hp : (b.maxHp || 0)));
 
         let formation = [null, null, null, null, null];
 
@@ -720,8 +762,8 @@ function simulateAIMatch(teamAId, teamBId, saveContext) {
         for (let attacker of combatants) {
             if (attacker.isDead) continue;
 
-            // Hunters can target any living enemy
-            let opponents = (attacker.class === 'Hunter')
+            // Hunters and Mages can target any living enemy
+            let opponents = (attacker.class === 'Hunter' || attacker.class === 'Mage')
                 ? combatants.filter(c => c.side !== attacker.side && !c.isDead)
                 : getValidTargets(attacker, combatants);
             if (opponents.length === 0) break;
@@ -857,13 +899,13 @@ function simulateAIMatch(teamAId, teamBId, saveContext) {
         if (aliveA > 0) {
             // Team A Won
             teamAData.gold += 1000;
-            teamBData.gold += 250;
+            teamBData.gold += 500;
             teamAData.wins = (teamAData.wins || 0) + 1;
             teamBData.losses = (teamBData.losses || 0) + 1;
         } else {
             // Team B Won
             teamBData.gold += 1000;
-            teamAData.gold += 250;
+            teamAData.gold += 500;
             teamBData.wins = (teamBData.wins || 0) + 1;
             teamAData.losses = (teamAData.losses || 0) + 1;
         }
