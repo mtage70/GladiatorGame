@@ -316,7 +316,7 @@ body {
     inset: 0;
     z-index: 20;
     background-size: cover;
-    background-position: center;
+    background-position: center bottom;
     background-repeat: no-repeat;
 
     display: flex;
@@ -1849,6 +1849,7 @@ screen and (max-width: 950px) {
         right: -2px !important;
     }
 }
+
 /* Floating Text Animations */
 .floating-text {
     position: absolute;
@@ -1889,13 +1890,16 @@ screen and (max-width: 950px) {
         top: 30%;
         transform: translate(-50%, -50%) scale(0.5);
     }
+
     15% {
         opacity: 1;
         transform: translate(-50%, -50%) scale(1.2);
     }
+
     30% {
         transform: translate(-50%, -50%) scale(1);
     }
+
     100% {
         opacity: 0;
         top: 0%;
@@ -1909,13 +1913,16 @@ screen and (max-width: 950px) {
         top: 30%;
         transform: translate(-50%, -50%) scale(0.5) rotate(-5deg);
     }
+
     15% {
         opacity: 1;
         transform: translate(-50%, -50%) scale(1.5) rotate(5deg);
     }
+
     30% {
         transform: translate(-50%, -50%) scale(1) rotate(0deg);
     }
+
     100% {
         opacity: 0;
         top: -10%;
@@ -1964,13 +1971,16 @@ screen and (max-width: 950px) {
         top: 30%;
         transform: translate(-50%, -50%) scale(0.5);
     }
+
     15% {
         opacity: 1;
         transform: translate(-50%, -50%) scale(1.2);
     }
+
     30% {
         transform: translate(-50%, -50%) scale(1);
     }
+
     100% {
         opacity: 0;
         top: 0%;
@@ -1984,17 +1994,19 @@ screen and (max-width: 950px) {
         top: 30%;
         transform: translate(-50%, -50%) scale(0.5) rotate(-5deg);
     }
+
     15% {
         opacity: 1;
         transform: translate(-50%, -50%) scale(1.5) rotate(5deg);
     }
+
     30% {
         transform: translate(-50%, -50%) scale(1) rotate(0deg);
     }
+
     100% {
         opacity: 0;
         top: -10%;
         transform: translate(-50%, -50%) scale(1) rotate(0deg);
     }
 }
-

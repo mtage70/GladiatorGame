@@ -33,7 +33,8 @@ function initializeMatchScreen(saveContext) {
 
     // Hide home screen, show match screen
     document.getElementById('homeScreen').classList.add('hidden');
-    document.getElementById('matchScreen').classList.remove('hidden');
+    const matchScreen = document.getElementById('matchScreen');
+    matchScreen.classList.remove('hidden');
 
     // Determine opponent
     const totalDaysElapsed = ((saveContext.year - 1) * 12 * 28) + ((saveContext.month - 1) * 28) + (saveContext.day - 1);
@@ -44,6 +45,11 @@ function initializeMatchScreen(saveContext) {
     const opponentId = myMatch.home === saveContext.teamId ? myMatch.away : myMatch.home;
     const opponentTeamInfo = TEAMS.find(t => t.id === opponentId);
     currentMatchState.opponentTeam = opponentTeamInfo;
+
+    // Set dynamic match background based on opponent team
+    matchScreen.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('arenas/arena_${opponentTeamInfo.id}.png')`;
+    matchScreen.style.backgroundSize = 'cover';
+    matchScreen.style.backgroundPosition = 'center bottom';
 
     const isHome = myMatch.home === saveContext.teamId;
     document.getElementById('matchPlayerHeader').innerHTML = `

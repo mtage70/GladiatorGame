@@ -23,7 +23,7 @@ function initializeCombat(playerFormation, opponentFormation, saveContext, oppon
     // Set dynamic combat background based on opponent team
     combatScreen.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('arenas/arena_${opponentTeamInfo.id}.png')`;
     combatScreen.style.backgroundSize = 'cover';
-    combatScreen.style.backgroundPosition = 'center';
+    combatScreen.style.backgroundPosition = 'center bottom';
 
     document.getElementById('combatPlayerHeader').innerHTML = `
         <div class="team-header-vertical">
