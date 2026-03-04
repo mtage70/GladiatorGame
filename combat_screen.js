@@ -212,6 +212,23 @@ function logCombat(message, type = 'normal') {
     logContainer.scrollTop = logContainer.scrollHeight;
 }
 
+function showFloatingText(gladId, text, type) {
+    const card = document.getElementById(`combatant-${gladId}`);
+    if (!card) return;
+
+    const floating = document.createElement('div');
+    floating.className = `floating-text ${type}`;
+    floating.textContent = text;
+
+    card.appendChild(floating);
+
+    setTimeout(() => {
+        if (floating.parentNode === card) {
+            floating.remove();
+        }
+    }, 1500);
+}
+
 // Frontline -> Midline -> Backline Priority Logic
 function getValidTargets(attacker, allCombatants) {
     const enemies = allCombatants.filter(c => c.side !== attacker.side && !c.isDead);
@@ -325,6 +342,7 @@ function executeTurn() {
             target.hp += effectAmount;
             if (target.hp > target.maxHp) target.hp = target.maxHp;
 
+            showFloatingText(target.id, `+${effectAmount}`, 'heal');
             logCombat(`<strong>${attacker.name}</strong> casts Heal on <strong>${target.name}</strong> for <span style="color:#4caf50">${effectAmount} HP</span>!`);
             updateCombatantUI(target);
 
@@ -352,6 +370,7 @@ function executeTurn() {
             }
 
             if (targetDodged) {
+                showFloatingText(target.id, 'Dodge!', 'dodge');
                 logCombat(`<strong>${attacker.name}</strong> attacks <strong>${target.name}</strong>, but they <em>dodged</em> the blow!`, 'normal');
 
                 // Allow card state to reset
@@ -389,6 +408,7 @@ function executeTurn() {
                 // Apply damage to primary
                 if (targetCard) targetCard.classList.add('taking-damage');
                 target.hp -= splitDamage;
+                showFloatingText(target.id, `-${splitDamage}`, 'damage');
                 if (target.hp <= 0) {
                     target.hp = 0;
                     target.isDead = true;
@@ -401,6 +421,7 @@ function executeTurn() {
                     const stCard = document.getElementById(`combatant-${st.id}`);
                     if (stCard) stCard.classList.add('taking-damage');
                     st.hp -= splitDamage;
+                    showFloatingText(st.id, `-${splitDamage}`, 'damage');
                     if (st.hp <= 0) {
                         st.hp = 0;
                         st.isDead = true;
@@ -442,6 +463,7 @@ function executeTurn() {
                 // Apply damage to primary
                 if (targetCard) targetCard.classList.add('taking-damage');
                 target.hp -= splitDamage;
+                showFloatingText(target.id, `-${splitDamage}`, 'damage');
                 if (target.hp <= 0) {
                     target.hp = 0;
                     target.isDead = true;
@@ -454,6 +476,7 @@ function executeTurn() {
                     const ctCard = document.getElementById(`combatant-${ct.id}`);
                     if (ctCard) ctCard.classList.add('taking-damage');
                     ct.hp -= splitDamage;
+                    showFloatingText(ct.id, `-${splitDamage}`, 'damage');
                     if (ct.hp <= 0) {
                         ct.hp = 0;
                         ct.isDead = true;
@@ -476,6 +499,8 @@ function executeTurn() {
                 if (targetCard) targetCard.classList.add('taking-damage');
 
                 target.hp -= effectAmount;
+                let dmgType = actionType === 'rogue_crit' ? 'crit' : 'damage';
+                showFloatingText(target.id, `-${effectAmount}`, dmgType);
                 if (actionType === 'rogue_crit') {
                     logCombat(`<strong>${attacker.name}</strong> <span style="color:#ffd700">CRITICAL STRIKES</span> <strong>${target.name}</strong> for <span style="color:#ff6666">${effectAmount} damage</span>!`, 'critical');
                 } else {

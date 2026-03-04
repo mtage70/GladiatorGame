@@ -1180,12 +1180,11 @@ body {
     width: 100%;
     height: 100%;
     padding: 0;
-    position: absolute;
+    position: relative;
     /* Lock to the explicit size of .formation-slot */
     top: 0;
     left: 0;
     border: 2px solid #505560;
-    overflow: hidden;
     display: block;
 }
 
@@ -1850,3 +1849,152 @@ screen and (max-width: 950px) {
         right: -2px !important;
     }
 }
+/* Floating Text Animations */
+.floating-text {
+    position: absolute;
+    top: 30%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 1.5rem;
+    font-weight: bold;
+    font-family: var(--font-title);
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8), -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+    pointer-events: none;
+    z-index: 100;
+    animation: floatUp 1.2s ease-out forwards;
+}
+
+.floating-text.damage {
+    color: var(--color-accent-danger);
+}
+
+.floating-text.heal {
+    color: var(--color-accent-success);
+}
+
+.floating-text.dodge {
+    color: var(--color-gold-light);
+    font-style: italic;
+}
+
+.floating-text.crit {
+    color: #ff6666;
+    font-size: 2rem;
+    animation: floatUpCrit 1.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+@keyframes floatUp {
+    0% {
+        opacity: 0;
+        top: 30%;
+        transform: translate(-50%, -50%) scale(0.5);
+    }
+    15% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1.2);
+    }
+    30% {
+        transform: translate(-50%, -50%) scale(1);
+    }
+    100% {
+        opacity: 0;
+        top: 0%;
+        transform: translate(-50%, -50%) scale(1);
+    }
+}
+
+@keyframes floatUpCrit {
+    0% {
+        opacity: 0;
+        top: 30%;
+        transform: translate(-50%, -50%) scale(0.5) rotate(-5deg);
+    }
+    15% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1.5) rotate(5deg);
+    }
+    30% {
+        transform: translate(-50%, -50%) scale(1) rotate(0deg);
+    }
+    100% {
+        opacity: 0;
+        top: -10%;
+        transform: translate(-50%, -50%) scale(1) rotate(0deg);
+    }
+}
+
+
+/* Floating Text Animations */
+.floating-text {
+    position: absolute;
+    top: 30%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 1.5rem;
+    font-weight: bold;
+    font-family: var(--font-title);
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8), -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+    pointer-events: none;
+    z-index: 100;
+    animation: floatUp 1.2s ease-out forwards;
+}
+
+.floating-text.damage {
+    color: var(--color-accent-danger);
+}
+
+.floating-text.heal {
+    color: var(--color-accent-success);
+}
+
+.floating-text.dodge {
+    color: var(--color-gold-light);
+    font-style: italic;
+}
+
+.floating-text.crit {
+    color: #ff6666;
+    font-size: 2rem;
+    animation: floatUpCrit 1.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+@keyframes floatUp {
+    0% {
+        opacity: 0;
+        top: 30%;
+        transform: translate(-50%, -50%) scale(0.5);
+    }
+    15% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1.2);
+    }
+    30% {
+        transform: translate(-50%, -50%) scale(1);
+    }
+    100% {
+        opacity: 0;
+        top: 0%;
+        transform: translate(-50%, -50%) scale(1);
+    }
+}
+
+@keyframes floatUpCrit {
+    0% {
+        opacity: 0;
+        top: 30%;
+        transform: translate(-50%, -50%) scale(0.5) rotate(-5deg);
+    }
+    15% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1.5) rotate(5deg);
+    }
+    30% {
+        transform: translate(-50%, -50%) scale(1) rotate(0deg);
+    }
+    100% {
+        opacity: 0;
+        top: -10%;
+        transform: translate(-50%, -50%) scale(1) rotate(0deg);
+    }
+}
+
