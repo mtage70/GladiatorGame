@@ -45,6 +45,12 @@ function renderRoster() {
 
     tbody.innerHTML = ''; // Clear current table body
 
+    const rosterCountDisplay = document.getElementById('rosterCountDisplay');
+    if (rosterCountDisplay) {
+        const livingCount = saveContext.roster.filter(g => g.hp === undefined || g.hp > 0).length;
+        rosterCountDisplay.textContent = `(${livingCount}/10)`;
+    }
+
     // Clone array so we don't permute the save data order, just visual
     let sortedRoster = [...saveContext.roster];
 

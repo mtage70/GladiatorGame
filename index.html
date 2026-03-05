@@ -73,7 +73,11 @@
                     <section id="teamSection" class="team-section panel"
                         style="display: flex; flex-direction: column; flex: 1;">
                         <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <h3 style="margin: 0;">Team Lineup</h3>
+                            <h3 style="margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+                                Team Lineup
+                                <span id="rosterCountDisplay"
+                                    style="font-size: 0.8em; color: var(--color-text-muted); font-weight: normal;">(0/10)</span>
+                            </h3>
                             <div style="display: flex; gap: 1rem;">
                                 <button class="action-btn success" id="recruitBtn">Recruit (500 G)</button>
                                 <button class="action-btn danger" id="viewGraveyardBtn">Graveyard</button>
