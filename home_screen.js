@@ -58,8 +58,8 @@ function renderRoster() {
         let valA, valB;
         switch (homeSortBy) {
             case 'hp':
-                valA = a.hp !== undefined ? a.hp : (a.maxHp || Math.floor(50 + ((a.stats.con || 25) * 2)));
-                valB = b.hp !== undefined ? b.hp : (b.maxHp || Math.floor(50 + ((b.stats.con || 25) * 2)));
+                valA = a.hp !== undefined ? a.hp : (a.maxHp || calculateMaxHp(a));
+                valB = b.hp !== undefined ? b.hp : (b.maxHp || calculateMaxHp(b));
                 break;
             case 'ovr':
                 valA = getPrimaryStat(a);
@@ -109,7 +109,7 @@ function renderRoster() {
             ? `<div class="glad-portrait-small" style="position:relative; width:40px; height:40px;"><img src="${glad.portrait}" alt="${glad.name}" style="width:100%; height:100%; object-fit:cover; border-radius:4px;" />${glad.battles > 0 ? `<div class="battles-badge-small" style="position:absolute; bottom:-5px; right:-5px; background:var(--color-accent-danger); border-radius:50%; width:16px; height:16px; font-size:10px; display:flex; align-items:center; justify-content:center;">${glad.battles}</div>` : ''}</div>`
             : `<div class="glad-portrait-small blank" style="position:relative; width:40px; height:40px; background:#333; border-radius:4px;">${glad.battles > 0 ? `<div class="battles-badge-small" style="position:absolute; bottom:-5px; right:-5px; background:var(--color-accent-danger); border-radius:50%; width:16px; height:16px; font-size:10px; display:flex; align-items:center; justify-content:center;">${glad.battles}</div>` : ''}</div>`;
 
-        const displayMaxHp = glad.maxHp || (50 + (glad.stats.str * 5));
+        const displayMaxHp = glad.maxHp || calculateMaxHp(glad);
         const displayHp = glad.hp !== undefined ? glad.hp : displayMaxHp;
         const hpPercent = Math.max(0, Math.floor((displayHp / displayMaxHp) * 100));
 
@@ -607,7 +607,7 @@ function advanceTime(saveContext) {
 
         // Heal Player Roster
         saveContext.roster.forEach(glad => {
-            const maxHp = glad.maxHp || (30 + (glad.stats.str * 2));
+            const maxHp = glad.maxHp || calculateMaxHp(glad);
             if (glad.hp < maxHp) {
                 glad.hp = Math.min(glad.hp + Math.max(1, Math.floor(maxHp * 0.1)), maxHp);
                 healedAnyone = true;
@@ -622,7 +622,7 @@ function advanceTime(saveContext) {
 
                 // Healing
                 roster.forEach(glad => {
-                    const maxHp = glad.maxHp || (30 + (glad.stats.str * 2));
+                    const maxHp = glad.maxHp || calculateMaxHp(glad);
                     if (glad.hp < maxHp) {
                         glad.hp = Math.min(glad.hp + Math.max(1, Math.floor(maxHp * 0.1)), maxHp);
                     }

@@ -38,7 +38,7 @@ function initializeCombat(playerFormation, opponentFormation, saveContext, oppon
     // Reset Dampener UI
     const dampenerDisplay = document.getElementById('healingDampenerDisplay');
     if (dampenerDisplay) {
-        dampenerDisplay.textContent = 'Healing: 100%';
+        dampenerDisplay.innerHTML = 'Healing<br>100%';
         dampenerDisplay.style.color = 'var(--color-accent-success)';
     }
 
@@ -55,14 +55,14 @@ function initializeCombat(playerFormation, opponentFormation, saveContext, oppon
     document.getElementById('combatPlayerHeader').innerHTML = `
         <div class="team-header-vertical" style="color: var(--team-primary); text-shadow: 0 0 10px rgba(0,0,0,0.8);">
             <img src="${saveContext.teamLogo}" class="team-logo-large" alt="${saveContext.teamName} Logo">
-            <span>${saveContext.teamName}</span>
+            <span style="background-color: ${getContrastColor('var(--team-primary)')};">${saveContext.teamName}</span>
         </div>
     `;
 
     document.getElementById('combatOpponentHeader').innerHTML = `
         <div class="team-header-vertical" style="color: ${opponentTeamInfo.primaryColor}; text-shadow: 0 0 10px rgba(0,0,0,0.8);">
             <img src="${opponentTeamInfo.logo}" class="team-logo-large" alt="${opponentTeamInfo.name} Logo">
-            <span>${opponentTeamInfo.name}</span>
+            <span style="background-color: ${getContrastColor(opponentTeamInfo.primaryColor)};">${opponentTeamInfo.name}</span>
         </div>
     `;
     document.getElementById('combatLog').innerHTML = ''; // clear previous logs
@@ -110,7 +110,7 @@ function setupCombatant(glad, side) {
 
     if (glad.maxHp === undefined) {
         // Fallback for older saves
-        glad.maxHp = Math.floor(50 + ((glad.stats.con || 25) * 2));
+        glad.maxHp = calculateMaxHp(glad);
         glad.hp = glad.maxHp;
     }
 
@@ -408,7 +408,7 @@ function executeTurn() {
             combatState.healingDampener = Math.max(0, combatState.healingDampener - 5);
             const dampenerDisplay = document.getElementById('healingDampenerDisplay');
             if (dampenerDisplay) {
-                dampenerDisplay.textContent = `Healing: ${combatState.healingDampener}%`;
+                dampenerDisplay.innerHTML = `Healing<br>${combatState.healingDampener}%`;
                 if (combatState.healingDampener === 0) {
                     dampenerDisplay.style.color = 'var(--color-accent-danger)';
                 } else if (combatState.healingDampener <= 50) {

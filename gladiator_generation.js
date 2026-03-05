@@ -55,7 +55,7 @@ function generateGladiator() {
             con = generateStat(25);
             break;
     }
-    const maxHp = Math.floor(50 + (con * 2));
+    const maxHp = calculateMaxHp({ class: charClass, stats: { con } });
 
     return {
         id: 'glad_' + Math.random().toString(36).substr(2, 9),

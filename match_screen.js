@@ -55,14 +55,14 @@ function initializeMatchScreen(saveContext) {
     document.getElementById('matchPlayerHeader').innerHTML = `
         <div class="team-header-vertical" style="color: var(--team-primary); text-shadow: 0 0 10px rgba(0,0,0,0.8);">
             <img src="${saveContext.teamLogo}" class="team-logo-large" alt="${saveContext.teamName} Logo">
-            <span>${saveContext.teamName}</span>
+            <span style="background-color: ${getContrastColor('var(--team-primary)')};">${saveContext.teamName}</span>
         </div>
     `;
 
     document.getElementById('matchOpponentHeader').innerHTML = `
         <div class="team-header-vertical" style="color: ${opponentTeamInfo.primaryColor}; text-shadow: 0 0 10px rgba(0,0,0,0.8);">
             <img src="${opponentTeamInfo.logo}" class="team-logo-large" alt="${opponentTeamInfo.name} Logo">
-            <span>${opponentTeamInfo.name}</span>
+            <span style="background-color: ${getContrastColor(opponentTeamInfo.primaryColor)};">${opponentTeamInfo.name}</span>
         </div>
     `;
 
@@ -72,10 +72,10 @@ function initializeMatchScreen(saveContext) {
     if (oppRoster && oppRoster.length > 0) {
         // Sort roster by suitability for frontline (highest HP first)
         let sortedRoster = oppRoster.slice().sort((a, b) => {
-            const hpA = a.hp !== undefined ? a.hp : (a.maxHp || (30 + a.stats.str * 2));
-            const hpB = b.hp !== undefined ? b.hp : (b.maxHp || (30 + b.stats.str * 2));
-            const maxHpA = a.maxHp || (30 + a.stats.str * 2);
-            const maxHpB = b.maxHp || (30 + b.stats.str * 2);
+            const maxHpA = a.maxHp || calculateMaxHp(a);
+            const maxHpB = b.maxHp || calculateMaxHp(b);
+            const hpA = a.hp !== undefined ? a.hp : maxHpA;
+            const hpB = b.hp !== undefined ? b.hp : maxHpB;
 
             const scoreA = getPrimaryStat(a) * (hpA / maxHpA);
             const scoreB = getPrimaryStat(b) * (hpB / maxHpB);
@@ -172,10 +172,10 @@ function autoFillPlayerFormation() {
 
     // Sort logic heavily mirroring the AI
     let sortedRoster = availableRoster.slice().sort((a, b) => {
-        const hpA = a.hp !== undefined ? a.hp : (a.maxHp || (30 + a.stats.str * 2));
-        const hpB = b.hp !== undefined ? b.hp : (b.maxHp || (30 + b.stats.str * 2));
-        const maxHpA = a.maxHp || (30 + a.stats.str * 2);
-        const maxHpB = b.maxHp || (30 + b.stats.str * 2);
+        const maxHpA = a.maxHp || calculateMaxHp(a);
+        const maxHpB = b.maxHp || calculateMaxHp(b);
+        const hpA = a.hp !== undefined ? a.hp : maxHpA;
+        const hpB = b.hp !== undefined ? b.hp : maxHpB;
 
         const scoreA = getPrimaryStat(a) * (hpA / maxHpA);
         const scoreB = getPrimaryStat(b) * (hpB / maxHpB);
@@ -294,8 +294,8 @@ function renderMatchRoster() {
         let valA, valB;
         switch (currentMatchState.sortBy) {
             case 'hp':
-                valA = a.hp !== undefined ? a.hp : (a.maxHp || Math.floor(50 + ((a.stats.con || 25) * 2)));
-                valB = b.hp !== undefined ? b.hp : (b.maxHp || Math.floor(50 + ((b.stats.con || 25) * 2)));
+                valA = a.hp !== undefined ? a.hp : (a.maxHp || calculateMaxHp(a));
+                valB = b.hp !== undefined ? b.hp : (b.maxHp || calculateMaxHp(b));
                 break;
             case 'ovr':
                 valA = getPrimaryStat(a);
@@ -349,7 +349,7 @@ function renderMatchRoster() {
             ? `<div style="position:relative;width:32px;height:32px;flex-shrink:0;overflow:hidden;border-radius:4px;"><img src="${glad.portrait}" alt="portrait" style="width:100%;height:100%;object-fit:cover;display:block;" />${glad.battles > 0 ? `<div class="battles-badge-small" style="position:absolute; bottom:-4px; right:-4px; background:var(--color-accent-danger); border-radius:50%; width:14px; height:14px; font-size:9px; display:flex; align-items:center; justify-content:center;">${glad.battles}</div>` : ''}</div>`
             : `<div style="position:relative;width:32px;height:32px;background:#333;border-radius:4px;flex-shrink:0;">${glad.battles > 0 ? `<div class="battles-badge-small" style="position:absolute; bottom:-4px; right:-4px; background:var(--color-accent-danger); border-radius:50%; width:14px; height:14px; font-size:9px; display:flex; align-items:center; justify-content:center;">${glad.battles}</div>` : ''}</div>`;
 
-        const maxHp = glad.maxHp || (30 + (glad.stats.str * 2));
+        const maxHp = glad.maxHp || calculateMaxHp(glad);
         const currentHp = glad.hp !== undefined ? glad.hp : maxHp;
         const hpPercent = Math.max(0, Math.floor((currentHp / maxHp) * 100));
 

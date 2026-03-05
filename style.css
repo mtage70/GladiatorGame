@@ -1477,6 +1477,12 @@ body {
     text-align: center;
 }
 
+.team-header-vertical span {
+    padding: 4px 12px;
+    border-radius: 4px;
+    display: inline-block;
+}
+
 /* Gladiator Context Menu */
 .gladiator-context-menu {
     position: fixed;
