@@ -238,7 +238,22 @@
     </div>
 
     <!-- Combat Screen -->
-    <div id="combatScreen" class="combat-screen hidden">
+    <div id="combatScreen" class="combat-screen hidden" style="position: relative;">
+        <!-- Toggle button -->
+        <button id="toggleCombatLogBtn" class="action-btn"
+            style="position: absolute; top: 1rem; left: 50%; transform: translateX(-50%); z-index: 10;">Show Combat
+            Log</button>
+
+        <!-- Big Return button -->
+        <button id="finishCombatBtn" class="action-btn hidden"
+            style="position: absolute; bottom: 4.5rem; left: 50%; transform: translateX(-50%); z-index: 10; font-size: 1.5rem; padding: 1rem 3rem;">END
+            BATTLE</button>
+
+        <!-- Healing Dampener Display -->
+        <div id="healingDampenerDisplay"
+            style="position: absolute; bottom: 1rem; left: 50%; transform: translateX(-50%); z-index: 9; color: var(--color-accent-success); font-weight: bold; font-size: 1.2rem; background: rgba(0,0,0,0.7); padding: 0.5rem 1rem; border-radius: 4px; border: 1px solid var(--color-gold-dark);">
+            Healing: 100%
+        </div>
         <div class="combat-main">
             <!-- Left Side: Player Team -->
             <div class="team-side player-side" style="flex: 1;">
@@ -253,13 +268,16 @@
             </div>
 
             <!-- Center: Combat Log -->
-            <div class="combat-center-panel panel" style="width: 400px; display: flex; flex-direction: column;">
-                <h3>Combat Log</h3>
+            <div id="combatCenterPanel" class="combat-center-panel panel"
+                style="width: 400px; display: flex; flex-direction: column; visibility: hidden; align-self: flex-start; margin-top: 4rem; height: calc(100vh - 16rem); z-index: 8;">
+                <div
+                    style="display: flex; justify-content: center; align-items: center; border-bottom: 1px solid #333; margin-bottom: 1rem; padding-bottom: 0.5rem;">
+                    <h3 style="margin: 0; border: none; padding: 0;">Combat Log</h3>
+                </div>
                 <div id="combatLog"
                     style="flex: 1; overflow-y: auto; background: rgba(0,0,0,0.6); padding: 1rem; border-radius: 4px; font-family: monospace; font-size: 0.9rem; line-height: 1.5; color: var(--color-text-body); border: 1px inset var(--color-text-muted);">
                     <!-- Log entries go here -->
                 </div>
-                <button id="finishCombatBtn" class="action-btn hidden" style="margin-top: 1rem;">RETURN TO HOME</button>
             </div>
 
             <!-- Right Side: Opponent Team -->

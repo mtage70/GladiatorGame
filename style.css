@@ -1123,7 +1123,6 @@ body {
 .combat-screen {
     display: flex;
     flex-direction: column;
-    padding: 1rem;
     width: 100vw;
     height: 100vh;
     justify-content: center;
@@ -1135,6 +1134,7 @@ body {
 
 .match-screen.hidden,
 .combat-screen.hidden,
+.action-btn.hidden,
 .modal.hidden {
     display: none !important;
 }
@@ -1787,6 +1787,8 @@ screen and (max-width: 950px) {
 
     .combat-center-panel {
         width: 180px !important;
+        margin-top: 3rem !important;
+        height: calc(100vh - 8.5rem) !important;
     }
 
     /* Team Selection Screen squashing */

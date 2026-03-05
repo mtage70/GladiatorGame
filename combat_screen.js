@@ -1,11 +1,30 @@
 // Combat Screen Logic
 
+const toggleLogBtn = document.getElementById('toggleCombatLogBtn');
+if (toggleLogBtn) {
+    toggleLogBtn.addEventListener('click', () => {
+        const panel = document.getElementById('combatCenterPanel');
+        if (panel) {
+            if (panel.style.visibility === 'hidden') {
+                panel.style.visibility = 'visible';
+                toggleLogBtn.textContent = 'Hide Combat Log';
+            } else {
+                panel.style.visibility = 'hidden';
+                toggleLogBtn.textContent = 'Show Combat Log';
+            }
+        }
+    });
+}
+
+
+
 let combatState = {
     combatants: [],
     turnIndex: 0,
     saveContext: null,
     isCombatActive: false,
-    opponentTeamId: null
+    opponentTeamId: null,
+    healingDampener: 100
 };
 
 function initializeCombat(playerFormation, opponentFormation, saveContext, opponentTeamInfo) {
@@ -14,6 +33,14 @@ function initializeCombat(playerFormation, opponentFormation, saveContext, oppon
     combatState.turnIndex = 0;
     combatState.isCombatActive = true;
     combatState.opponentTeamId = opponentTeamInfo.id;
+    combatState.healingDampener = 100;
+
+    // Reset Dampener UI
+    const dampenerDisplay = document.getElementById('healingDampenerDisplay');
+    if (dampenerDisplay) {
+        dampenerDisplay.textContent = 'Healing: 100%';
+        dampenerDisplay.style.color = 'var(--color-accent-success)';
+    }
 
     // Hide Match Screen, Show Combat Screen
     document.getElementById('matchScreen').classList.add('hidden');
@@ -39,6 +66,15 @@ function initializeCombat(playerFormation, opponentFormation, saveContext, oppon
         </div>
     `;
     document.getElementById('combatLog').innerHTML = ''; // clear previous logs
+
+    const combatCenterPanel = document.getElementById('combatCenterPanel');
+    if (combatCenterPanel) {
+        combatCenterPanel.style.visibility = 'hidden';
+    }
+    const toggleCombatLogBtn = document.getElementById('toggleCombatLogBtn');
+    if (toggleCombatLogBtn) {
+        toggleCombatLogBtn.textContent = 'Show Combat Log';
+    }
 
     document.getElementById('finishCombatBtn').classList.add('hidden');
     document.getElementById('finishCombatBtn').onclick = finishCombatTransition;
@@ -293,7 +329,7 @@ function executeTurn() {
     let target = null;
     let effectAmount = 0;
 
-    if (attacker.class === 'Cleric') {
+    if (attacker.class === 'Cleric' && combatState.healingDampener > 0) {
         const friendlies = combatState.combatants.filter(c => c.side === attacker.side && !c.isDead && c.hp < c.maxHp);
         if (friendlies.length > 0) {
             target = friendlies.reduce((lowest, current) => {
@@ -310,7 +346,14 @@ function executeTurn() {
     if (actionType === 'attack') {
         target = validTargets[Math.floor(Math.random() * validTargets.length)];
         const variance = (0.8 + (Math.random() * 0.4));
-        effectAmount = Math.floor(attacker.baseDamage * variance);
+
+        // If a Cleric is attacking, override baseDamage to use STR instead of WIS
+        let attackDamage = attacker.baseDamage;
+        if (attacker.class === 'Cleric') {
+            attackDamage = attacker.stats.str * 1.5;
+        }
+
+        effectAmount = Math.floor(attackDamage * variance);
         if (effectAmount < 1) effectAmount = 1;
 
         // Rogue: Critical chance scales with DEX (up to 50%)
@@ -339,12 +382,29 @@ function executeTurn() {
         if (actionType === 'heal') {
             if (targetCard) targetCard.classList.add('receiving-heal');
 
+            // Apply dampener
+            effectAmount = Math.max(1, Math.floor(effectAmount * (combatState.healingDampener / 100)));
+
             target.hp += effectAmount;
             if (target.hp > target.maxHp) target.hp = target.maxHp;
 
             showFloatingText(target.id, `+${effectAmount}`, 'heal');
             logCombat(`<strong>${attacker.name}</strong> casts Heal on <strong>${target.name}</strong> for <span style="color:#4caf50">${effectAmount} HP</span>!`);
             updateCombatantUI(target);
+
+            // Reduce dampener
+            combatState.healingDampener = Math.max(0, combatState.healingDampener - 5);
+            const dampenerDisplay = document.getElementById('healingDampenerDisplay');
+            if (dampenerDisplay) {
+                dampenerDisplay.textContent = `Healing: ${combatState.healingDampener}%`;
+                if (combatState.healingDampener === 0) {
+                    dampenerDisplay.style.color = 'var(--color-accent-danger)';
+                } else if (combatState.healingDampener <= 50) {
+                    dampenerDisplay.style.color = 'var(--color-gold-light)';
+                } else {
+                    dampenerDisplay.style.color = 'var(--color-accent-success)';
+                }
+            }
 
             setTimeout(() => {
                 if (targetCard) targetCard.classList.remove('receiving-heal');
@@ -358,11 +418,17 @@ function executeTurn() {
             let targetDodged = false;
 
             if (isPhysicalAttack) {
-                // Calculate dodge chance. target's dex vs attacker's primary stat.
-                // Cap dodge at 40% maximum to ensure stats don't break the game.
-                let dodgeChance = (target.stats.dex - attacker.baseDamage) * 0.01;
+                // Calculate dodge chance. target's dex determines flat dodge chance.
+                // 0 dex -> 0%
+                // 75 dex -> 25%
+                // 99 dex -> 50%
+                // Quadratic fit: (17 / 2376) * x^2 + (-161 / 792) * x
+                let dex = target.stats.dex;
+                let dodgeChance = ((17 / 2376) * Math.pow(dex, 2)) - ((161 / 792) * dex);
+                dodgeChance = dodgeChance / 100; // convert percentage to decimal
+
                 if (dodgeChance < 0) dodgeChance = 0;
-                if (dodgeChance > 0.40) dodgeChance = 0.40;
+                if (dodgeChance > 0.50) dodgeChance = 0.50;
 
                 if (Math.random() < dodgeChance) {
                     targetDodged = true;
@@ -592,8 +658,11 @@ function finishCombatTransition() {
         // Find the gladiator in the current roster
         const rosterIndex = combatState.saveContext.roster.findIndex(g => g.id === combatant.id);
         if (rosterIndex !== -1) {
-            // Base 60% chance of permadeath at 25 CON. Paladins (75 CON) drop to 20%.
-            const deathChance = Math.max(0.10, 0.80 - ((combatant.stats.con || 25) * 0.008));
+            // Base 30% chance of permadeath at 25 CON. Decreases to 15% at 75 CON.
+            // Formula: 0.30 - ((CON - 25) * 0.003)
+            let deathChance = 0.30 - (((combatant.stats.con || 25) - 25) * 0.003);
+            if (deathChance < 0.10) deathChance = 0.10; // floor at 10%
+
             if (Math.random() < deathChance) {
                 const fallenGlad = combatState.saveContext.roster.splice(rosterIndex, 1)[0];
                 combatState.saveContext.graveyard.push(fallenGlad);
@@ -632,11 +701,11 @@ function finishCombatTransition() {
         // Recalculate stats: baseStats + battles bonus
         const b = glad.battles;
         glad.stats = {
-            str: glad.baseStats.str + b,
-            dex: glad.baseStats.dex + b,
-            int: glad.baseStats.int + b,
-            wis: glad.baseStats.wis + b,
-            con: glad.baseStats.con + b
+            str: Math.min(99, glad.baseStats.str + b),
+            dex: Math.min(99, glad.baseStats.dex + b),
+            int: Math.min(99, glad.baseStats.int + b),
+            wis: Math.min(99, glad.baseStats.wis + b),
+            con: Math.min(99, glad.baseStats.con + b)
         };
         // Recalculate maxHP from new CON
         glad.maxHp = Math.floor(50 + (glad.stats.con * 2));
