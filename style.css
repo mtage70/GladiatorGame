@@ -1411,6 +1411,14 @@ body {
     z-index: 10;
 }
 
+.projectile {
+    position: fixed;
+    z-index: 1000;
+    pointer-events: none;
+    transition: left 0.4s linear, top 0.4s linear;
+    transform: translate(-50%, -50%);
+}
+
 .combatant-card.taking-damage {
     animation: wiggleHit 0.4s ease-in-out;
     border-color: #ff4444 !important;

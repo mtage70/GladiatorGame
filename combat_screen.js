@@ -313,295 +313,353 @@ function executeTurn() {
 
     setCardActiveState(attacker.id, true);
 
-    // Find all enemies to verify if the combat should end
-    const targetSide = attacker.side === 'player' ? 'opponent' : 'player';
-    const allEnemies = combatState.combatants.filter(c => c.side === targetSide && !c.isDead);
+    function animateProjectile(startElem, endElem, imageUrl, duration = 400) {
+        return new Promise(resolve => {
+            if (!startElem || !endElem) {
+                resolve();
+                return;
+            }
 
-    if (allEnemies.length === 0) {
-        // Team wipe detected
-        const winner = attacker.side === 'player' ? 'Player Team' : 'Opponent Team';
-        logCombat(`The battle is over! ${winner} is victorious!`, 'critical');
-        endCombat(attacker.side);
-        return;
-    }
+            const startRect = startElem.getBoundingClientRect();
+            const endRect = endElem.getBoundingClientRect();
 
-    // Apply structured targeting priority for attack
-    // Hunters and Mages can target any living enemy (bypass frontline priority)
-    const validTargets = (attacker.class === 'Hunter' || attacker.class === 'Mage')
-        ? combatState.combatants.filter(c => c.side === targetSide && !c.isDead)
-        : getValidTargets(attacker, combatState.combatants);
+            const projectile = document.createElement('img');
+            projectile.src = imageUrl;
+            projectile.className = 'projectile';
+            projectile.style.width = '120px';
+            projectile.style.height = '120px';
+            projectile.style.left = `${startRect.left + startRect.width / 2}px`;
+            projectile.style.top = `${startRect.top + startRect.height / 2}px`;
 
-    // Determine Action
-    let actionType = 'attack';
-    let target = null;
-    let effectAmount = 0;
+            // Calculate rotation to face the target
+            const dx = (endRect.left + endRect.width / 2) - (startRect.left + startRect.width / 2);
+            const dy = (endRect.top + endRect.height / 2) - (startRect.top + startRect.height / 2);
+            const angle = (Math.atan2(dy, dx) * 180 / Math.PI) + 180;
 
-    if (attacker.class === 'Cleric' && combatState.healingDampener > 0) {
-        const allAliveFriendlies = combatState.combatants.filter(c => c.side === attacker.side && !c.isDead);
+            projectile.style.transform = `translate(-50%, -50%) rotate(${angle}deg)`;
 
-        // Only attempt to heal if the Cleric is not the last person alive on their team
-        if (allAliveFriendlies.length > 1) {
-            const friendliesNeedingHeal = allAliveFriendlies.filter(c => c.hp < c.maxHp);
-            if (friendliesNeedingHeal.length > 0) {
-                target = friendliesNeedingHeal.reduce((lowest, current) => {
-                    const currentPct = current.hp / current.maxHp;
-                    const lowestPct = lowest.hp / lowest.maxHp;
-                    return currentPct < lowestPct ? current : lowest;
+            document.body.appendChild(projectile);
+
+            // Trigger animation
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    projectile.style.left = `${endRect.left + endRect.width / 2}px`;
+                    projectile.style.top = `${endRect.top + endRect.height / 2}px`;
                 });
-                actionType = 'heal';
-                const variance = (0.8 + (Math.random() * 0.4));
-                effectAmount = Math.floor(attacker.baseDamage * 1.0 * variance); // Heals equivalent to base damage
-            }
-        }
-    }
-
-    if (actionType === 'attack') {
-        target = validTargets[Math.floor(Math.random() * validTargets.length)];
-        const variance = (0.8 + (Math.random() * 0.4));
-
-        // If a Cleric is attacking, override baseDamage to use STR instead of WIS
-        let attackDamage = attacker.baseDamage;
-        if (attacker.class === 'Cleric') {
-            attackDamage = attacker.stats.str * 1.5;
-        }
-
-        effectAmount = Math.floor(attackDamage * variance);
-        if (effectAmount < 1) effectAmount = 1;
-
-        // Rogue: Critical chance scales with DEX (up to 50%)
-        const critChance = Math.min(0.5, attacker.stats.dex * 0.004);
-        if (attacker.class === 'Rogue' && Math.random() < critChance) {
-            effectAmount *= 2;
-            actionType = 'rogue_crit';
-        }
-
-        // Mage unique mechanical override: Splash damage across adjacent formation slots
-        if (attacker.class === 'Mage') {
-            actionType = 'fireball';
-        }
-    }
-
-    // Trigger visual attack/cast animation
-    const attackerCard = document.getElementById(`combatant-${attacker.id}`);
-    if (attackerCard) attackerCard.classList.add('attacking');
-
-    // Wait a brief moment for the 'swing/cast', then process effect
-    setTimeout(() => {
-        if (attackerCard) attackerCard.classList.remove('attacking');
-
-        const targetCard = document.getElementById(`combatant-${target.id}`);
-
-        if (actionType === 'heal') {
-            if (targetCard) targetCard.classList.add('receiving-heal');
-
-            // Apply dampener
-            effectAmount = Math.max(1, Math.floor(effectAmount * (combatState.healingDampener / 100)));
-
-            target.hp += effectAmount;
-            if (target.hp > target.maxHp) target.hp = target.maxHp;
-
-            showFloatingText(target.id, `+${effectAmount}`, 'heal');
-            logCombat(`<strong>${attacker.name}</strong> casts Heal on <strong>${target.name}</strong> for <span style="color:#4caf50">${effectAmount} HP</span>!`);
-            updateCombatantUI(target);
-
-            // Reduce dampener
-            combatState.healingDampener = Math.max(0, combatState.healingDampener - 5);
-            const dampenerDisplay = document.getElementById('healingDampenerDisplay');
-            if (dampenerDisplay) {
-                dampenerDisplay.innerHTML = `Healing<br>${combatState.healingDampener}%`;
-                if (combatState.healingDampener === 0) {
-                    dampenerDisplay.style.color = 'var(--color-accent-danger)';
-                } else if (combatState.healingDampener <= 50) {
-                    dampenerDisplay.style.color = 'var(--color-gold-light)';
-                } else {
-                    dampenerDisplay.style.color = 'var(--color-accent-success)';
-                }
-            }
+            });
 
             setTimeout(() => {
-                if (targetCard) targetCard.classList.remove('receiving-heal');
-                setCardActiveState(null, false);
-                setTimeout(executeTurn, 800);
-            }, 400);
+                projectile.remove();
+                resolve();
+            }, duration);
+        });
+    }
 
-        } else {
-            // Check for Dodge against physical attacks
-            let isPhysicalAttack = ['Warrior', 'Paladin', 'Rogue', 'Hunter'].includes(attacker.class);
-            let targetDodged = false;
+    // Process Actions
+    setTimeout(async () => {
+        // Find all enemies to verify if the combat should end
+        const targetSide = attacker.side === 'player' ? 'opponent' : 'player';
+        const allEnemies = combatState.combatants.filter(c => c.side === targetSide && !c.isDead);
 
-            if (isPhysicalAttack) {
-                // Calculate dodge chance. target's dex determines flat dodge chance.
-                // 0 dex -> 0%
-                // 75 dex -> 25%
-                // 99 dex -> 50%
-                // Quadratic fit: (17 / 2376) * x^2 + (-161 / 792) * x
-                let dex = target.stats.dex;
-                let dodgeChance = ((17 / 2376) * Math.pow(dex, 2)) - ((161 / 792) * dex);
-                dodgeChance = dodgeChance / 100; // convert percentage to decimal
+        if (allEnemies.length === 0) {
+            // Team wipe detected
+            const winner = attacker.side === 'player' ? 'Player Team' : 'Opponent Team';
+            logCombat(`The battle is over! ${winner} is victorious!`, 'critical');
+            endCombat(attacker.side);
+            return;
+        }
 
-                if (dodgeChance < 0) dodgeChance = 0;
-                if (dodgeChance > 0.50) dodgeChance = 0.50;
+        // Apply structured targeting priority for attack
+        // Hunters and Mages can target any living enemy (bypass frontline priority)
+        const validTargets = (attacker.class === 'Hunter' || attacker.class === 'Mage')
+            ? combatState.combatants.filter(c => c.side === targetSide && !c.isDead)
+            : getValidTargets(attacker, combatState.combatants);
 
-                if (Math.random() < dodgeChance) {
-                    targetDodged = true;
+        // Determine Action
+        let actionType = 'attack';
+        let target = null;
+        let effectAmount = 0;
+
+        if (attacker.class === 'Cleric' && combatState.healingDampener > 0) {
+            const allAliveFriendlies = combatState.combatants.filter(c => c.side === attacker.side && !c.isDead);
+
+            // Only attempt to heal if the Cleric is not the last person alive on their team
+            if (allAliveFriendlies.length > 1) {
+                const friendliesNeedingHeal = allAliveFriendlies.filter(c => c.hp < c.maxHp);
+                if (friendliesNeedingHeal.length > 0) {
+                    target = friendliesNeedingHeal.reduce((lowest, current) => {
+                        const currentPct = current.hp / current.maxHp;
+                        const lowestPct = lowest.hp / lowest.maxHp;
+                        return currentPct < lowestPct ? current : lowest;
+                    });
+                    actionType = 'heal';
+                    const variance = (0.8 + (Math.random() * 0.4));
+                    effectAmount = Math.floor(attacker.baseDamage * 1.0 * variance); // Heals equivalent to base damage
                 }
             }
+        }
 
-            if (targetDodged) {
-                showFloatingText(target.id, 'Dodge!', 'dodge');
-                logCombat(`<strong>${attacker.name}</strong> attacks <strong>${target.name}</strong>, but they <em>dodged</em> the blow!`, 'normal');
+        if (actionType === 'attack') {
+            target = validTargets[Math.floor(Math.random() * validTargets.length)];
+            const variance = (0.8 + (Math.random() * 0.4));
 
-                // Allow card state to reset
-                setTimeout(() => {
-                    setCardActiveState(null, false);
-                    setTimeout(executeTurn, 800);
-                }, 400);
+            // If a Cleric is attacking, override baseDamage to use STR instead of WIS
+            let attackDamage = attacker.baseDamage;
+            if (attacker.class === 'Cleric') {
+                attackDamage = attacker.stats.str * 1.5;
+            }
 
-            } else if (actionType === 'fireball') {
-                // Determine adjacent slots.
-                // Slots: 0 (Front), 1 (Back), 2 (Mid-Top), 3 (Mid-Center), 4 (Mid-Bottom)
-                // Actually, wait - let's define "adjacent" based on the numerical grid layout in style.css.
-                // Slot 0 (Frontline) has no lateral adjacencies, only depth.
-                // A true splash in a 5-man cross formation: 
-                // Front(1) - Mid(3) - Back(1)
-                // Let's splash based on the "Midline" vertical column (indices 2, 3, 4). 
-                // If targeting Midline, hit adjacent midline slots. If targeting Front/Back, hit the center Mid slot (3) behind it.
-                let adjacentIndices = [];
-                const tIdx = target.formationIndex;
-                if (tIdx === 0) adjacentIndices = [4]; // Front splashes to Mid-Center
-                else if (tIdx === 1) adjacentIndices = [4]; // Back splashes to Mid-Center
-                else if (tIdx === 2) adjacentIndices = [4]; // Mid-Top splashes to Mid-Center
-                else if (tIdx === 3) adjacentIndices = [4]; // Mid-Bottom splashes to Mid-Center
-                else if (tIdx === 4) adjacentIndices = [0, 1, 2, 3]; // Mid-Center splashes EVERYWHERE
+            effectAmount = Math.floor(attackDamage * variance);
+            if (effectAmount < 1) effectAmount = 1;
 
-                // Find living targets in those slots
-                const splashTargets = combatState.combatants.filter(c => c.side === target.side && !c.isDead && adjacentIndices.includes(c.formationIndex));
+            // Rogue: Critical chance scales with DEX (up to 50%)
+            const critChance = Math.min(0.5, attacker.stats.dex * 0.004);
+            if (attacker.class === 'Rogue' && Math.random() < critChance) {
+                effectAmount *= 2;
+                actionType = 'rogue_crit';
+            }
 
-                // Determine divided damage
-                const totalTargetsCaught = 1 + splashTargets.length;
-                const splitDamage = Math.max(1, Math.floor(effectAmount / totalTargetsCaught));
+            // Mage unique mechanical override: Splash damage across adjacent formation slots
+            if (attacker.class === 'Mage') {
+                actionType = 'fireball';
+            }
+        }
 
-                logCombat(`<strong>${attacker.name}</strong> hurls a <span style="color:#ff8800">Fireball</span> at <strong>${target.name}</strong>, scorching ${totalTargetsCaught} enemies for ${splitDamage} damage each!`);
+        // Trigger visual attack/cast animation
+        const attackerCard = document.getElementById(`combatant-${attacker.id}`);
+        if (attackerCard) attackerCard.classList.add('attacking');
 
-                // Apply damage to primary
-                if (targetCard) targetCard.classList.add('taking-damage');
-                target.hp -= splitDamage;
-                showFloatingText(target.id, `-${splitDamage}`, 'damage');
-                if (target.hp <= 0) {
-                    target.hp = 0;
-                    target.isDead = true;
-                    logCombat(`--> <strong>${target.name}</strong> was burned to ashes!`, 'death');
-                }
+        // Wait a brief moment for the 'swing/cast', then process effect
+        setTimeout(async () => {
+            if (attackerCard) attackerCard.classList.remove('attacking');
+
+            const targetCard = document.getElementById(`combatant-${target.id}`);
+
+            if (actionType === 'heal') {
+                if (targetCard) targetCard.classList.add('receiving-heal');
+
+                // Apply dampener
+                effectAmount = Math.max(1, Math.floor(effectAmount * (combatState.healingDampener / 100)));
+
+                target.hp += effectAmount;
+                if (target.hp > target.maxHp) target.hp = target.maxHp;
+
+                showFloatingText(target.id, `+${effectAmount}`, 'heal');
+                logCombat(`<strong>${attacker.name}</strong> casts Heal on <strong>${target.name}</strong> for <span style="color:#4caf50">${effectAmount} HP</span>!`);
                 updateCombatantUI(target);
 
-                // Apply damage to secondary targets
-                splashTargets.forEach(st => {
-                    const stCard = document.getElementById(`combatant-${st.id}`);
-                    if (stCard) stCard.classList.add('taking-damage');
-                    st.hp -= splitDamage;
-                    showFloatingText(st.id, `-${splitDamage}`, 'damage');
-                    if (st.hp <= 0) {
-                        st.hp = 0;
-                        st.isDead = true;
-                        logCombat(`--> <strong>${st.name}</strong> was caught in the blast and died!`, 'death');
+                // Reduce dampener
+                combatState.healingDampener = Math.max(0, combatState.healingDampener - 5);
+                const dampenerDisplay = document.getElementById('healingDampenerDisplay');
+                if (dampenerDisplay) {
+                    dampenerDisplay.innerHTML = `Healing<br>${combatState.healingDampener}%`;
+                    if (combatState.healingDampener === 0) {
+                        dampenerDisplay.style.color = 'var(--color-accent-danger)';
+                    } else if (combatState.healingDampener <= 50) {
+                        dampenerDisplay.style.color = 'var(--color-gold-light)';
+                    } else {
+                        dampenerDisplay.style.color = 'var(--color-accent-success)';
                     }
-                    updateCombatantUI(st);
-
-                    setTimeout(() => {
-                        if (stCard) stCard.classList.remove('taking-damage');
-                    }, 400);
-                });
-
-                setTimeout(() => {
-                    if (targetCard) targetCard.classList.remove('taking-damage');
-                    setCardActiveState(null, false);
-                    setTimeout(executeTurn, 800);
-                }, 400);
-
-            } else if (attacker.class === 'Warrior') {
-                // Warrior: Cleave damage vertically across primary target and neighbors
-                let adjacentIndices = [];
-                const tIdx = target.formationIndex;
-                if (tIdx === 0) adjacentIndices = [4];
-                else if (tIdx === 1) adjacentIndices = [];
-                else if (tIdx === 2) adjacentIndices = [];
-                else if (tIdx === 3) adjacentIndices = [4];
-                else if (tIdx === 4) adjacentIndices = [0, 3];
-
-                const cleaveTargets = combatState.combatants.filter(c => c.side === target.side && !c.isDead && adjacentIndices.includes(c.formationIndex));
-                const totalTargetsCaught = 1 + cleaveTargets.length;
-                const splitDamage = Math.max(1, Math.floor(effectAmount / totalTargetsCaught));
-
-                if (cleaveTargets.length > 0) {
-                    logCombat(`<strong>${attacker.name}</strong> <span style="color:#d32f2f">CLEAVES</span> <strong>${target.name}</strong>, striking ${totalTargetsCaught} enemies for ${splitDamage} damage each!`);
-                } else {
-                    logCombat(`<strong>${attacker.name}</strong> attacks <strong>${target.name}</strong> for ${splitDamage} damage!`);
                 }
 
-                // Apply damage to primary
-                if (targetCard) targetCard.classList.add('taking-damage');
-                target.hp -= splitDamage;
-                showFloatingText(target.id, `-${splitDamage}`, 'damage');
-                if (target.hp <= 0) {
-                    target.hp = 0;
-                    target.isDead = true;
-                    logCombat(`--> <strong>${target.name}</strong> has been struck down!`, 'death');
-                }
-                updateCombatantUI(target);
-
-                // Apply damage to secondary targets
-                cleaveTargets.forEach(ct => {
-                    const ctCard = document.getElementById(`combatant-${ct.id}`);
-                    if (ctCard) ctCard.classList.add('taking-damage');
-                    ct.hp -= splitDamage;
-                    showFloatingText(ct.id, `-${splitDamage}`, 'damage');
-                    if (ct.hp <= 0) {
-                        ct.hp = 0;
-                        ct.isDead = true;
-                        logCombat(`--> <strong>${ct.name}</strong> was caught in the cleave and died!`, 'death');
-                    }
-                    updateCombatantUI(ct);
-
-                    setTimeout(() => {
-                        if (ctCard) ctCard.classList.remove('taking-damage');
-                    }, 400);
-                });
-
                 setTimeout(() => {
-                    if (targetCard) targetCard.classList.remove('taking-damage');
+                    if (targetCard) targetCard.classList.remove('receiving-heal');
                     setCardActiveState(null, false);
                     setTimeout(executeTurn, 800);
                 }, 400);
 
             } else {
-                if (targetCard) targetCard.classList.add('taking-damage');
+                // Check for Dodge against physical attacks
+                let isPhysicalAttack = ['Warrior', 'Paladin', 'Rogue', 'Hunter'].includes(attacker.class);
+                let targetDodged = false;
 
-                target.hp -= effectAmount;
-                let dmgType = actionType === 'rogue_crit' ? 'crit' : 'damage';
-                showFloatingText(target.id, `-${effectAmount}`, dmgType);
-                if (actionType === 'rogue_crit') {
-                    logCombat(`<strong>${attacker.name}</strong> <span style="color:#ffd700">CRITICAL STRIKES</span> <strong>${target.name}</strong> for <span style="color:#ff6666">${effectAmount} damage</span>!`, 'critical');
+                if (isPhysicalAttack) {
+                    // Calculate dodge chance. target's dex determines flat dodge chance.
+                    // 0 dex -> 0%
+                    // 75 dex -> 25%
+                    // 99 dex -> 50%
+                    // Quadratic fit: (17 / 2376) * x^2 + (-161 / 792) * x
+                    let dex = target.stats.dex;
+                    let dodgeChance = ((17 / 2376) * Math.pow(dex, 2)) - ((161 / 792) * dex);
+                    dodgeChance = dodgeChance / 100; // convert percentage to decimal
+
+                    if (dodgeChance < 0) dodgeChance = 0;
+                    if (dodgeChance > 0.50) dodgeChance = 0.50;
+
+                    if (Math.random() < dodgeChance) {
+                        targetDodged = true;
+                    }
+                }
+
+                if (targetDodged) {
+                    showFloatingText(target.id, 'Dodge!', 'dodge');
+                    logCombat(`<strong>${attacker.name}</strong> attacks <strong>${target.name}</strong>, but they <em>dodged</em> the blow!`, 'normal');
+
+                    // Allow card state to reset
+                    setTimeout(() => {
+                        setCardActiveState(null, false);
+                        setTimeout(executeTurn, 800);
+                    }, 400);
+
+                } else if (actionType === 'fireball') {
+                    // Actually, wait - let's define "adjacent" based on the numerical grid layout in style.css.
+                    // Slot 0 (Frontline) has no lateral adjacencies, only depth.
+                    // A true splash in a 5-man cross formation: 
+                    // Front(1) - Mid(3) - Back(1)
+                    // Let's splash based on the "Midline" vertical column (indices 2, 3, 4). 
+                    // Mage unique mechanical override: Splash damage across adjacent formation slots
+                    const variance = (0.8 + (Math.random() * 0.4));
+                    effectAmount = Math.floor(attacker.baseDamage * 1.5 * variance); // Mages hit slightly harder base, but AoE divided
+
+                    let adjacentIndices = [];
+                    const tIdx = target.formationIndex;
+                    if (tIdx === 0) adjacentIndices = [4]; // Front splashes to Mid-Center
+                    else if (tIdx === 1) adjacentIndices = [4]; // Back splashes to Mid-Center
+                    else if (tIdx === 2) adjacentIndices = [4]; // Mid-Top splashes to Mid-Center
+                    else if (tIdx === 3) adjacentIndices = [4]; // Mid-Bottom splashes to Mid-Center
+                    else if (tIdx === 4) adjacentIndices = [0, 1, 2, 3]; // Mid-Center splashes EVERYWHERE
+
+                    // Find living targets in those slots
+                    const splashTargets = combatState.combatants.filter(c => c.side === target.side && !c.isDead && adjacentIndices.includes(c.formationIndex));
+
+                    // Determine divided damage
+                    const totalTargetsCaught = 1 + splashTargets.length;
+                    const splitDamage = Math.max(1, Math.floor(effectAmount / totalTargetsCaught));
+
+                    logCombat(`<strong>${attacker.name}</strong> hurls a <span style="color:#ff8800">Fireball</span> at <strong>${target.name}</strong>, scorching ${totalTargetsCaught} enemies for ${splitDamage} damage each!`);
+
+                    // Phase 1: Animate primary fireball
+                    await animateProjectile(attackerCard, targetCard, 'fireball.png', 400);
+
+                    // Phase 2: Damage primary
+                    if (targetCard) targetCard.classList.add('taking-damage');
+                    target.hp -= splitDamage;
+                    showFloatingText(target.id, `-${splitDamage}`, 'damage');
+                    if (target.hp <= 0) {
+                        target.hp = 0;
+                        target.isDead = true;
+                        logCombat(`--> <strong>${target.name}</strong> was burned to ashes!`, 'death');
+                    }
+                    updateCombatantUI(target);
+
+                    // Phase 3: Animate splash fireballs concurrently
+                    if (splashTargets.length > 0) {
+                        const splashAnimations = splashTargets.map(st => {
+                            const stCard = document.getElementById(`combatant-${st.id}`);
+                            return animateProjectile(targetCard, stCard, 'fireball.png', 250);
+                        });
+                        await Promise.all(splashAnimations);
+                    }
+
+                    // Phase 4: Damage secondary targets
+                    splashTargets.forEach(st => {
+                        const stCard = document.getElementById(`combatant-${st.id}`);
+                        if (stCard) stCard.classList.add('taking-damage');
+                        st.hp -= splitDamage;
+                        showFloatingText(st.id, `-${splitDamage}`, 'damage');
+                        if (st.hp <= 0) {
+                            st.hp = 0;
+                            st.isDead = true;
+                            logCombat(`--> <strong>${st.name}</strong> was caught in the blast and died!`, 'death');
+                        }
+                        updateCombatantUI(st);
+
+                        setTimeout(() => {
+                            if (stCard) stCard.classList.remove('taking-damage');
+                        }, 400);
+                    });
+
+                    setTimeout(() => {
+                        if (targetCard) targetCard.classList.remove('taking-damage');
+                        setCardActiveState(null, false);
+                        setTimeout(executeTurn, 800);
+                    }, 400);
+
+                } else if (attacker.class === 'Warrior') {
+                    // Warrior: Cleave damage vertically across primary target and neighbors
+                    let adjacentIndices = [];
+                    const tIdx = target.formationIndex;
+                    if (tIdx === 0) adjacentIndices = [4];
+                    else if (tIdx === 1) adjacentIndices = [];
+                    else if (tIdx === 2) adjacentIndices = [];
+                    else if (tIdx === 3) adjacentIndices = [4];
+                    else if (tIdx === 4) adjacentIndices = [0, 3];
+
+                    const cleaveTargets = combatState.combatants.filter(c => c.side === target.side && !c.isDead && adjacentIndices.includes(c.formationIndex));
+                    const totalTargetsCaught = 1 + cleaveTargets.length;
+                    const splitDamage = Math.max(1, Math.floor(effectAmount / totalTargetsCaught));
+
+                    if (cleaveTargets.length > 0) {
+                        logCombat(`<strong>${attacker.name}</strong> <span style="color:#d32f2f">CLEAVES</span> <strong>${target.name}</strong>, striking ${totalTargetsCaught} enemies for ${splitDamage} damage each!`);
+                    } else {
+                        logCombat(`<strong>${attacker.name}</strong> attacks <strong>${target.name}</strong> for ${splitDamage} damage!`);
+                    }
+
+                    // Apply damage to primary
+                    if (targetCard) targetCard.classList.add('taking-damage');
+                    target.hp -= splitDamage;
+                    showFloatingText(target.id, `-${splitDamage}`, 'damage');
+                    if (target.hp <= 0) {
+                        target.hp = 0;
+                        target.isDead = true;
+                        logCombat(`--> <strong>${target.name}</strong> has been struck down!`, 'death');
+                    }
+                    updateCombatantUI(target);
+
+                    // Apply damage to secondary targets
+                    cleaveTargets.forEach(ct => {
+                        const ctCard = document.getElementById(`combatant-${ct.id}`);
+                        if (ctCard) ctCard.classList.add('taking-damage');
+                        ct.hp -= splitDamage;
+                        showFloatingText(ct.id, `-${splitDamage}`, 'damage');
+                        if (ct.hp <= 0) {
+                            ct.hp = 0;
+                            ct.isDead = true;
+                            logCombat(`--> <strong>${ct.name}</strong> was caught in the cleave and died!`, 'death');
+                        }
+                        updateCombatantUI(ct);
+
+                        setTimeout(() => {
+                            if (ctCard) ctCard.classList.remove('taking-damage');
+                        }, 400);
+                    });
+
+                    setTimeout(() => {
+                        if (targetCard) targetCard.classList.remove('taking-damage');
+                        setCardActiveState(null, false);
+                        setTimeout(executeTurn, 800);
+                    }, 400);
+
                 } else {
-                    logCombat(`<strong>${attacker.name}</strong> attacks <strong>${target.name}</strong> for ${effectAmount} damage!`);
+                    if (targetCard) targetCard.classList.add('taking-damage');
+
+                    target.hp -= effectAmount;
+                    let dmgType = actionType === 'rogue_crit' ? 'crit' : 'damage';
+                    showFloatingText(target.id, `-${effectAmount}`, dmgType);
+                    if (actionType === 'rogue_crit') {
+                        logCombat(`<strong>${attacker.name}</strong> <span style="color:#ffd700">CRITICAL STRIKES</span> <strong>${target.name}</strong> for <span style="color:#ff6666">${effectAmount} damage</span>!`, 'critical');
+                    } else {
+                        logCombat(`<strong>${attacker.name}</strong> attacks <strong>${target.name}</strong> for ${effectAmount} damage!`);
+                    }
+
+                    if (target.hp <= 0) {
+                        target.hp = 0;
+                        target.isDead = true;
+                        logCombat(`--> <strong>${target.name}</strong> has been struck down!`, 'death');
+                    }
+
+                    updateCombatantUI(target);
+
+                    // Remove damage reaction after a moment and prep next turn
+                    setTimeout(() => {
+                        if (targetCard) targetCard.classList.remove('taking-damage');
+                        setCardActiveState(null, false);
+                        setTimeout(executeTurn, 800); // reduced delay between turn handoffs since animations eat up time
+                    }, 400); // Time for the hit wiggle
                 }
-
-                if (target.hp <= 0) {
-                    target.hp = 0;
-                    target.isDead = true;
-                    logCombat(`--> <strong>${target.name}</strong> has been struck down!`, 'death');
-                }
-
-                updateCombatantUI(target);
-
-                // Remove damage reaction after a moment and prep next turn
-                setTimeout(() => {
-                    if (targetCard) targetCard.classList.remove('taking-damage');
-                    setCardActiveState(null, false);
-                    setTimeout(executeTurn, 800); // reduced delay between turn handoffs since animations eat up time
-                }, 400); // Time for the hit wiggle
             }
-        }
-    }, 400); // Time for attack/cast wiggle
+        }, 400); // Time for attack/cast wiggle
+    });
 }
 
 function endCombat(winningSide) {
