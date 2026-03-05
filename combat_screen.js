@@ -326,8 +326,16 @@ function executeTurn() {
             const projectile = document.createElement('img');
             projectile.src = imageUrl;
             projectile.className = 'projectile';
-            projectile.style.width = '120px';
-            projectile.style.height = '120px';
+
+            // Adjust dimensions based on the sprite
+            if (imageUrl === 'arrow.png') {
+                projectile.style.width = '60px';
+                projectile.style.height = '60px';
+            } else {
+                projectile.style.width = '120px';
+                projectile.style.height = '120px';
+            }
+
             projectile.style.left = `${startRect.left + startRect.width / 2}px`;
             projectile.style.top = `${startRect.top + startRect.height / 2}px`;
 
@@ -352,6 +360,69 @@ function executeTurn() {
                 projectile.remove();
                 resolve();
             }, duration);
+        });
+    }
+
+    function animateMeleeBump(attackerElem, targetElems, duration = 400) {
+        return new Promise(resolve => {
+            if (!attackerElem || !targetElems) {
+                resolve();
+                return;
+            }
+
+            const targets = Array.isArray(targetElems) ? targetElems : [targetElems];
+            if (targets.length === 0) {
+                resolve();
+                return;
+            }
+
+            // Calculate the average center position of all targets
+            let avgTargetX = 0;
+            let avgTargetY = 0;
+            let validTargetCount = 0;
+
+            targets.forEach(el => {
+                if (el) {
+                    const rect = el.getBoundingClientRect();
+                    avgTargetX += rect.left + rect.width / 2;
+                    avgTargetY += rect.top + rect.height / 2;
+                    validTargetCount++;
+                }
+            });
+
+            if (validTargetCount === 0) {
+                resolve();
+                return;
+            }
+
+            avgTargetX /= validTargetCount;
+            avgTargetY /= validTargetCount;
+
+            const attackerRect = attackerElem.getBoundingClientRect();
+            const attackerCenterX = attackerRect.left + attackerRect.width / 2;
+            const attackerCenterY = attackerRect.top + attackerRect.height / 2;
+
+            // Vector from attacker to target midpoint
+            const dx = avgTargetX - attackerCenterX;
+            const dy = avgTargetY - attackerCenterY;
+
+            // We want to lunge about 40% of the distance
+            const lungeX = dx * 0.8;
+            const lungeY = dy * 0.8;
+
+            attackerElem.style.transition = `transform ${duration / 2}ms ease-out`;
+            attackerElem.style.zIndex = "1000";
+            attackerElem.style.transform = `translate(${lungeX}px, ${lungeY}px) scale(1.05)`;
+
+            setTimeout(() => {
+                attackerElem.style.transition = `transform ${duration / 2}ms ease-in`;
+                attackerElem.style.transform = `translate(0, 0) scale(1)`;
+                setTimeout(() => {
+                    attackerElem.style.transition = "";
+                    attackerElem.style.zIndex = "";
+                    resolve();
+                }, duration / 2);
+            }, duration / 2);
         });
     }
 
@@ -417,6 +488,11 @@ function executeTurn() {
             if (attacker.class === 'Rogue' && Math.random() < critChance) {
                 effectAmount *= 2;
                 actionType = 'rogue_crit';
+            }
+
+            // Hunter unique mechanical override: Animate arrow
+            if (attacker.class === 'Hunter') {
+                actionType = 'arrow';
             }
 
             // Mage unique mechanical override: Splash damage across adjacent formation slots
@@ -491,22 +567,7 @@ function executeTurn() {
                     }
                 }
 
-                if (targetDodged) {
-                    showFloatingText(target.id, 'Dodge!', 'dodge');
-                    logCombat(`<strong>${attacker.name}</strong> attacks <strong>${target.name}</strong>, but they <em>dodged</em> the blow!`, 'normal');
-
-                    // Allow card state to reset
-                    setTimeout(() => {
-                        setCardActiveState(null, false);
-                        setTimeout(executeTurn, 800);
-                    }, 400);
-
-                } else if (actionType === 'fireball') {
-                    // Actually, wait - let's define "adjacent" based on the numerical grid layout in style.css.
-                    // Slot 0 (Frontline) has no lateral adjacencies, only depth.
-                    // A true splash in a 5-man cross formation: 
-                    // Front(1) - Mid(3) - Back(1)
-                    // Let's splash based on the "Midline" vertical column (indices 2, 3, 4). 
+                if (actionType === 'fireball') {
                     // Mage unique mechanical override: Splash damage across adjacent formation slots
                     const variance = (0.8 + (Math.random() * 0.4));
                     effectAmount = Math.floor(attacker.baseDamage * 1.5 * variance); // Mages hit slightly harder base, but AoE divided
@@ -575,6 +636,37 @@ function executeTurn() {
                         setTimeout(executeTurn, 800);
                     }, 400);
 
+                } else if (actionType === 'arrow') {
+                    // Apply hunter logic
+                    const variance = (0.8 + (Math.random() * 0.4));
+                    effectAmount = Math.floor(attacker.baseDamage * variance);
+
+                    // Phase 1: Animate arrow projectile
+                    await animateProjectile(attackerCard, targetCard, 'arrow.png', 300);
+
+                    if (targetDodged) {
+                        showFloatingText(target.id, 'Dodge!', 'dodge');
+                        logCombat(`<strong>${attacker.name}</strong> shoots an arrow at <strong>${target.name}</strong>, but they <em>dodged</em> it!`, 'normal');
+                    } else {
+                        if (targetCard) targetCard.classList.add('taking-damage');
+                        target.hp -= effectAmount;
+                        showFloatingText(target.id, `-${effectAmount}`, 'damage');
+                        logCombat(`<strong>${attacker.name}</strong> shoots an arrow at <strong>${target.name}</strong> for ${effectAmount} damage!`);
+
+                        if (target.hp <= 0) {
+                            target.hp = 0;
+                            target.isDead = true;
+                            logCombat(`--> <strong>${target.name}</strong> was shot down!`, 'death');
+                        }
+                        updateCombatantUI(target);
+                    }
+
+                    setTimeout(() => {
+                        if (targetCard) targetCard.classList.remove('taking-damage');
+                        setCardActiveState(null, false);
+                        setTimeout(executeTurn, 800);
+                    }, 400);
+
                 } else if (attacker.class === 'Warrior') {
                     // Warrior: Cleave damage vertically across primary target and neighbors
                     let adjacentIndices = [];
@@ -589,6 +681,14 @@ function executeTurn() {
                     const totalTargetsCaught = 1 + cleaveTargets.length;
                     const splitDamage = Math.max(1, Math.floor(effectAmount / totalTargetsCaught));
 
+                    // Play bump animation to midpoint of all targets
+                    const targetCards = [targetCard];
+                    cleaveTargets.forEach(ct => {
+                        const ctCard = document.getElementById(`combatant-${ct.id}`);
+                        if (ctCard) targetCards.push(ctCard);
+                    });
+                    await animateMeleeBump(attackerCard, targetCards);
+
                     if (cleaveTargets.length > 0) {
                         logCombat(`<strong>${attacker.name}</strong> <span style="color:#d32f2f">CLEAVES</span> <strong>${target.name}</strong>, striking ${totalTargetsCaught} enemies for ${splitDamage} damage each!`);
                     } else {
@@ -596,15 +696,20 @@ function executeTurn() {
                     }
 
                     // Apply damage to primary
-                    if (targetCard) targetCard.classList.add('taking-damage');
-                    target.hp -= splitDamage;
-                    showFloatingText(target.id, `-${splitDamage}`, 'damage');
-                    if (target.hp <= 0) {
-                        target.hp = 0;
-                        target.isDead = true;
-                        logCombat(`--> <strong>${target.name}</strong> has been struck down!`, 'death');
+                    if (targetDodged) {
+                        showFloatingText(target.id, 'Dodge!', 'dodge');
+                        logCombat(`<strong>${attacker.name}</strong> attacks <strong>${target.name}</strong>, but they <em>dodged</em> the blow!`, 'normal');
+                    } else {
+                        if (targetCard) targetCard.classList.add('taking-damage');
+                        target.hp -= splitDamage;
+                        showFloatingText(target.id, `-${splitDamage}`, 'damage');
+                        if (target.hp <= 0) {
+                            target.hp = 0;
+                            target.isDead = true;
+                            logCombat(`--> <strong>${target.name}</strong> has been struck down!`, 'death');
+                        }
+                        updateCombatantUI(target);
                     }
-                    updateCombatantUI(target);
 
                     // Apply damage to secondary targets
                     cleaveTargets.forEach(ct => {
@@ -631,24 +736,32 @@ function executeTurn() {
                     }, 400);
 
                 } else {
-                    if (targetCard) targetCard.classList.add('taking-damage');
+                    // Play bump animation to target
+                    await animateMeleeBump(attackerCard, targetCard);
 
-                    target.hp -= effectAmount;
-                    let dmgType = actionType === 'rogue_crit' ? 'crit' : 'damage';
-                    showFloatingText(target.id, `-${effectAmount}`, dmgType);
-                    if (actionType === 'rogue_crit') {
-                        logCombat(`<strong>${attacker.name}</strong> <span style="color:#ffd700">CRITICAL STRIKES</span> <strong>${target.name}</strong> for <span style="color:#ff6666">${effectAmount} damage</span>!`, 'critical');
+                    if (targetDodged) {
+                        showFloatingText(target.id, 'Dodge!', 'dodge');
+                        logCombat(`<strong>${attacker.name}</strong> attacks <strong>${target.name}</strong>, but they <em>dodged</em> the blow!`, 'normal');
                     } else {
-                        logCombat(`<strong>${attacker.name}</strong> attacks <strong>${target.name}</strong> for ${effectAmount} damage!`);
-                    }
+                        if (targetCard) targetCard.classList.add('taking-damage');
 
-                    if (target.hp <= 0) {
-                        target.hp = 0;
-                        target.isDead = true;
-                        logCombat(`--> <strong>${target.name}</strong> has been struck down!`, 'death');
-                    }
+                        target.hp -= effectAmount;
+                        let dmgType = actionType === 'rogue_crit' ? 'crit' : 'damage';
+                        showFloatingText(target.id, `-${effectAmount}`, dmgType);
+                        if (actionType === 'rogue_crit') {
+                            logCombat(`<strong>${attacker.name}</strong> <span style="color:#ffd700">CRITICAL STRIKES</span> <strong>${target.name}</strong> for <span style="color:#ff6666">${effectAmount} damage</span>!`, 'critical');
+                        } else {
+                            logCombat(`<strong>${attacker.name}</strong> attacks <strong>${target.name}</strong> for ${effectAmount} damage!`);
+                        }
 
-                    updateCombatantUI(target);
+                        if (target.hp <= 0) {
+                            target.hp = 0;
+                            target.isDead = true;
+                            logCombat(`--> <strong>${target.name}</strong> has been struck down!`, 'death');
+                        }
+
+                        updateCombatantUI(target);
+                    }
 
                     // Remove damage reaction after a moment and prep next turn
                     setTimeout(() => {
