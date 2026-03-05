@@ -22,7 +22,7 @@ const TEAMS = [
     { id: 'lucinda_lions', name: 'The Lucinda Lions', mascot: 'Lion', theme: 'Golden Royalty', primaryColor: '#FFD700', secondaryColor: '#DC143C', logo: 'portraits/logo_lucinda.png' },
     { id: 'kaelen_krakens', name: 'The Kaelen Krakens', mascot: 'Kraken', theme: 'Deep Sea Horrors', primaryColor: '#2E8B57', secondaryColor: '#4B0082', logo: 'portraits/logo_kaelen.png' },
     { id: 'theron_thunder', name: 'The Theron Thunder', mascot: 'Thunderbird', theme: 'Storm Lords', primaryColor: '#FFFF00', secondaryColor: '#708090', logo: 'portraits/logo_theron.png' },
-    { id: 'zephyr_vipers', name: 'The Zephyr Vipers', mascot: 'Viper', theme: 'Desert Assassins', primaryColor: '#F5F5DC', secondaryColor: '#50C878', logo: 'portraits/logo_zephyr.png' },
+    { id: 'sacre_scarabs', name: 'The Sacre Scarabs', mascot: 'Scarab', theme: 'Desert Sun-Weavers', primaryColor: '#800080', secondaryColor: '#F5F5DC', logo: 'portraits/logo_sacre.png' },
     { id: 'vane_vanguard', name: 'The Vane Vanguard', mascot: 'Shield', theme: 'Impenetrable Defenders', primaryColor: '#B0C4DE', secondaryColor: '#4169E1', logo: 'portraits/logo_vane.png' },
     { id: 'fenric_falcons', name: 'The Fenric Falcons', mascot: 'Falcon', theme: 'Sky Hunters', primaryColor: '#87CEEB', secondaryColor: '#FFFFFF', logo: 'portraits/logo_fenric.png' },
     { id: 'orion_owls', name: 'The Orion Owls', mascot: 'Owl', theme: 'Mystic Scholars', primaryColor: '#191970', secondaryColor: '#D3D3D3', logo: 'portraits/logo_orion.png' },
