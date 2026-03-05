@@ -197,7 +197,7 @@
     </div>
 
     <!-- Match Screen (Preparation & Combat) -->
-    <div id="matchScreen" class="match-screen hidden">
+    <div id="matchScreen" class="match-screen hidden" style="position: relative;">
         <div class="match-main"
             style="display: flex; flex-direction: row; gap: 2rem; flex: 1; overflow: hidden; height: 100%;">
 
@@ -216,10 +216,9 @@
 
                 <div class="versus-divider">
                     <button id="autoFillBtn" class="action-btn"
-                        style="font-size: 0.8rem; padding: 0.25rem 0.5rem; margin-bottom: 1rem; width: 100%;">Auto-fill</button>
+                        style="font-size: 0.8rem; padding: 0.25rem 0.5rem; margin-bottom: 1rem; width: 100%;">Fill</button>
                     <h1>VS</h1>
                     <button id="startCombatBtn" class="action-btn danger">START COMBAT</button>
-                    <button id="retreatBtn" class="action-btn">Retreat</button>
                 </div>
 
                 <div class="team-side opponent-side" style="border-image-source: url('ui_border_red.png');">
@@ -235,6 +234,12 @@
                 </div>
             </div>
         </div>
+
+        <!-- Bottom Action Buttons -->
+        <button id="retreatBtn" class="action-btn"
+            style="position: absolute; bottom: 4.5rem; left: 50%; transform: translateX(-50%); z-index: 10;">Return</button>
+        <button id="forfeitBtn" class="action-btn danger"
+            style="position: absolute; bottom: 1rem; left: 50%; transform: translateX(-50%); z-index: 10;">Forfeit</button>
     </div>
 
     <!-- Combat Screen -->
@@ -290,6 +295,20 @@
                     <div class="formation-slot" data-slot="3"></div>
                     <div class="formation-slot" data-slot="4"></div>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Forfeit Confirmation Modal -->
+    <div id="forfeitModal" class="modal hidden"
+        style="position: absolute; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.8); z-index: 200; display: flex; justify-content: center; align-items: center;">
+        <div class="panel" style="width: 400px; text-align: center; padding: 2rem;">
+            <h2 style="color: var(--color-accent-danger); margin-bottom: 1rem;">Confirm Forfeit</h2>
+            <p style="margin-bottom: 2rem;">Are you sure you want to forfeit? This counts as a loss and your opponent
+                will receive the victory gold.</p>
+            <div style="display: flex; justify-content: space-around;">
+                <button id="cancelForfeitBtn" class="action-btn">Cancel</button>
+                <button id="confirmForfeitBtn" class="action-btn danger">Forfeit Match</button>
             </div>
         </div>
     </div>

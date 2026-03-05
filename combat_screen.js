@@ -330,16 +330,21 @@ function executeTurn() {
     let effectAmount = 0;
 
     if (attacker.class === 'Cleric' && combatState.healingDampener > 0) {
-        const friendlies = combatState.combatants.filter(c => c.side === attacker.side && !c.isDead && c.hp < c.maxHp);
-        if (friendlies.length > 0) {
-            target = friendlies.reduce((lowest, current) => {
-                const currentPct = current.hp / current.maxHp;
-                const lowestPct = lowest.hp / lowest.maxHp;
-                return currentPct < lowestPct ? current : lowest;
-            });
-            actionType = 'heal';
-            const variance = (0.8 + (Math.random() * 0.4));
-            effectAmount = Math.floor(attacker.baseDamage * 1.0 * variance); // Heals equivalent to base damage
+        const allAliveFriendlies = combatState.combatants.filter(c => c.side === attacker.side && !c.isDead);
+
+        // Only attempt to heal if the Cleric is not the last person alive on their team
+        if (allAliveFriendlies.length > 1) {
+            const friendliesNeedingHeal = allAliveFriendlies.filter(c => c.hp < c.maxHp);
+            if (friendliesNeedingHeal.length > 0) {
+                target = friendliesNeedingHeal.reduce((lowest, current) => {
+                    const currentPct = current.hp / current.maxHp;
+                    const lowestPct = lowest.hp / lowest.maxHp;
+                    return currentPct < lowestPct ? current : lowest;
+                });
+                actionType = 'heal';
+                const variance = (0.8 + (Math.random() * 0.4));
+                effectAmount = Math.floor(attacker.baseDamage * 1.0 * variance); // Heals equivalent to base damage
+            }
         }
     }
 

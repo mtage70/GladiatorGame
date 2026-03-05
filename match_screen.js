@@ -137,6 +137,11 @@ function initializeMatchScreen(saveContext) {
     document.getElementById('startCombatBtn').onclick = startCombat;
     document.getElementById('retreatBtn').onclick = retreatFromMatch;
 
+    const forfeitBtn = document.getElementById('forfeitBtn');
+    if (forfeitBtn) {
+        forfeitBtn.onclick = forfeitMatch;
+    }
+
     const autoFillBtn = document.getElementById('autoFillBtn');
     if (autoFillBtn) {
         autoFillBtn.onclick = autoFillPlayerFormation;
@@ -481,6 +486,76 @@ function retreatFromMatch() {
     // For now, we'll just go back.
 }
 
+function forfeitMatch() {
+    document.getElementById('forfeitModal').classList.remove('hidden');
+}
+
+function confirmForfeitMatch() {
+    document.getElementById('forfeitModal').classList.add('hidden');
+
+    // Record the loss
+    if (!currentMatchState.saveContext.matchResults) {
+        currentMatchState.saveContext.matchResults = [];
+    }
+    currentMatchState.saveContext.matchResults.push({
+        won: false,
+        day: currentMatchState.saveContext.day,
+        month: currentMatchState.saveContext.month,
+        year: currentMatchState.saveContext.year
+    });
+
+    // Update opponent stats
+    const oppId = currentMatchState.opponentTeam.id;
+    const oppData = currentMatchState.saveContext.opposingRosters && currentMatchState.saveContext.opposingRosters[oppId];
+    if (oppData) {
+        oppData.wins = (oppData.wins || 0) + 1;
+        oppData.gold = (oppData.gold || 0) + 1000;
+    }
+
+    // Grant player the loser gold
+    currentMatchState.saveContext.gold = (currentMatchState.saveContext.gold || 0) + 500;
+
+    // Add news item
+    const newsList = document.getElementById('newsList');
+    if (newsList) {
+        const newsItem = document.createElement('div');
+        newsItem.className = 'news-item';
+        newsItem.innerHTML = `<p><strong>Match Result</strong>: Your team forfeited the match. You earned <span style="color:var(--color-gold-primary);">500 G</span>.</p>`;
+
+        if (newsList.firstChild) {
+            newsList.insertBefore(newsItem, newsList.firstChild);
+        } else {
+            newsList.appendChild(newsItem);
+        }
+    }
+
+    // Simulate other matches
+    if (typeof simulateLeagueMatches === 'function') {
+        simulateLeagueMatches(currentMatchState.saveContext);
+    }
+
+    // Advance Day
+    currentMatchState.saveContext.day += 1;
+    if (currentMatchState.saveContext.day > 28) {
+        currentMatchState.saveContext.day = 1;
+        currentMatchState.saveContext.month += 1;
+        if (currentMatchState.saveContext.month > 12) {
+            currentMatchState.saveContext.month = 1;
+            currentMatchState.saveContext.year += 1;
+        }
+    }
+
+    // Save and return to home
+    localStorage.setItem('gladiatorSaveContext', JSON.stringify(currentMatchState.saveContext));
+    document.getElementById('matchScreen').classList.add('hidden');
+    document.getElementById('homeScreen').classList.remove('hidden');
+
+    // Re-render UI
+    if (typeof renderRoster === 'function') renderRoster();
+    if (typeof renderCalendar === 'function') renderCalendar(currentMatchState.saveContext);
+    if (typeof setupAdvanceTimeBtn === 'function') setupAdvanceTimeBtn();
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     // Table Sorting Event Listeners for Match Prep
     const matchTableHeaders = document.querySelectorAll('#matchRosterTable th[data-sort]');
@@ -498,4 +573,16 @@ document.addEventListener('DOMContentLoaded', () => {
             renderMatchRoster();
         });
     });
+
+    const cancelForfeitBtn = document.getElementById('cancelForfeitBtn');
+    if (cancelForfeitBtn) {
+        cancelForfeitBtn.addEventListener('click', () => {
+            document.getElementById('forfeitModal').classList.add('hidden');
+        });
+    }
+
+    const confirmForfeitBtn = document.getElementById('confirmForfeitBtn');
+    if (confirmForfeitBtn) {
+        confirmForfeitBtn.addEventListener('click', confirmForfeitMatch);
+    }
 });
