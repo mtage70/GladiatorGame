@@ -233,7 +233,7 @@ function renderOpponentFormation() {
     const slots = document.getElementById('opponentFormation').querySelectorAll('.formation-slot');
     slots.forEach((slot, index) => {
         const glad = currentMatchState.opponentFormation[index];
-        slot.innerHTML = glad ? buildGladiatorCardSmall(glad) : '<img src="empty_slot.png" alt="Empty Slot" style="width:100%;height:100%;object-fit:cover;border-radius:4px;opacity:0.6;">';
+        slot.innerHTML = glad ? buildGladiatorCardSmall(glad, 'opponent') : '<img src="empty_slot.png" alt="Empty Slot" style="width:100%;height:100%;object-fit:cover;border-radius:4px;opacity:0.6;">';
     });
 }
 
@@ -259,7 +259,7 @@ function renderPlayerFormation() {
     const slots = document.getElementById('playerFormation').querySelectorAll('.formation-slot');
     slots.forEach((slot, index) => {
         const glad = currentMatchState.playerFormation[index];
-        slot.innerHTML = glad ? buildGladiatorCardSmall(glad) : '<img src="empty_slot.png" alt="Empty Slot" style="width:100%;height:100%;object-fit:cover;border-radius:4px;opacity:0.6;">';
+        slot.innerHTML = glad ? buildGladiatorCardSmall(glad, 'player') : '<img src="empty_slot.png" alt="Empty Slot" style="width:100%;height:100%;object-fit:cover;border-radius:4px;opacity:0.6;">';
 
         slot.onclick = () => {
             if (currentMatchState.playerFormation[index]) {
@@ -398,7 +398,7 @@ function renderMatchRoster() {
     });
 }
 
-function buildGladiatorCardSmall(glad) {
+function buildGladiatorCardSmall(glad, side = 'player') {
     // We now share the same widget builder as the Combat Screen
     let innerContent = '';
     if (typeof buildSquareGladiatorCard === 'function') {
@@ -419,7 +419,8 @@ function buildGladiatorCardSmall(glad) {
         `;
     }
 
-    return `<div class="combatant-card full-slot">${innerContent}</div>`;
+    const borderColor = side === 'opponent' ? currentMatchState.opponentTeam.primaryColor : 'var(--team-primary)';
+    return `<div class="combatant-card full-slot" style="border-color: ${borderColor};">${innerContent}</div>`;
 }
 
 // Ensure the standard card function is available or duplicated here temporarily if not globally accessible

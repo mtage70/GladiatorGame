@@ -200,6 +200,13 @@ function renderCombatSide(side) {
         card.id = `combatant-${glad.id}`;
         card.className = `combatant-card full-slot ${glad.isDead ? 'dead' : ''}`;
 
+        let borderColor = 'var(--team-primary)';
+        if (side === 'opponent') {
+            const oppTeamInfo = TEAMS.find(t => t.id === combatState.opponentTeamId);
+            if (oppTeamInfo) borderColor = oppTeamInfo.primaryColor;
+        }
+        card.style.borderColor = borderColor;
+
         // Use the shared square widget builder
         card.innerHTML = buildSquareGladiatorCard(glad, 'combat-');
 
