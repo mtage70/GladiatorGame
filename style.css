@@ -1497,9 +1497,23 @@ body {
 @media screen and (max-height: 550px) and (orientation: landscape),
 screen and (max-width: 950px) {
     .main-container {
-        padding: 0.25rem !important;
-        gap: 0.25rem !important;
+        height: 100vh !important;
+        width: 100vw !important;
+        justify-content: space-between !important;
+        padding: 4rem 1rem 2rem 1rem !important;
+        gap: 0 !important;
     }
+
+    .main-menu {
+        gap: 0.5rem !important;
+        margin-bottom: 2rem !important;
+    }
+
+    .game-header {
+        padding: 2.5rem 1rem !important;
+    }
+
+    /* Removed duplicate main-container block */
 
     .game-title {
         font-size: 1.5rem !important;
@@ -1543,7 +1557,7 @@ screen and (max-width: 950px) {
     }
 
     .game-header {
-        padding: 0 !important;
+        padding: 1rem !important;
     }
 
     .game-header h2 {
