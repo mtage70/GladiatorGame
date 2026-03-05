@@ -366,13 +366,13 @@ function executeTurn() {
     function animateMeleeBump(attackerElem, targetElems, duration = 400) {
         return new Promise(resolve => {
             if (!attackerElem || !targetElems) {
-                resolve();
+                resolve(() => Promise.resolve());
                 return;
             }
 
             const targets = Array.isArray(targetElems) ? targetElems : [targetElems];
             if (targets.length === 0) {
-                resolve();
+                resolve(() => Promise.resolve());
                 return;
             }
 
@@ -391,7 +391,7 @@ function executeTurn() {
             });
 
             if (validTargetCount === 0) {
-                resolve();
+                resolve(() => Promise.resolve());
                 return;
             }
 
@@ -402,27 +402,40 @@ function executeTurn() {
             const attackerCenterX = attackerRect.left + attackerRect.width / 2;
             const attackerCenterY = attackerRect.top + attackerRect.height / 2;
 
-            // Vector from attacker to target midpoint
+            // Total distance to target midpoint
             const dx = avgTargetX - attackerCenterX;
             const dy = avgTargetY - attackerCenterY;
+            const dist = Math.sqrt(dx * dx + dy * dy);
 
-            // We want to lunge about 40% of the distance
-            const lungeX = dx * 0.8;
-            const lungeY = dy * 0.8;
+            // We want to stop within half a character card's width of the target center
+            // Card width is attackerRect.width
+            const stopGap = attackerRect.width / 2;
+            const lungeDist = Math.max(0, dist - stopGap);
 
-            attackerElem.style.transition = `transform ${duration / 2}ms ease-out`;
+            // Normalize direction and scale by lungeDist
+            const lungeX = (dx / dist) * lungeDist;
+            const lungeY = (dy / dist) * lungeDist;
+
+            attackerElem.style.transition = `transform ${duration / 3}ms cubic-bezier(0.175, 0.885, 0.32, 1.275)`;
             attackerElem.style.zIndex = "1000";
             attackerElem.style.transform = `translate(${lungeX}px, ${lungeY}px) scale(1.05)`;
 
+            const returnToOrigin = () => {
+                return new Promise(res => {
+                    attackerElem.style.transition = `transform ${duration / 2}ms ease-in`;
+                    attackerElem.style.transform = "";
+                    setTimeout(() => {
+                        attackerElem.style.transition = "";
+                        attackerElem.style.zIndex = "";
+                        res();
+                    }, duration / 2);
+                });
+            };
+
+            // Resolve Phase 1 after the lunge transition
             setTimeout(() => {
-                attackerElem.style.transition = `transform ${duration / 2}ms ease-in`;
-                attackerElem.style.transform = `translate(0, 0) scale(1)`;
-                setTimeout(() => {
-                    attackerElem.style.transition = "";
-                    attackerElem.style.zIndex = "";
-                    resolve();
-                }, duration / 2);
-            }, duration / 2);
+                resolve(returnToOrigin);
+            }, duration / 3);
         });
     }
 
@@ -500,6 +513,9 @@ function executeTurn() {
                 actionType = 'fireball';
             }
         }
+
+        // Helper to wait for animations
+        const wait = ms => new Promise(res => setTimeout(res, ms));
 
         // Trigger visual attack/cast animation
         const attackerCard = document.getElementById(`combatant-${attacker.id}`);
@@ -624,17 +640,20 @@ function executeTurn() {
                             logCombat(`--> <strong>${st.name}</strong> was caught in the blast and died!`, 'death');
                         }
                         updateCombatantUI(st);
-
-                        setTimeout(() => {
-                            if (stCard) stCard.classList.remove('taking-damage');
-                        }, 400);
                     });
 
-                    setTimeout(() => {
-                        if (targetCard) targetCard.classList.remove('taking-damage');
-                        setCardActiveState(null, false);
-                        setTimeout(executeTurn, 800);
-                    }, 400);
+                    // Wait for all damage animations to finish
+                    await wait(500);
+
+                    // Cleanup classes
+                    if (targetCard) targetCard.classList.remove('taking-damage');
+                    splashTargets.forEach(st => {
+                        const stCard = document.getElementById(`combatant-${st.id}`);
+                        if (stCard) stCard.classList.remove('taking-damage');
+                    });
+
+                    setCardActiveState(null, false);
+                    setTimeout(executeTurn, 400);
 
                 } else if (actionType === 'arrow') {
                     // Apply hunter logic
@@ -661,11 +680,10 @@ function executeTurn() {
                         updateCombatantUI(target);
                     }
 
-                    setTimeout(() => {
-                        if (targetCard) targetCard.classList.remove('taking-damage');
-                        setCardActiveState(null, false);
-                        setTimeout(executeTurn, 800);
-                    }, 400);
+                    await wait(500);
+                    if (targetCard) targetCard.classList.remove('taking-damage');
+                    setCardActiveState(null, false);
+                    setTimeout(executeTurn, 400);
 
                 } else if (attacker.class === 'Warrior') {
                     // Warrior: Cleave damage vertically across primary target and neighbors
@@ -687,7 +705,7 @@ function executeTurn() {
                         const ctCard = document.getElementById(`combatant-${ct.id}`);
                         if (ctCard) targetCards.push(ctCard);
                     });
-                    await animateMeleeBump(attackerCard, targetCards);
+                    const returnToOrigin = await animateMeleeBump(attackerCard, targetCards);
 
                     if (cleaveTargets.length > 0) {
                         logCombat(`<strong>${attacker.name}</strong> <span style="color:#d32f2f">CLEAVES</span> <strong>${target.name}</strong>, striking ${totalTargetsCaught} enemies for ${splitDamage} damage each!`);
@@ -723,21 +741,24 @@ function executeTurn() {
                             logCombat(`--> <strong>${ct.name}</strong> was caught in the cleave and died!`, 'death');
                         }
                         updateCombatantUI(ct);
-
-                        setTimeout(() => {
-                            if (ctCard) ctCard.classList.remove('taking-damage');
-                        }, 400);
                     });
 
-                    setTimeout(() => {
-                        if (targetCard) targetCard.classList.remove('taking-damage');
-                        setCardActiveState(null, false);
-                        setTimeout(executeTurn, 800);
-                    }, 400);
+                    // Pull back while enemies wiggle
+                    await returnToOrigin();
+                    await wait(200);
+
+                    if (targetCard) targetCard.classList.remove('taking-damage');
+                    cleaveTargets.forEach(ct => {
+                        const ctCard = document.getElementById(`combatant-${ct.id}`);
+                        if (ctCard) ctCard.classList.remove('taking-damage');
+                    });
+
+                    setCardActiveState(null, false);
+                    setTimeout(executeTurn, 400);
 
                 } else {
                     // Play bump animation to target
-                    await animateMeleeBump(attackerCard, targetCard);
+                    const returnToOrigin = await animateMeleeBump(attackerCard, targetCard);
 
                     if (targetDodged) {
                         showFloatingText(target.id, 'Dodge!', 'dodge');
@@ -763,12 +784,12 @@ function executeTurn() {
                         updateCombatantUI(target);
                     }
 
-                    // Remove damage reaction after a moment and prep next turn
-                    setTimeout(() => {
-                        if (targetCard) targetCard.classList.remove('taking-damage');
-                        setCardActiveState(null, false);
-                        setTimeout(executeTurn, 800); // reduced delay between turn handoffs since animations eat up time
-                    }, 400); // Time for the hit wiggle
+                    // Pull back while enemy wiggles
+                    await returnToOrigin();
+                    await wait(200);
+                    if (targetCard) targetCard.classList.remove('taking-damage');
+                    setCardActiveState(null, false);
+                    setTimeout(executeTurn, 400);
                 }
             }
         }, 400); // Time for attack/cast wiggle
