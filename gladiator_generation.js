@@ -97,52 +97,63 @@ function generateOpposingRosters(playerTeamId) {
     return opposingRosters;
 }
 
-function generateSeasonSchedule() {
+function generateSeasonSchedule(playerTeamId) {
     // Generate a double round-robin schedule for all teams
-    const teamIds = TEAMS.map(t => t.id);
+    const allTeamIds = TEAMS.map(t => t.id);
+
+    // Move player's team to the first position so it's the "fixed" anchor 
+    // in the circle algorithm, ensuring perfectly alternating Home/Away Games.
+    const playerIdx = allTeamIds.indexOf(playerTeamId);
+    if (playerIdx !== -1) {
+        allTeamIds.splice(playerIdx, 1);
+        allTeamIds.unshift(playerTeamId);
+    }
+
+    const teamIds = allTeamIds;
     const numTeams = teamIds.length;
     const numDays = numTeams - 1; // 9 weeks for single round-robin
     const halfSize = numTeams / 2;
 
-    let schedule = []; // Array of weeks, each week is an array of matchups
+    let firstHalf = [];
 
     let teams = [...teamIds];
-    teams.shift(); // Remove first team to keep it fixed
+    const fixedTeam = teams.shift(); // Keep player team fixed for round-robin rotation
 
-    // First Half of Season (Weeks 1-9)
+    // Generation of First Half
     for (let day = 0; day < numDays; day++) {
         const weekMatches = [];
-        const teamIdx = day % numDays;
 
-        // Match 1: Fixed team (teamIds[0]) vs current rotated team
-        weekMatches.push({
-            home: teamIds[0],
-            away: teams[teamIdx]
-        });
+        // Rotation logic for other teams
+        const rotatedTeams = [...teams.slice(day % numDays), ...teams.slice(0, day % numDays)];
+
+        // Match 1: Fixed team vs one of the rotated teams
+        // Alternate home/away for the fixed team each week
+        if (day % 2 === 0) {
+            weekMatches.push({ home: fixedTeam, away: rotatedTeams[0] });
+        } else {
+            weekMatches.push({ home: rotatedTeams[0], away: fixedTeam });
+        }
 
         // Other matches
         for (let idx = 1; idx < halfSize; idx++) {
-            const firstTeam = teams[(day + idx) % numDays];
-            const secondTeam = teams[(day + numDays - idx) % numDays];
-            weekMatches.push({
-                home: firstTeam,
-                away: secondTeam
-            });
+            const first = rotatedTeams[idx];
+            const second = rotatedTeams[numDays - idx];
+            // Stagger these too based on index to keep balance
+            if ((day + idx) % 2 === 0) {
+                weekMatches.push({ home: first, away: second });
+            } else {
+                weekMatches.push({ home: second, away: first });
+            }
         }
-        schedule.push(weekMatches);
+        firstHalf.push(weekMatches);
     }
 
-    // Second Half of Season (Weeks 10-18)
-    // Same matchups, but reverse home/away
-    const secondHalf = [];
-    for (let i = 0; i < schedule.length; i++) {
-        const reversedMatches = schedule[i].map(match => ({
-            home: match.away,
-            away: match.home
-        }));
-        secondHalf.push(reversedMatches);
-    }
+    // Generation of Second Half (Reversed)
+    const secondHalf = firstHalf.map(week => week.map(match => ({
+        home: match.away,
+        away: match.home
+    })));
 
-    schedule = schedule.concat(secondHalf);
-    return schedule;
+    // Return the full 18-week schedule
+    return firstHalf.concat(secondHalf);
 }

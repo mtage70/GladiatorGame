@@ -106,7 +106,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     teamLogo: team.logo,
                     teamPrimaryColor: team.primaryColor,
                     teamSecondaryColor: team.secondaryColor,
-                    schedule: generateSeasonSchedule(),
+                    schedule: generateSeasonSchedule(team.id),
                     opposingRosters: generateOpposingRosters(team.id)
                 }));
                 // Inject colors immediately

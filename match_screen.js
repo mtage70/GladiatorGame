@@ -42,16 +42,22 @@ function initializeMatchScreen(saveContext) {
     const weekMatches = saveContext.schedule[currentWeekIndex];
     const myMatch = weekMatches.find(m => m.home === saveContext.teamId || m.away === saveContext.teamId);
 
-    const opponentId = myMatch.home === saveContext.teamId ? myMatch.away : myMatch.home;
+    const isHome = myMatch.home === saveContext.teamId;
+    const opponentId = isHome ? myMatch.away : myMatch.home;
+    const arenaTeamId = isHome ? saveContext.teamId : opponentId;
     const opponentTeamInfo = TEAMS.find(t => t.id === opponentId);
     currentMatchState.opponentTeam = opponentTeamInfo;
 
-    // Set dynamic match background based on opponent team
-    matchScreen.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('arenas/arena_${opponentTeamInfo.id}.png')`;
+    // Set dynamic match background based on whether it is Home or Away
+    matchScreen.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('arenas/arena_${arenaTeamId}.png')`;
     matchScreen.style.backgroundSize = 'cover';
     matchScreen.style.backgroundPosition = 'center bottom';
 
-    const isHome = myMatch.home === saveContext.teamId;
+    const typeLabel = document.getElementById('matchTypeLabel');
+    if (typeLabel) {
+        typeLabel.textContent = isHome ? 'HOME MATCH' : 'AWAY MATCH';
+        typeLabel.style.color = isHome ? 'var(--color-accent-success)' : 'var(--color-gold-light)';
+    }
     document.getElementById('matchPlayerHeader').innerHTML = `
         <div class="team-header-vertical" style="color: var(--team-primary); text-shadow: 0 0 10px rgba(0,0,0,0.8);">
             <img src="${saveContext.teamLogo}" class="team-logo-large" alt="${saveContext.teamName} Logo">
