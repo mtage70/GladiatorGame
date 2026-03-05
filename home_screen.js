@@ -34,10 +34,8 @@ function renderRoster() {
     }
 
     const goldDisplay = document.getElementById('goldDisplay');
-    const fameDisplay = document.getElementById('fameDisplay');
     const recordDisplay = document.getElementById('recordDisplay');
     if (goldDisplay) goldDisplay.innerHTML = `<span class="stat-icon">💰</span> ${saveContext.gold} G`;
-    if (fameDisplay) fameDisplay.innerHTML = `<span class="stat-icon">🏆</span> Fame: ${saveContext.fame}`;
 
     // Compute and display player W/L record
     const matchResults = saveContext.matchResults || [];
@@ -271,7 +269,7 @@ function renderCalendar(saveContext) {
     if (calendarGrid) {
         calendarGrid.innerHTML = '';
 
-        const daysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+        const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
         daysOfWeek.forEach(day => {
             const header = document.createElement('div');
             header.className = 'calendar-header-day';
@@ -291,7 +289,7 @@ function renderCalendar(saveContext) {
             numSpan.textContent = i;
             dayDiv.appendChild(numSpan);
 
-            // Matches are on Sundays (7, 14, 21, 28)
+            // Matches are on Saturdays (7, 14, 21, 28)
             if (i % 7 === 0) {
                 const totalWeeksBeforeThisMonth = ((saveContext.year - 1) * 12 * 4) + ((saveContext.month - 1) * 4);
                 const globalWeekIndexForDay = totalWeeksBeforeThisMonth + Math.floor((i - 1) / 7);
@@ -301,14 +299,13 @@ function renderCalendar(saveContext) {
                     const myMatch = weekMatches.find(m => m.home === saveContext.teamId || m.away === saveContext.teamId);
 
                     if (myMatch) {
-                        const icon = document.createElement('img');
-                        icon.src = 'crossed_swords.png';
-                        icon.className = 'match-icon';
-
                         const isHome = myMatch.home === saveContext.teamId;
                         const opponentId = isHome ? myMatch.away : myMatch.home;
                         const opponentTeam = TEAMS.find(t => t.id === opponentId);
 
+                        const icon = document.createElement('img');
+                        icon.src = opponentTeam.logo;
+                        icon.className = 'match-icon';
                         icon.title = `Match ${isHome ? 'vs.' : '@'} ${opponentTeam.name}`;
                         dayDiv.appendChild(icon);
                     }
@@ -472,11 +469,13 @@ document.addEventListener('DOMContentLoaded', () => {
                             ? `<div class="glad-portrait"><img src="${glad.portrait}" alt="${glad.name}" /></div>`
                             : `<div class="glad-portrait blank"></div>`;
 
+                        const battlesCount = glad.battles || 0;
                         slot.innerHTML = `
                             <div class="glad-info" style="opacity: 0.8;">
                                 ${portraitHtml}
                                 <span class="glad-class ${glad.class.toLowerCase()}">${glad.class}</span>
                                 <span class="glad-name" title="${glad.name}">${glad.name} <br/> <span style="font-size:0.75rem;">(RIP)</span></span>
+                                <span style="font-size:0.8rem; color:var(--color-text-muted); margin-top:2px;">Battles: ${battlesCount}</span>
                             </div>
                         `;
                         graveyardGrid.appendChild(slot);
@@ -553,7 +552,7 @@ function setupAdvanceTimeBtn() {
         const opponentTeam = TEAMS.find(t => t.id === opponentId);
         const opponentName = opponentTeam ? opponentTeam.name : "Unknown Opponent";
 
-        advanceBtn.textContent = "Vs " + opponentName;
+        advanceBtn.innerHTML = `<div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem;"><span>VS</span><img src="${opponentTeam.logo}" alt="${opponentTeam.name}" style="height: 24px; width: 24px; object-fit: contain;"></div>`;
         advanceBtn.style.background = "linear-gradient(to bottom, #4a2f32 0%, #2a1a1d 100%)";
         advanceBtn.style.borderColor = "#70474b";
         advanceBtn.onclick = () => {

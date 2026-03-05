@@ -1,4 +1,11 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // Inject team colors globally if save exists
+    const saveContext = JSON.parse(localStorage.getItem('gladiatorSaveContext'));
+    if (saveContext && saveContext.teamPrimaryColor) {
+        document.documentElement.style.setProperty('--team-primary', saveContext.teamPrimaryColor);
+        document.documentElement.style.setProperty('--team-secondary', saveContext.teamSecondaryColor);
+    }
+
     const buttons = document.querySelectorAll('.menu-btn');
     const startOverlay = document.getElementById('startOverlay');
     const panBackground = document.getElementById('panBackground');
@@ -102,9 +109,15 @@ document.addEventListener('DOMContentLoaded', () => {
                     teamId: team.id,
                     teamName: team.name,
                     teamLogo: team.logo,
+                    teamPrimaryColor: team.primaryColor,
+                    teamSecondaryColor: team.secondaryColor,
                     schedule: generateSeasonSchedule(),
                     opposingRosters: generateOpposingRosters(team.id)
                 }));
+                // Inject colors immediately
+                document.documentElement.style.setProperty('--team-primary', team.primaryColor);
+                document.documentElement.style.setProperty('--team-secondary', team.secondaryColor);
+
                 teamSelectionScreen.classList.add('hidden');
                 transitionToHome();
             });

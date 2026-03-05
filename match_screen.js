@@ -53,14 +53,14 @@ function initializeMatchScreen(saveContext) {
 
     const isHome = myMatch.home === saveContext.teamId;
     document.getElementById('matchPlayerHeader').innerHTML = `
-        <div class="team-header-vertical">
+        <div class="team-header-vertical" style="color: var(--team-primary); text-shadow: 0 0 10px rgba(0,0,0,0.8);">
             <img src="${saveContext.teamLogo}" class="team-logo-large" alt="${saveContext.teamName} Logo">
             <span>${saveContext.teamName}</span>
         </div>
     `;
 
     document.getElementById('matchOpponentHeader').innerHTML = `
-        <div class="team-header-vertical" style="color: var(--color-accent-danger);">
+        <div class="team-header-vertical" style="color: ${opponentTeamInfo.primaryColor}; text-shadow: 0 0 10px rgba(0,0,0,0.8);">
             <img src="${opponentTeamInfo.logo}" class="team-logo-large" alt="${opponentTeamInfo.name} Logo">
             <span>${opponentTeamInfo.name}</span>
         </div>

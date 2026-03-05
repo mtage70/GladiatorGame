@@ -53,14 +53,14 @@ function initializeCombat(playerFormation, opponentFormation, saveContext, oppon
     combatScreen.style.backgroundPosition = 'center bottom';
 
     document.getElementById('combatPlayerHeader').innerHTML = `
-        <div class="team-header-vertical">
+        <div class="team-header-vertical" style="color: var(--team-primary); text-shadow: 0 0 10px rgba(0,0,0,0.8);">
             <img src="${saveContext.teamLogo}" class="team-logo-large" alt="${saveContext.teamName} Logo">
             <span>${saveContext.teamName}</span>
         </div>
     `;
 
     document.getElementById('combatOpponentHeader').innerHTML = `
-        <div class="team-header-vertical" style="color: var(--color-accent-danger);">
+        <div class="team-header-vertical" style="color: ${opponentTeamInfo.primaryColor}; text-shadow: 0 0 10px rgba(0,0,0,0.8);">
             <img src="${opponentTeamInfo.logo}" class="team-logo-large" alt="${opponentTeamInfo.name} Logo">
             <span>${opponentTeamInfo.name}</span>
         </div>
@@ -670,6 +670,7 @@ function finishCombatTransition() {
 
             if (Math.random() < deathChance) {
                 const fallenGlad = combatState.saveContext.roster.splice(rosterIndex, 1)[0];
+                fallenGlad.battles = (fallenGlad.battles || 0) + 1;
                 combatState.saveContext.graveyard.push(fallenGlad);
                 permadeaths.push(fallenGlad);
 

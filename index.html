@@ -64,7 +64,6 @@
             <h2 class="home-title">Gladiator Manager</h2>
             <div class="header-stats">
                 <span class="stat-item" id="goldDisplay"><span class="stat-icon">💰</span> 1000 G</span>
-                <span class="stat-item" id="fameDisplay"><span class="stat-icon">🏆</span> Fame: 0</span>
                 <span class="stat-item" id="recordDisplay"><span class="stat-icon">⚔️</span> 0-0</span>
             </div>
         </header>
@@ -77,7 +76,7 @@
                             <h3 style="margin: 0;">Team Lineup</h3>
                             <div style="display: flex; gap: 1rem;">
                                 <button class="action-btn success" id="recruitBtn">Recruit (500 G)</button>
-                                <button class="action-btn danger" id="viewGraveyardBtn">View Graveyard</button>
+                                <button class="action-btn danger" id="viewGraveyardBtn">Graveyard</button>
                             </div>
                         </div>
                         <div
@@ -87,40 +86,42 @@
                                 <thead style="position: sticky; top: 0; z-index: 10; background: var(--color-bg-base);">
                                     <tr style="text-align: left; border-bottom: 2px solid var(--color-gold-dark);">
                                         <th data-sort="ovr"
-                                            style="cursor: pointer; padding: 0.5rem; background: rgba(212, 175, 55, 0.1);">
+                                            style="cursor: pointer; padding: 0.5rem; background: color-mix(in srgb, var(--team-primary) 30%, rgba(0,0,0, 0.5));">
                                             OVR
                                         </th>
                                         <th data-sort="class"
-                                            style="cursor: pointer; padding: 0.5rem; background: rgba(212, 175, 55, 0.1);">
+                                            style="cursor: pointer; padding: 0.5rem; background: color-mix(in srgb, var(--team-primary) 30%, rgba(0,0,0, 0.5));">
                                             Class
                                         </th>
-                                        <th style="padding: 0.5rem; background: rgba(212, 175, 55, 0.1);">img</th>
+                                        <th
+                                            style="padding: 0.5rem; background: color-mix(in srgb, var(--team-primary) 30%, rgba(0,0,0, 0.5));">
+                                            img</th>
                                         <th data-sort="name"
-                                            style="cursor: pointer; padding: 0.5rem; background: rgba(212, 175, 55, 0.1);">
+                                            style="cursor: pointer; padding: 0.5rem; background: color-mix(in srgb, var(--team-primary) 30%, rgba(0,0,0, 0.5));">
                                             Name
                                         </th>
                                         <th data-sort="hp"
-                                            style="cursor: pointer; padding: 0.5rem; background: rgba(212, 175, 55, 0.1);">
+                                            style="cursor: pointer; padding: 0.5rem; background: color-mix(in srgb, var(--team-primary) 30%, rgba(0,0,0, 0.5));">
                                             HP
                                         </th>
                                         <th data-sort="con"
-                                            style="cursor: pointer; padding: 0.5rem 0.2rem; background: rgba(212, 175, 55, 0.1);">
+                                            style="cursor: pointer; padding: 0.5rem 0.2rem; background: color-mix(in srgb, var(--team-primary) 30%, rgba(0,0,0, 0.5));">
                                             CON
                                         </th>
                                         <th data-sort="str"
-                                            style="cursor: pointer; padding: 0.5rem 0.2rem; background: rgba(212, 175, 55, 0.1);">
+                                            style="cursor: pointer; padding: 0.5rem 0.2rem; background: color-mix(in srgb, var(--team-primary) 30%, rgba(0,0,0, 0.5));">
                                             STR
                                         </th>
                                         <th data-sort="dex"
-                                            style="cursor: pointer; padding: 0.5rem 0.2rem; background: rgba(212, 175, 55, 0.1);">
+                                            style="cursor: pointer; padding: 0.5rem 0.2rem; background: color-mix(in srgb, var(--team-primary) 30%, rgba(0,0,0, 0.5));">
                                             DEX
                                         </th>
                                         <th data-sort="int"
-                                            style="cursor: pointer; padding: 0.5rem 0.2rem; background: rgba(212, 175, 55, 0.1);">
+                                            style="cursor: pointer; padding: 0.5rem 0.2rem; background: color-mix(in srgb, var(--team-primary) 30%, rgba(0,0,0, 0.5));">
                                             INT
                                         </th>
                                         <th data-sort="wis"
-                                            style="cursor: pointer; padding: 0.5rem 0.2rem; background: rgba(212, 175, 55, 0.1);">
+                                            style="cursor: pointer; padding: 0.5rem 0.2rem; background: color-mix(in srgb, var(--team-primary) 30%, rgba(0,0,0, 0.5));">
                                             WIS
                                         </th>
                                     </tr>
@@ -181,7 +182,7 @@
                 <button class="tab-btn" data-target="tab-news">News Hub</button>
 
                 <div
-                    style="margin-top: auto; display: flex; flex-direction: column; gap: 0.5rem; background: var(--color-bg-light); border: 1px solid var(--color-gold-dark); border-radius: 4px; padding: 1rem; text-align: center;">
+                    style="margin-top: auto; display: flex; flex-direction: column; background: linear-gradient(to bottom, color-mix(in srgb, var(--team-primary) 40%, rgba(58, 63, 71, 0.95)) 0%, color-mix(in srgb, var(--team-secondary) 40%, rgba(37, 40, 48, 0.95)) 100%); border: 2px solid var(--team-primary); border-radius: 4px; padding: 0.5rem; text-align: center; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.6), inset 0 2px 4px rgba(255, 255, 255, 0.1);">
                     <p class="current-date" id="currentDateDisplay"
                         style="margin: 0; font-family: var(--font-title); color: var(--color-gold-light); font-size: 1.1rem; border-bottom: 1px solid rgba(212, 175, 55, 0.3); padding-bottom: 0.5rem; margin-bottom: 0.5rem;">
                         Year 1, Month 1, Week 1</p>
@@ -387,7 +388,8 @@
         <div class="panel"
             style="width: 95vw; max-width: 800px; height: 90vh; max-height: 600px; display: flex; flex-direction: column;">
             <h2 style="color: var(--color-text-title); text-align: center; margin-bottom: 1rem;">The Graveyard</h2>
-            <div id="graveyardGrid" class="roster-grid" style="flex: 1; overflow-y: auto; align-content: start;">
+            <div id="graveyardGrid" class="roster-grid"
+                style="flex: 1; overflow-y: auto; align-content: start; display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 1rem; padding: 1rem;">
                 <!-- Fallen gladiators injected here -->
             </div>
             <div style="text-align: center; margin-top: 1rem;">
