@@ -230,8 +230,8 @@ function renderCalendar(saveContext) {
     // Calculate which "week" of the season schedule we are in
     // There are 28 days a month. Seasons last 18 weeks (126 days). So assuming the season runs continuously:
     // This is a simple calculation. For now, we take total elapsed weeks since start of game.
-    const totalDaysElapsed = ((saveContext.year - 1) * 12 * 28) + ((saveContext.month - 1) * 28) + (saveContext.day - 1);
-    const currentWeekIndex = Math.floor(totalDaysElapsed / 7);
+    const totalDaysElapsed = ((saveContext.year - 1) * MONTHS_PER_YEAR * 28) + ((saveContext.month - 1) * 28) + (saveContext.day - 1);
+    const currentWeekIndex = Math.floor(totalDaysElapsed / 7) % (MONTHS_PER_YEAR * 4);
 
     // If we're past week 18, we can say off-season, or just wrap around for simplicity
     const schedule = saveContext.schedule;
@@ -242,11 +242,19 @@ function renderCalendar(saveContext) {
     }
 
     if (currentWeekIndex < schedule.length) {
+        // Migration check: if schedule[0] is an array, convert old format to new
+        if (Array.isArray(schedule[0])) {
+            console.log("Migrating old schedule format to new...");
+            saveContext.schedule = schedule.map(week => ({ matches: week, simulated: false }));
+            localStorage.setItem('gladiatorSaveContext', JSON.stringify(saveContext));
+        }
+
         // Find our team's match this week
         const myTeamId = saveContext.teamId;
-        const weekMatches = schedule[currentWeekIndex];
+        const weekObj = saveContext.schedule[currentWeekIndex];
+        const weekMatches = (weekObj && weekObj.matches) ? weekObj.matches : (Array.isArray(weekObj) ? weekObj : []);
 
-        const myMatch = weekMatches.find(m => m.home === myTeamId || m.away === myTeamId);
+        const myMatch = weekMatches.find ? weekMatches.find(m => m.home === myTeamId || m.away === myTeamId) : null;
 
         if (myMatch) {
             const isHome = myMatch.home === myTeamId;
@@ -265,6 +273,27 @@ function renderCalendar(saveContext) {
             }
         } else {
             eventDisplay.textContent = "Bye Week - Rest and Train";
+        }
+    } else if (currentWeekIndex === 18) {
+        eventDisplay.innerHTML = `<strong style="color:var(--color-accent-success)">AOWAN CUP PREP:</strong> The top two teams prepare for the grand finale.`;
+    } else if (currentWeekIndex === 19) {
+        // Aowan Cup Week
+        const standings = getStandings(saveContext);
+        const topTwo = standings.slice(0, 2);
+        const playerInCup = topTwo.some(t => t.isPlayer);
+
+        if (playerInCup) {
+            const opponent = topTwo.find(t => !t.isPlayer);
+            const dayOfWeek = saveContext.day % 7;
+            const daysUntilMatch = dayOfWeek === 0 ? 0 : 7 - dayOfWeek;
+
+            if (daysUntilMatch === 0) {
+                eventDisplay.innerHTML = `<strong style="color:var(--color-accent-danger)">AOWAN CUP TODAY:</strong> vs. <img src="${opponent.team.logo}" class="team-logo-tiny" alt="${opponent.team.name} Logo"> ${opponent.team.name}`;
+            } else {
+                eventDisplay.innerHTML = `Aowan Cup in ${daysUntilMatch} days: vs. <img src="${opponent.team.logo}" class="team-logo-tiny" alt="${opponent.team.name} Logo"> ${opponent.team.name}`;
+            }
+        } else {
+            eventDisplay.innerHTML = `<strong style="color:var(--color-gold-light)">AOWAN CUP:</strong> <img src="${topTwo[0].team.logo}" class="team-logo-tiny"> ${topTwo[0].team.name} vs. <img src="${topTwo[1].team.logo}" class="team-logo-tiny"> ${topTwo[1].team.name}`;
         }
     } else {
         eventDisplay.textContent = "Off-Season";
@@ -295,14 +324,15 @@ function renderCalendar(saveContext) {
             numSpan.textContent = i;
             dayDiv.appendChild(numSpan);
 
-            // Matches are on Saturdays (7, 14, 21, 28)
+            // Matches
             if (i % 7 === 0) {
-                const totalWeeksBeforeThisMonth = ((saveContext.year - 1) * 12 * 4) + ((saveContext.month - 1) * 4);
-                const globalWeekIndexForDay = totalWeeksBeforeThisMonth + Math.floor((i - 1) / 7);
+                const totalWeeksBeforeThisMonth = ((saveContext.year - 1) * MONTHS_PER_YEAR * 4) + ((saveContext.month - 1) * 4);
+                const globalWeekIndexForDay = (totalWeeksBeforeThisMonth + Math.floor((i - 1) / 7)) % (MONTHS_PER_YEAR * 4);
 
                 if (schedule && globalWeekIndexForDay < schedule.length) {
-                    const weekMatches = schedule[globalWeekIndexForDay];
-                    const myMatch = weekMatches.find(m => m.home === saveContext.teamId || m.away === saveContext.teamId);
+                    const weekObj = schedule[globalWeekIndexForDay];
+                    const weekMatches = (weekObj && weekObj.matches) ? weekObj.matches : (Array.isArray(weekObj) ? weekObj : []);
+                    const myMatch = weekMatches.find ? weekMatches.find(m => m.home === saveContext.teamId || m.away === saveContext.teamId) : null;
 
                     if (myMatch) {
                         const isHome = myMatch.home === saveContext.teamId;
@@ -315,6 +345,18 @@ function renderCalendar(saveContext) {
                         icon.title = `Match ${isHome ? 'vs.' : '@'} ${opponentTeam.name}`;
                         dayDiv.appendChild(icon);
                     }
+                } else if (globalWeekIndexForDay === 19) {
+                    // Aowan Cup Icon
+                    const stands = getStandings(saveContext);
+                    const top2 = stands.slice(0, 2);
+                    const inCup = top2.some(t => t.isPlayer);
+
+                    const cupIcon = document.createElement('span');
+                    cupIcon.innerHTML = '🏆';
+                    cupIcon.className = 'match-icon';
+                    cupIcon.style.fontSize = '1.2rem';
+                    cupIcon.title = inCup ? "Aowan Cup (Participating)" : "Aowan Cup (Finals)";
+                    dayDiv.appendChild(cupIcon);
                 }
             }
             calendarGrid.appendChild(dayDiv);
@@ -322,21 +364,15 @@ function renderCalendar(saveContext) {
     }
 }
 
-function renderStandings(saveContext) {
-    const tbody = document.getElementById('standingsBody');
-    if (!tbody) return;
-
-    // Build records for all teams
-    const allTeams = TEAMS.map(team => {
+function getStandings(saveContext) {
+    return TEAMS.map(team => {
         let wins = 0, losses = 0;
 
         if (team.id === saveContext.teamId) {
-            // Player team: use matchResults
             const results = saveContext.matchResults || [];
             wins = results.filter(r => r.won).length;
             losses = results.filter(r => !r.won).length;
         } else {
-            // AI team: derive from schedule results stored in opposingRosters
             const aiData = saveContext.opposingRosters && saveContext.opposingRosters[team.id];
             wins = (aiData && aiData.wins) || 0;
             losses = (aiData && aiData.losses) || 0;
@@ -345,10 +381,14 @@ function renderStandings(saveContext) {
         const played = wins + losses;
         const pct = played > 0 ? (wins / played) : 0;
         return { team, wins, losses, played, pct, isPlayer: team.id === saveContext.teamId };
-    });
+    }).sort((a, b) => b.wins - a.wins || a.losses - b.losses);
+}
 
-    // Sort: most wins first, then fewest losses
-    allTeams.sort((a, b) => b.wins - a.wins || a.losses - b.losses);
+function renderStandings(saveContext) {
+    const tbody = document.getElementById('standingsBody');
+    if (!tbody) return;
+
+    const allTeams = getStandings(saveContext);
 
     tbody.innerHTML = '';
     allTeams.forEach((entry, i) => {
@@ -539,28 +579,50 @@ function setupAdvanceTimeBtn() {
     renderCalendar(saveContext);
 
     const dayOfWeek = saveContext.day % 7;
-    const totalDaysElapsed = ((saveContext.year - 1) * 12 * 28) + ((saveContext.month - 1) * 28) + (saveContext.day - 1);
-    const currentWeekIndex = Math.floor(totalDaysElapsed / 7);
+    const totalDaysElapsed = ((saveContext.year - 1) * MONTHS_PER_YEAR * 28) + ((saveContext.month - 1) * 28) + (saveContext.day - 1);
+    const currentWeekIndex = Math.floor(totalDaysElapsed / 7) % (MONTHS_PER_YEAR * 4);
 
     let isMatchDay = false;
     let matchObj = null;
 
-    if (dayOfWeek === 0 && currentWeekIndex < saveContext.schedule.length) {
-        const weekMatches = saveContext.schedule[currentWeekIndex];
-        matchObj = weekMatches.find(m => m.home === saveContext.teamId || m.away === saveContext.teamId);
-        isMatchDay = !!matchObj;
+    if (dayOfWeek === 0) {
+        if (currentWeekIndex < saveContext.schedule.length) {
+            const weekObj = saveContext.schedule[currentWeekIndex];
+            const weekMatches = (weekObj && weekObj.matches) ? weekObj.matches : (Array.isArray(weekObj) ? weekObj : []);
+            matchObj = weekMatches.find ? weekMatches.find(m => m.home === saveContext.teamId || m.away === saveContext.teamId) : null;
+            isMatchDay = !!matchObj;
+        } else if (currentWeekIndex === 19) {
+            const standings = getStandings(saveContext);
+            const topTwo = standings.slice(0, 2);
+            const playerEntry = topTwo.find(t => t.isPlayer);
+            if (playerEntry) {
+                isMatchDay = true;
+                const opponent = topTwo.find(t => !t.isPlayer);
+                matchObj = { isCup: true, opponent: opponent };
+            }
+        }
     }
 
     if (isMatchDay) {
         // Resolve opponent formatting
-        const isHome = matchObj.home === saveContext.teamId;
-        const opponentId = isHome ? matchObj.away : matchObj.home;
-        const opponentTeam = TEAMS.find(t => t.id === opponentId);
-        const opponentName = opponentTeam ? opponentTeam.name : "Unknown Opponent";
+        let opponentTeam;
+        let buttonLabel;
 
-        advanceBtn.innerHTML = `<div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem;"><span>VS</span><img src="${opponentTeam.logo}" alt="${opponentTeam.name}" style="height: 24px; width: 24px; object-fit: contain;"></div>`;
-        advanceBtn.style.background = "linear-gradient(to bottom, #4a2f32 0%, #2a1a1d 100%)";
-        advanceBtn.style.borderColor = "#70474b";
+        if (matchObj.isCup) {
+            opponentTeam = matchObj.opponent.team;
+            buttonLabel = `<div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem;"><span style="color: gold; font-weight: bold; text-shadow: 0 0 5px gold;">🏆 CUP</span><img src="${opponentTeam.logo}" alt="${opponentTeam.name}" style="height: 24px; width: 24px; object-fit: contain;"></div>`;
+            advanceBtn.style.background = "linear-gradient(to bottom, #7a5f1a 0%, #3a2a0d 100%)";
+            advanceBtn.style.borderColor = "gold";
+        } else {
+            const isHome = matchObj.home === saveContext.teamId;
+            const opponentId = isHome ? matchObj.away : matchObj.home;
+            opponentTeam = TEAMS.find(t => t.id === opponentId);
+            buttonLabel = `<div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem;"><span>VS</span><img src="${opponentTeam.logo}" alt="${opponentTeam.name}" style="height: 24px; width: 24px; object-fit: contain;"></div>`;
+            advanceBtn.style.background = "linear-gradient(to bottom, #4a2f32 0%, #2a1a1d 100%)";
+            advanceBtn.style.borderColor = "#70474b";
+        }
+
+        advanceBtn.innerHTML = buttonLabel;
         advanceBtn.onclick = () => {
             if (typeof initializeMatchScreen === 'function') {
                 initializeMatchScreen(saveContext);
@@ -586,7 +648,8 @@ function advanceTime(saveContext) {
     let daysAdvanced = 0;
 
     function tickDay() {
-        if (daysAdvanced >= 7) {
+        // Safety cap: Advance at most 28 days (one month) at a time
+        if (daysAdvanced >= 28) {
             finishAdvancing(saveContext, daysAdvanced);
             return;
         }
@@ -595,12 +658,52 @@ function advanceTime(saveContext) {
         if (saveContext.day > 28) {
             saveContext.day = 1;
             saveContext.month += 1;
-            if (saveContext.month > 12) {
+            if (saveContext.month > MONTHS_PER_YEAR) {
                 saveContext.month = 1;
                 saveContext.year += 1;
+                startNewSeason(saveContext);
+
+                // EVENT STOP: New Season Day 1
+                finishAdvancing(saveContext, daysAdvanced + 1);
+                return;
             }
         }
         daysAdvanced++;
+
+        // Process Match Day Logic (Sundays)
+        const totalDaysElapsed = ((saveContext.year - 1) * MONTHS_PER_YEAR * 28) + ((saveContext.month - 1) * 28) + (saveContext.day - 1);
+        const currentWeekIndex = Math.floor(totalDaysElapsed / 7) % (MONTHS_PER_YEAR * 4);
+        const dayOfWeek = saveContext.day % 7;
+
+        if (dayOfWeek === 0) {
+            // It is match day (Sunday)
+            if (currentWeekIndex < saveContext.schedule.length) {
+                if (typeof simulateLeagueMatches === 'function') {
+                    simulateLeagueMatches(saveContext, currentWeekIndex);
+                }
+            } else if (currentWeekIndex === 19) {
+                // Aowan Cup Day
+                const standings = getStandings(saveContext);
+                const topTwo = standings.slice(0, 2);
+                const playerInCup = topTwo.some(t => t.isPlayer);
+
+                if (!playerInCup) {
+                    // Simulate the cup for AI
+                    const winnerIdx = Math.random() < 0.5 ? 0 : 1;
+                    const winner = topTwo[winnerIdx];
+                    const loser = topTwo[1 - winnerIdx];
+
+                    const newsList = document.getElementById('newsList');
+                    if (newsList) {
+                        const newsItem = document.createElement('div');
+                        newsItem.className = 'news-item';
+                        newsItem.style.borderLeft = '4px solid gold';
+                        newsItem.innerHTML = `<p><strong>AOWAN CUP RESULT:</strong> <strong>${winner.team.name}</strong> has defeated ${loser.team.name} to claim the Grand Trophy!</p>`;
+                        newsList.insertBefore(newsItem, newsList.firstChild);
+                    }
+                }
+            }
+        }
 
         // Process daily healing
         let healedAnyone = false;
@@ -617,10 +720,7 @@ function advanceTime(saveContext) {
         // Heal Opponent Rosters and Process Recruitment
         if (saveContext.opposingRosters) {
             Object.values(saveContext.opposingRosters).forEach(aiTeamData => {
-                // Fallback for pre-patch saves
                 const roster = aiTeamData.roster || aiTeamData;
-
-                // Healing
                 roster.forEach(glad => {
                     const maxHp = glad.maxHp || calculateMaxHp(glad);
                     if (glad.hp < maxHp) {
@@ -628,7 +728,6 @@ function advanceTime(saveContext) {
                     }
                 });
 
-                // Recruitment
                 if (aiTeamData.gold !== undefined) {
                     while (roster.length < 10 && aiTeamData.gold >= 500) {
                         aiTeamData.gold -= 500;
@@ -645,21 +744,33 @@ function advanceTime(saveContext) {
         renderCalendar(saveContext);
         if (healedAnyone) renderRoster();
 
-        // Stop if the new day is a match day for this team
-        const dayOfWeek = saveContext.day % 7; // Sunday = 0
-        let isMatchDay = false;
-        if (dayOfWeek === 0) {
-            const totalDaysElapsed = ((saveContext.year - 1) * 12 * 28) + ((saveContext.month - 1) * 28) + (saveContext.day - 1);
-            const currentWeekIndex = Math.floor(totalDaysElapsed / 7);
-            if (saveContext.schedule && currentWeekIndex < saveContext.schedule.length) {
-                const weekMatches = saveContext.schedule[currentWeekIndex];
-                if (weekMatches.find(m => m.home === saveContext.teamId || m.away === saveContext.teamId)) {
-                    isMatchDay = true;
-                }
+        // DETERMINE IF WE SHOULD STOP ADVANCING
+        let shouldStop = false;
+
+        // 1. Regular Season Match Day
+        if (dayOfWeek === 0 && currentWeekIndex < saveContext.schedule.length) {
+            const weekObj = saveContext.schedule[currentWeekIndex];
+            const weekMatches = (weekObj && weekObj.matches) ? weekObj.matches : (Array.isArray(weekObj) ? weekObj : []);
+            if (weekMatches.find && weekMatches.find(m => m.home === saveContext.teamId || m.away === saveContext.teamId)) {
+                shouldStop = true;
             }
         }
 
-        if (isMatchDay) {
+        // 2. Aowan Cup Prep Week Start
+        if (saveContext.month === 5 && saveContext.day === 15) {
+            shouldStop = true;
+        }
+
+        // 3. Aowan Cup Match Day (if participating)
+        if (dayOfWeek === 0 && currentWeekIndex === 19) {
+            const standings = getStandings(saveContext);
+            const topTwo = standings.slice(0, 2);
+            if (topTwo.some(t => t.isPlayer)) {
+                shouldStop = true;
+            }
+        }
+
+        if (shouldStop) {
             finishAdvancing(saveContext, daysAdvanced);
             return;
         }
@@ -688,3 +799,59 @@ function finishAdvancing(saveContext, daysAdvanced) {
     renderCalendar(saveContext);
     setupAdvanceTimeBtn();
 }
+
+function startNewSeason(saveContext) {
+    if (typeof recalculateSeasonData === 'function') {
+        recalculateSeasonData(saveContext);
+    }
+
+    // Log the event
+    const newsList = document.getElementById('newsList');
+    if (newsList) {
+        const newsItem = document.createElement('div');
+        newsItem.className = 'news-item';
+        newsItem.style.borderLeft = '4px solid #4CAF50';
+        newsItem.innerHTML = `<p><strong>HAPPY NEW YEAR!</strong> Year ${saveContext.year} has begun. A fresh season of glory awaits!</p>`;
+        newsList.insertBefore(newsItem, newsList.firstChild);
+    }
+
+    // Immediate save
+    localStorage.setItem('gladiatorSaveContext', JSON.stringify(saveContext));
+}
+
+// DEBUG COMMANDS
+window.skipToCupPrep = function (wins = 15) {
+    const saveContext = JSON.parse(localStorage.getItem('gladiatorSaveContext'));
+    if (!saveContext) return console.error("No save context found");
+
+    // Reset records
+    if (saveContext.opposingRosters) {
+        Object.values(saveContext.opposingRosters).forEach(ai => {
+            ai.wins = 0;
+            ai.losses = 0;
+        });
+    }
+
+    // Simulate all 18 weeks of regular season
+    for (let i = 0; i < 18; i++) {
+        simulateLeagueMatches(saveContext, i);
+    }
+
+    // Set player's wins (enough to be #1 or #2 usually)
+    saveContext.matchResults = [];
+    for (let i = 0; i < wins; i++) {
+        saveContext.matchResults.push({ won: true, day: 1, month: 1, year: 1 });
+    }
+    for (let i = 0; i < (18 - wins); i++) {
+        saveContext.matchResults.push({ won: false, day: 1, month: 1, year: 1 });
+    }
+
+    // Advance to Week 19 (Prep week)
+    // Month 5, Day 15 is Week 19 Day 1
+    saveContext.month = 5;
+    saveContext.day = 15;
+
+    localStorage.setItem('gladiatorSaveContext', JSON.stringify(saveContext));
+    console.log("Season simulated. Skipping to Week 19 (Aowan Cup Prep)...");
+    location.reload();
+};

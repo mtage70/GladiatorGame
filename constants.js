@@ -1,3 +1,4 @@
+const MONTHS_PER_YEAR = 6;
 const GLADIATOR_CLASSES = ['Warrior', 'Paladin', 'Rogue', 'Hunter', 'Mage', 'Cleric'];
 
 // Portrait lookup: only defined combinations have an image. Others return null.

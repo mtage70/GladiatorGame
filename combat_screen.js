@@ -27,7 +27,7 @@ let combatState = {
     healingDampener: 100
 };
 
-function initializeCombat(playerFormation, opponentFormation, saveContext, opponentTeamInfo) {
+function initializeCombat(playerFormation, opponentFormation, saveContext, opponentTeamInfo, isHome) {
     combatState.saveContext = saveContext;
     combatState.combatants = [];
     combatState.turnIndex = 0;
@@ -42,13 +42,23 @@ function initializeCombat(playerFormation, opponentFormation, saveContext, oppon
         dampenerDisplay.style.color = 'var(--color-accent-success)';
     }
 
-    // Hide Match Screen, Show Combat Screen
+    // Show Match Screen, Show Combat Screen
     document.getElementById('matchScreen').classList.add('hidden');
     const combatScreen = document.getElementById('combatScreen');
     combatScreen.classList.remove('hidden');
 
-    // Set dynamic combat background based on opponent team
-    combatScreen.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('arenas/arena_${opponentTeamInfo.id}.png')`;
+    // Determine if this is the Aowan Cup
+    const totalDaysElapsed = ((saveContext.year - 1) * MONTHS_PER_YEAR * 28) + ((saveContext.month - 1) * 28) + (saveContext.day - 1);
+    const currentWeekIndex = Math.floor(totalDaysElapsed / 7) % (MONTHS_PER_YEAR * 4);
+    const isCup = currentWeekIndex === 19;
+
+    // Set dynamic combat background
+    if (isCup) {
+        combatScreen.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('colosseum.png')`;
+    } else {
+        const arenaId = isHome ? saveContext.teamId : opponentTeamInfo.id;
+        combatScreen.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('arenas/arena_${arenaId}.png')`;
+    }
     combatScreen.style.backgroundSize = 'cover';
     combatScreen.style.backgroundPosition = 'center bottom';
 
@@ -821,8 +831,22 @@ function finishCombatTransition() {
     if (newsList) {
         const lastResult = combatState.saveContext.matchResults[combatState.saveContext.matchResults.length - 1];
 
+        // Determine if this was the Aowan Cup
+        const totalDaysElapsed = ((combatState.saveContext.year - 1) * MONTHS_PER_YEAR * 28) + ((combatState.saveContext.month - 1) * 28) + (combatState.saveContext.day - 1);
+        const currentWeekIndex = Math.floor(totalDaysElapsed / 7) % (MONTHS_PER_YEAR * 4);
+        const isCup = currentWeekIndex === 19;
+
         // Grant match rewards
-        const reward = lastResult.won ? 1000 : 500;
+        let reward = lastResult.won ? 1000 : 500;
+        if (isCup && lastResult.won) {
+            reward = 3000; // Grand Prize
+            combatState.saveContext.fame = (combatState.saveContext.fame || 0) + 500;
+            if (!combatState.saveContext.achievements) combatState.saveContext.achievements = [];
+            if (!combatState.saveContext.achievements.includes('Aowan Cup Champion')) {
+                combatState.saveContext.achievements.push('Aowan Cup Champion');
+            }
+        }
+
         combatState.saveContext.gold = (combatState.saveContext.gold || 0) + reward;
 
         // Update opponent team record
@@ -840,7 +864,13 @@ function finishCombatTransition() {
 
         const newsItem = document.createElement('div');
         newsItem.className = 'news-item';
-        newsItem.innerHTML = `<p><strong>Match Result</strong>: Your team ${lastResult.won ? 'won' : 'lost'} the match! You earned <span style="color:var(--color-gold-primary);">${reward} G</span>.</p>`;
+        if (isCup && lastResult.won) {
+            newsItem.style.borderLeft = '4px solid gold';
+            newsItem.style.background = 'rgba(255, 215, 0, 0.1)';
+            newsItem.innerHTML = `<p><strong style="color:gold;">🏆 AOWAN CUP CHAMPION!</strong> Your team defeated the top seed to claim the Grand Trophy and <span style="color:var(--color-gold-primary);">3000 G</span>! Glory to the arena!</p>`;
+        } else {
+            newsItem.innerHTML = `<p><strong>Match Result</strong>: Your team ${lastResult.won ? 'won' : 'lost'} the match! You earned <span style="color:var(--color-gold-primary);">${reward} G</span>.</p>`;
+        }
 
         // Find insert before first child
         if (newsList.firstChild) {
@@ -934,15 +964,23 @@ function finishCombatTransition() {
     }
 
     // Advance past the match day automatically so we aren't stuck on it
-    simulateLeagueMatches(combatState.saveContext);
+    if (typeof simulateLeagueMatches === 'function') {
+        const saveContext = combatState.saveContext;
+        const totalDaysElapsed = ((saveContext.year - 1) * MONTHS_PER_YEAR * 28) + ((saveContext.month - 1) * 28) + (saveContext.day - 1);
+        const currentWeekIndex = Math.floor(totalDaysElapsed / 7) % (MONTHS_PER_YEAR * 4);
+        simulateLeagueMatches(saveContext, currentWeekIndex);
+    }
 
     combatState.saveContext.day += 1;
     if (combatState.saveContext.day > 28) {
         combatState.saveContext.day = 1;
         combatState.saveContext.month += 1;
-        if (combatState.saveContext.month > 12) {
+        if (combatState.saveContext.month > MONTHS_PER_YEAR) {
             combatState.saveContext.month = 1;
             combatState.saveContext.year += 1;
+            if (typeof recalculateSeasonData === 'function') {
+                recalculateSeasonData(combatState.saveContext);
+            }
         }
     }
 
@@ -958,255 +996,4 @@ function finishCombatTransition() {
     if (typeof setupAdvanceTimeBtn === 'function') setupAdvanceTimeBtn();
 }
 
-function simulateLeagueMatches(saveContext) {
-    const totalDaysElapsed = ((saveContext.year - 1) * 12 * 28) + ((saveContext.month - 1) * 28) + (saveContext.day - 1);
-    const currentWeekIndex = Math.floor(totalDaysElapsed / 7);
-    if (!saveContext.schedule || currentWeekIndex >= saveContext.schedule.length) return;
 
-    const weekMatches = saveContext.schedule[currentWeekIndex];
-    const aiMatches = weekMatches.filter(m => m.home !== saveContext.teamId && m.away !== saveContext.teamId);
-
-    aiMatches.forEach(match => {
-        simulateAIMatch(match.home, match.away, saveContext);
-    });
-}
-
-function simulateAIMatch(teamAId, teamBId, saveContext) {
-    const teamAData = saveContext.opposingRosters[teamAId];
-    const rosterA = teamAData ? (teamAData.roster || teamAData) : [];
-
-    const teamBData = saveContext.opposingRosters[teamBId];
-    const rosterB = teamBData ? (teamBData.roster || teamBData) : [];
-
-    if (rosterA.length === 0 || rosterB.length === 0) return;
-
-    const selectSmartFormation = (roster, side) => {
-        let sortedRoster = roster.slice().sort((a, b) => {
-            const hpA = a.hp !== undefined ? a.hp : (a.maxHp || (30 + a.stats.str * 2));
-            const hpB = b.hp !== undefined ? b.hp : (b.maxHp || (30 + b.stats.str * 2));
-            const maxHpA = a.maxHp || (30 + a.stats.str * 2);
-            const maxHpB = b.maxHp || (30 + b.stats.str * 2);
-
-            const scoreA = getPrimaryStat(a) * (hpA / maxHpA);
-            const scoreB = getPrimaryStat(b) * (hpB / maxHpB);
-
-            return scoreB - scoreA;
-        });
-
-        let activeFighters = sortedRoster.slice(0, 5);
-        let tanks = [], squishies = [], flexible = [];
-
-        activeFighters.forEach(g => {
-            if (g.class === 'Mage' || g.class === 'Cleric') squishies.push(g);
-            else if (g.class === 'Warrior' || g.class === 'Paladin') tanks.push(g);
-            else flexible.push(g);
-        });
-
-        tanks.sort((a, b) => (b.hp !== undefined ? b.hp : (b.maxHp || 0)) - (a.hp !== undefined ? a.hp : (a.maxHp || 0)));
-        squishies.sort((a, b) => (a.hp !== undefined ? a.hp : (a.maxHp || 0)) - (b.hp !== undefined ? b.hp : (b.maxHp || 0)));
-
-        let formation = [null, null, null, null, null];
-
-        // Side 'B' (right side): player/A attacks slot 1 first → tank in slot 1, squishy in slot 2
-        // Side 'A' (left side): opponent/B attacks slot 2 first → tank in slot 2, squishy in slot 1
-        const frontSlot = (side === 'B') ? 1 : 2;
-        const backSlot = (side === 'B') ? 2 : 1;
-
-        if (tanks.length > 0) formation[frontSlot] = tanks.shift();
-        else if (flexible.length > 0) formation[frontSlot] = flexible.shift();
-        else formation[frontSlot] = squishies.shift();
-
-        if (squishies.length > 0) formation[backSlot] = squishies.shift();
-        else if (flexible.length > 0) formation[backSlot] = flexible.shift();
-        else formation[backSlot] = tanks.shift();
-
-        // Midline: slots 0, 3, 4
-        let remaining = [...tanks, ...flexible, ...squishies];
-        formation[0] = remaining.shift() || null;
-        formation[3] = remaining.shift() || null;
-        formation[4] = remaining.shift() || null;
-
-        return formation;
-    };
-
-    const formationA = selectSmartFormation(rosterA, 'A');
-    const formationB = selectSmartFormation(rosterB, 'B');
-
-    let combatants = [];
-    formationA.forEach((glad, i) => {
-        if (glad) {
-            setupCombatant(glad, 'A');
-            glad.formationIndex = i;
-            combatants.push(glad);
-        }
-    });
-    formationB.forEach((glad, i) => {
-        if (glad) {
-            setupCombatant(glad, 'B');
-            glad.formationIndex = i;
-            combatants.push(glad);
-        }
-    });
-
-    // Fast-forward combat until one side is dead or 100 turns limit
-    let turns = 0;
-    while (turns < 100) {
-        let aliveA = combatants.filter(c => c.side === 'A' && !c.isDead);
-        let aliveB = combatants.filter(c => c.side === 'B' && !c.isDead);
-
-        if (aliveA.length === 0 || aliveB.length === 0) break;
-
-        combatants.sort((a, b) => b.stats.dex - a.stats.dex); // Highest dex first
-
-        for (let attacker of combatants) {
-            if (attacker.isDead) continue;
-
-            // Hunters and Mages can target any living enemy
-            let opponents = (attacker.class === 'Hunter' || attacker.class === 'Mage')
-                ? combatants.filter(c => c.side !== attacker.side && !c.isDead)
-                : getValidTargets(attacker, combatants);
-            if (opponents.length === 0) break;
-
-            let target = opponents[Math.floor(Math.random() * opponents.length)];
-            let isPhysicalAttack = ['Warrior', 'Paladin', 'Rogue', 'Hunter'].includes(attacker.class);
-            let targetDodged = false;
-
-            if (isPhysicalAttack) {
-                let dodgeChance = (target.stats.dex - attacker.baseDamage) * 0.01;
-                if (dodgeChance < 0) dodgeChance = 0;
-                if (dodgeChance > 0.40) dodgeChance = 0.40;
-                if (Math.random() < dodgeChance) targetDodged = true;
-            }
-
-            if (!targetDodged || attacker.class === 'Mage') {
-                const variance = (0.8 + (Math.random() * 0.4));
-                let effectAmount = Math.floor(attacker.baseDamage * variance);
-                if (effectAmount < 1) effectAmount = 1;
-
-                // Rogue: Critical chance scales with DEX (up to 50%)
-                const critChance = Math.min(0.5, attacker.stats.dex * 0.004);
-                if (attacker.class === 'Rogue' && Math.random() < critChance) {
-                    effectAmount *= 2;
-                }
-
-                if (attacker.class === 'Cleric') {
-                    if (Math.random() < 0.5) {
-                        let allies = attacker.side === 'A' ? combatants.filter(c => c.side === 'A' && !c.isDead && c.hp < c.maxHp) : combatants.filter(c => c.side === 'B' && !c.isDead && c.hp < c.maxHp);
-                        if (allies.length > 0) {
-                            let healTarget = allies[0];
-                            healTarget.hp += Math.floor(attacker.baseDamage * 0.5 * variance);
-                            if (healTarget.hp > healTarget.maxHp) healTarget.hp = healTarget.maxHp;
-                            continue; // skip attack
-                        }
-                    }
-                }
-
-                if (attacker.class === 'Mage') {
-                    let adjacentIndices = [];
-                    const tIdx = target.formationIndex;
-                    if (tIdx === 0) adjacentIndices = [4];
-                    else if (tIdx === 1) adjacentIndices = [4];
-                    else if (tIdx === 2) adjacentIndices = [4];
-                    else if (tIdx === 3) adjacentIndices = [4];
-                    else if (tIdx === 4) adjacentIndices = [0, 1, 2, 3];
-
-                    const splashTargets = combatants.filter(c => c.side === target.side && !c.isDead && adjacentIndices.includes(c.formationIndex));
-                    const totalTargetsCaught = 1 + splashTargets.length;
-                    const splitDamage = Math.max(1, Math.floor(effectAmount / totalTargetsCaught));
-
-                    target.hp -= splitDamage;
-                    if (target.hp <= 0) { target.hp = 0; target.isDead = true; }
-
-                    splashTargets.forEach(st => {
-                        st.hp -= splitDamage;
-                        if (st.hp <= 0) { st.hp = 0; st.isDead = true; }
-                    });
-                } else {
-                    target.hp -= effectAmount;
-                    if (target.hp <= 0) {
-                        target.hp = 0;
-                        target.isDead = true;
-                    }
-                }
-            }
-        }
-        turns++;
-    }
-    // Award Battle XP to all AI participants
-    const participantIds = new Set(combatants.map(c => c.id));
-    rosterA.forEach(glad => {
-        if (!participantIds.has(glad.id)) return;
-        if (!glad.baseStats) {
-            glad.baseStats = { str: glad.stats.str, dex: glad.stats.dex, int: glad.stats.int, wis: glad.stats.wis, con: glad.stats.con || 25 };
-        }
-        if (glad.baseStats.con === undefined) glad.baseStats.con = glad.stats.con || 25;
-        glad.battles = (glad.battles || 0) + 1;
-        const b = glad.battles;
-        glad.stats = {
-            str: glad.baseStats.str + b,
-            dex: glad.baseStats.dex + b,
-            int: glad.baseStats.int + b,
-            wis: glad.baseStats.wis + b,
-            con: glad.baseStats.con + b
-        };
-        glad.maxHp = Math.floor(50 + (glad.stats.con * 2));
-    });
-    rosterB.forEach(glad => {
-        if (!participantIds.has(glad.id)) return;
-        if (!glad.baseStats) {
-            glad.baseStats = { str: glad.stats.str, dex: glad.stats.dex, int: glad.stats.int, wis: glad.stats.wis, con: glad.stats.con || 25 };
-        }
-        if (glad.baseStats.con === undefined) glad.baseStats.con = glad.stats.con || 25;
-        glad.battles = (glad.battles || 0) + 1;
-        const b = glad.battles;
-        glad.stats = {
-            str: glad.baseStats.str + b,
-            dex: glad.baseStats.dex + b,
-            int: glad.baseStats.int + b,
-            wis: glad.baseStats.wis + b,
-            con: glad.baseStats.con + b
-        };
-        glad.maxHp = Math.floor(50 + (glad.stats.con * 2));
-    });
-
-    // Process deaths
-    const deadA = combatants.filter(c => c.side === 'A' && c.isDead);
-    const deadB = combatants.filter(c => c.side === 'B' && c.isDead);
-
-    deadA.forEach(deadGlad => {
-        if (Math.random() < 0.5) {
-            const rIndex = rosterA.findIndex(g => g.id === deadGlad.id);
-            if (rIndex !== -1) rosterA.splice(rIndex, 1);
-        } else {
-            deadGlad.hp = 1;
-        }
-    });
-
-    deadB.forEach(deadGlad => {
-        if (Math.random() < 0.5) {
-            const rIndex = rosterB.findIndex(g => g.id === deadGlad.id);
-            if (rIndex !== -1) rosterB.splice(rIndex, 1);
-        } else {
-            deadGlad.hp = 1;
-        }
-    });
-
-    // Handle AI Rewards and Track Wins/Losses
-    if (teamAData && teamAData.gold !== undefined && teamBData && teamBData.gold !== undefined) {
-        // Did teamA wipe?
-        let aliveA = combatants.filter(c => c.side === 'A' && !c.isDead).length;
-        if (aliveA > 0) {
-            // Team A Won
-            teamAData.gold += 1000;
-            teamBData.gold += 500;
-            teamAData.wins = (teamAData.wins || 0) + 1;
-            teamBData.losses = (teamBData.losses || 0) + 1;
-        } else {
-            // Team B Won
-            teamBData.gold += 1000;
-            teamAData.gold += 500;
-            teamBData.wins = (teamBData.wins || 0) + 1;
-            teamAData.losses = (teamAData.losses || 0) + 1;
-        }
-    }
-}

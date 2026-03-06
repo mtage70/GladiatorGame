@@ -145,15 +145,77 @@ function generateSeasonSchedule(playerTeamId) {
                 weekMatches.push({ home: second, away: first });
             }
         }
-        firstHalf.push(weekMatches);
+        firstHalf.push({ matches: weekMatches, simulated: false });
     }
 
     // Generation of Second Half (Reversed)
-    const secondHalf = firstHalf.map(week => week.map(match => ({
-        home: match.away,
-        away: match.home
-    })));
+    const secondHalf = firstHalf.map(week => ({
+        matches: week.matches.map(match => ({
+            home: match.away,
+            away: match.home
+        })),
+        simulated: false
+    }));
 
     // Return the full 18-week schedule
     return firstHalf.concat(secondHalf);
+}
+
+function simulateLeagueMatches(saveContext, weekIndex) {
+    if (!saveContext.schedule || weekIndex < 0 || weekIndex >= saveContext.schedule.length) return;
+
+    const weekObj = saveContext.schedule[weekIndex];
+    // Safety check: Don't simulate twice
+    if (weekObj.simulated) return;
+
+    const weekMatches = (weekObj && weekObj.matches) ? weekObj.matches : (Array.isArray(weekObj) ? weekObj : []);
+    weekMatches.forEach(match => {
+        // Skip match if player is involved
+        if (match.home === saveContext.teamId || match.away === saveContext.teamId) return;
+
+        // Simple simulation based on random for now, could be improved with OVR
+        const homeWins = Math.random() < 0.55; // Slight home field advantage
+        const winnerId = homeWins ? match.home : match.away;
+        const loserId = homeWins ? match.away : match.home;
+
+        const winnerData = saveContext.opposingRosters[winnerId];
+        const loserData = saveContext.opposingRosters[loserId];
+
+        if (winnerData) {
+            winnerData.wins = (winnerData.wins || 0) + 1;
+            winnerData.gold = (winnerData.gold || 0) + 1000;
+        }
+        if (loserData) {
+            loserData.losses = (loserData.losses || 0) + 1;
+            loserData.gold = (loserData.gold || 0) + 500;
+        }
+    });
+
+    // Mark as simulated
+    weekObj.simulated = true;
+
+    const newsList = document.getElementById('newsList');
+    if (newsList) {
+        const newsItem = document.createElement('div');
+        newsItem.className = 'news-item';
+        newsItem.style.borderLeftColor = 'var(--color-accent-warning)';
+        newsItem.innerHTML = `<p><em>Results for Week ${weekIndex + 1} are in. Check the standings for the latest rankings!</em></p>`;
+        newsList.insertBefore(newsItem, newsList.firstChild);
+    }
+}
+
+function recalculateSeasonData(saveContext) {
+    // Generate fresh schedule for the new year
+    if (typeof generateSeasonSchedule === 'function') {
+        saveContext.schedule = generateSeasonSchedule(saveContext.teamId);
+    }
+
+    // Reset records
+    saveContext.matchResults = [];
+    if (saveContext.opposingRosters) {
+        Object.values(saveContext.opposingRosters).forEach(ai => {
+            ai.wins = 0;
+            ai.losses = 0;
+        });
+    }
 }

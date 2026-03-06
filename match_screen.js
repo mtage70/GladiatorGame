@@ -8,7 +8,9 @@ let currentMatchState = {
     selectedGladiatorId: null,
     highlightedSlotIndex: -1,
     sortBy: 'ovr',
-    sortAscending: false
+    sortAscending: false,
+    isHome: false,
+    isCup: false
 };
 
 function initializeMatchScreen(saveContext) {
@@ -37,26 +39,67 @@ function initializeMatchScreen(saveContext) {
     matchScreen.classList.remove('hidden');
 
     // Determine opponent
-    const totalDaysElapsed = ((saveContext.year - 1) * 12 * 28) + ((saveContext.month - 1) * 28) + (saveContext.day - 1);
-    const currentWeekIndex = Math.floor(totalDaysElapsed / 7);
-    const weekMatches = saveContext.schedule[currentWeekIndex];
-    const myMatch = weekMatches.find(m => m.home === saveContext.teamId || m.away === saveContext.teamId);
+    const totalDaysElapsed = ((saveContext.year - 1) * MONTHS_PER_YEAR * 28) + ((saveContext.month - 1) * 28) + (saveContext.day - 1);
+    const currentWeekIndex = Math.floor(totalDaysElapsed / 7) % (MONTHS_PER_YEAR * 4);
 
-    const isHome = myMatch.home === saveContext.teamId;
-    const opponentId = isHome ? myMatch.away : myMatch.home;
+    let opponentId;
+    let isCup = false;
+    let myMatch = null;
+
+    if (currentWeekIndex < saveContext.schedule.length) {
+        const weekObj = saveContext.schedule[currentWeekIndex];
+        const weekMatches = (weekObj && weekObj.matches) ? weekObj.matches : (Array.isArray(weekObj) ? weekObj : []);
+        myMatch = weekMatches.find ? weekMatches.find(m => m.home === saveContext.teamId || m.away === saveContext.teamId) : null;
+        opponentId = myMatch.home === saveContext.teamId ? myMatch.away : myMatch.home;
+    } else if (currentWeekIndex === 19) {
+        // Aowan Cup
+        isCup = true;
+        const standings = typeof getStandings === 'function' ? getStandings(saveContext) : [];
+        const topTwo = standings.slice(0, 2);
+        const opponentEntry = topTwo.find(t => !t.isPlayer);
+        opponentId = opponentEntry ? opponentEntry.team.id : null;
+    }
+
+    const isHome = isCup ? false : (myMatch && myMatch.home === saveContext.teamId);
+    currentMatchState.isHome = isHome;
+    currentMatchState.isCup = isCup;
     const arenaTeamId = isHome ? saveContext.teamId : opponentId;
     const opponentTeamInfo = TEAMS.find(t => t.id === opponentId);
     currentMatchState.opponentTeam = opponentTeamInfo;
 
-    // Set dynamic match background based on whether it is Home or Away
-    matchScreen.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('arenas/arena_${arenaTeamId}.png')`;
+    // Set dynamic match background
+    if (isCup) {
+        matchScreen.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('colosseum.png')`;
+    } else {
+        matchScreen.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('arenas/arena_${arenaTeamId}.png')`;
+    }
     matchScreen.style.backgroundSize = 'cover';
     matchScreen.style.backgroundPosition = 'center bottom';
 
     const typeLabel = document.getElementById('matchTypeLabel');
     if (typeLabel) {
-        typeLabel.textContent = isHome ? 'HOME MATCH' : 'AWAY MATCH';
-        typeLabel.style.color = isHome ? 'var(--color-accent-success)' : 'var(--color-gold-light)';
+        if (isCup) {
+            typeLabel.innerHTML = 'THE<br>AOWAN<br>CUP';
+            typeLabel.className = 'cup-title-special'; // Apply special CSS class
+            typeLabel.style.top = '1rem';
+        } else {
+            typeLabel.textContent = isHome ? 'HOME MATCH' : 'AWAY MATCH';
+            typeLabel.className = ''; // Reset class
+            typeLabel.style.color = isHome ? 'var(--color-accent-success)' : 'var(--color-gold-light)';
+            typeLabel.style.fontSize = '1.1rem';
+            typeLabel.style.lineHeight = 'normal';
+            typeLabel.style.textShadow = '2px 2px 4px rgba(0,0,0,0.8)';
+            typeLabel.style.letterSpacing = '2px';
+            typeLabel.style.top = '2rem';
+        }
+
+        // Shared positioning
+        typeLabel.style.position = 'absolute';
+        typeLabel.style.left = '50%';
+        typeLabel.style.transform = 'translateX(-50%)';
+        typeLabel.style.width = '100%';
+        typeLabel.style.textAlign = 'center';
+        typeLabel.style.zIndex = '10';
     }
     document.getElementById('matchPlayerHeader').innerHTML = `
         <div class="team-header-vertical" style="color: var(--team-primary); text-shadow: 0 0 10px rgba(0,0,0,0.8);">
@@ -481,7 +524,8 @@ function startCombat() {
         pForm,
         oForm,
         currentMatchState.saveContext,
-        currentMatchState.opponentTeam
+        currentMatchState.opponentTeam,
+        currentMatchState.isHome
     );
 }
 
@@ -538,7 +582,9 @@ function confirmForfeitMatch() {
 
     // Simulate other matches
     if (typeof simulateLeagueMatches === 'function') {
-        simulateLeagueMatches(currentMatchState.saveContext);
+        const totalDaysElapsed = ((currentMatchState.saveContext.year - 1) * MONTHS_PER_YEAR * 28) + ((currentMatchState.saveContext.month - 1) * 28) + (currentMatchState.saveContext.day - 1);
+        const currentWeekIndex = Math.floor(totalDaysElapsed / 7) % (MONTHS_PER_YEAR * 4);
+        simulateLeagueMatches(currentMatchState.saveContext, currentWeekIndex);
     }
 
     // Advance Day
@@ -546,9 +592,12 @@ function confirmForfeitMatch() {
     if (currentMatchState.saveContext.day > 28) {
         currentMatchState.saveContext.day = 1;
         currentMatchState.saveContext.month += 1;
-        if (currentMatchState.saveContext.month > 12) {
+        if (currentMatchState.saveContext.month > MONTHS_PER_YEAR) {
             currentMatchState.saveContext.month = 1;
             currentMatchState.saveContext.year += 1;
+            if (typeof recalculateSeasonData === 'function') {
+                recalculateSeasonData(currentMatchState.saveContext);
+            }
         }
     }
 
