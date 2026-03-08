@@ -159,6 +159,15 @@ function renderRoster() {
                 menu.style.left = `${leftPos}px`;
                 menu.style.top = `${Math.max(10, topPos)}px`;
 
+                // Bind View Details
+                const viewDetailsBtn = document.getElementById('contextViewDetailsBtn');
+                if (viewDetailsBtn) {
+                    viewDetailsBtn.onclick = () => {
+                        menu.classList.add('hidden');
+                        openGladiatorDetails(glad);
+                    };
+                }
+
                 // Bind sell logic
                 sellBtn.onclick = () => {
                     const rosterIndex = saveContext.roster.findIndex(g => g.id === glad.id);
@@ -217,6 +226,81 @@ function renderRoster() {
 
     renderCalendar(saveContext);
     renderStandings(saveContext);
+}
+
+function openGladiatorDetails(glad) {
+    const modal = document.getElementById('gladiatorDetailsModal');
+    if (!modal) return;
+
+    // Portrait
+    const portraitEl = document.getElementById('detailsPortrait');
+    if (portraitEl) {
+        portraitEl.innerHTML = glad.portrait
+            ? `<img src="${glad.portrait}" alt="${glad.name}" />`
+            : `<div style="width:100%;height:100%;background:#333;display:flex;align-items:center;justify-content:center;color:#666;font-size:2rem;">?</div>`;
+    }
+
+    // Class badge
+    const classEl = document.getElementById('detailsClass');
+    if (classEl) {
+        classEl.textContent = glad.class;
+        classEl.className = `glad-class ${glad.class.toLowerCase()}`;
+    }
+
+    // Name & Surname
+    document.getElementById('detailsName').textContent = glad.name;
+    document.getElementById('detailsSurname').textContent = glad.surname || '';
+
+    // HP Bar
+    const maxHp = glad.maxHp || calculateMaxHp(glad);
+    const currentHp = glad.hp !== undefined ? glad.hp : maxHp;
+    const hpPercent = Math.max(0, Math.floor((currentHp / maxHp) * 100));
+    document.getElementById('detailsHpFill').style.width = `${hpPercent}%`;
+    document.getElementById('detailsHpText').textContent = `${currentHp} / ${maxHp}`;
+
+    // Battles
+    const battlesEl = document.getElementById('detailsBattles');
+    if (battlesEl) {
+        battlesEl.textContent = glad.battles > 0 ? `⚔️ ${glad.battles} battle${glad.battles !== 1 ? 's' : ''} fought` : '🛡️ No battles yet';
+    }
+
+    // Stats with animated bars
+    const statsContainer = document.getElementById('detailsStats');
+    const stats = [
+        { key: 'str', label: 'STR', value: glad.stats.str },
+        { key: 'dex', label: 'DEX', value: glad.stats.dex },
+        { key: 'int', label: 'INT', value: glad.stats.int },
+        { key: 'wis', label: 'WIS', value: glad.stats.wis },
+        { key: 'con', label: 'CON', value: glad.stats.con || 25 }
+    ];
+
+    statsContainer.innerHTML = stats.map(s => `
+        <div class="stat-bar-row">
+            <span class="stat-bar-label">${s.label}</span>
+            <div class="stat-bar-track">
+                <div class="stat-bar-fill ${s.key}" style="width: 0%" data-target="${s.value}"></div>
+            </div>
+            <span class="stat-bar-value">${s.value}</span>
+        </div>
+    `).join('');
+
+    // Show modal
+    modal.classList.remove('hidden');
+
+    // Animate stat bars after a tiny delay so the CSS transition fires
+    requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+            statsContainer.querySelectorAll('.stat-bar-fill').forEach(bar => {
+                bar.style.width = `${bar.getAttribute('data-target')}%`;
+            });
+        });
+    });
+
+    // Close handlers
+    document.getElementById('closeDetailsBtn').onclick = () => modal.classList.add('hidden');
+    modal.onclick = (e) => {
+        if (e.target === modal) modal.classList.add('hidden');
+    };
 }
 
 function renderCalendar(saveContext) {
@@ -478,7 +562,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (saveContext.gold >= 500) {
                 saveContext.gold -= 500;
-                saveContext.roster.push(generateGladiator());
+                const newGladiator = generateGladiator();
+                saveContext.roster.push(newGladiator);
                 localStorage.setItem('gladiatorSaveContext', JSON.stringify(saveContext));
 
                 // Update gold display and re-render roster
@@ -488,6 +573,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (typeof setupAdvanceTimeBtn === 'function') {
                     setupAdvanceTimeBtn();
                 }
+
+                // Show the new recruit's details
+                openGladiatorDetails(newGladiator);
             } else {
                 recruitBtn.style.animation = 'shake 0.5s';
                 setTimeout(() => recruitBtn.style.animation = '', 500);
