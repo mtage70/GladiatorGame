@@ -132,8 +132,39 @@ function initializeMatchScreen(saveContext) {
             return scoreB - scoreA;
         });
 
-        // Pick top 5 gladiators
-        let activeFighters = sortedRoster.slice(0, 5);
+        // Pick a diverse top 5 gladiators
+        let activeFighters = [];
+        let pool = [...sortedRoster];
+
+        // Define roles to ensure variety
+        const roles = [
+            ['Warrior', 'Paladin'], // Tanks
+            ['Mage', 'Cleric'],    // Support/Backline
+            ['Rogue', 'Hunter']    // Damage
+        ];
+
+        // 1. Try to pick the best of each role first
+        roles.forEach(roleClasses => {
+            const bestInRoleIdx = pool.findIndex(g => roleClasses.includes(g.class));
+            if (bestInRoleIdx !== -1 && bestInRoleIdx < 6) { // Only if reasonably good
+                activeFighters.push(pool.splice(bestInRoleIdx, 1)[0]);
+            }
+        });
+
+        // 2. Try to pick the best of any class not already represented
+        pool.forEach((g, index) => {
+            if (activeFighters.length < 5) {
+                const alreadyHasClass = activeFighters.some(af => af.class === g.class);
+                if (!alreadyHasClass) {
+                    activeFighters.push(pool.splice(index, 1)[0]);
+                }
+            }
+        });
+
+        // 3. Fill remaining with best available
+        while (activeFighters.length < 5 && pool.length > 0) {
+            activeFighters.push(pool.shift());
+        }
 
         // Separate them into Tanks vs Squishies
         // Clerics and Mages are inherently squishy backliners. Warriors/Paladins are tanks.
@@ -232,7 +263,40 @@ function autoFillPlayerFormation() {
         return scoreB - scoreA;
     });
 
-    let activeFighters = sortedRoster.slice(0, 5);
+    // Pick a diverse top 5 gladiators (mirroring the improved AI logic)
+    let activeFighters = [];
+    let pool = [...sortedRoster];
+
+    // Define roles to ensure variety
+    const roles = [
+        ['Warrior', 'Paladin'], // Tanks
+        ['Mage', 'Cleric'],    // Support/Backline
+        ['Rogue', 'Hunter']    // Damage
+    ];
+
+    // 1. Try to pick the best of each role first (if reasonably strong)
+    roles.forEach(roleClasses => {
+        const bestInRoleIdx = pool.findIndex(g => roleClasses.includes(g.class));
+        if (bestInRoleIdx !== -1 && bestInRoleIdx < 6) {
+            activeFighters.push(pool.splice(bestInRoleIdx, 1)[0]);
+        }
+    });
+
+    // 2. Try to pick the best of any class not already represented
+    pool.forEach((g, index) => {
+        if (activeFighters.length < 5) {
+            const alreadyHasClass = activeFighters.some(af => af.class === g.class);
+            if (!alreadyHasClass) {
+                const found = pool.splice(index, 1)[0];
+                if (found) activeFighters.push(found);
+            }
+        }
+    });
+
+    // 3. Fill remaining with best available
+    while (activeFighters.length < 5 && pool.length > 0) {
+        activeFighters.push(pool.shift());
+    }
 
     let tanks = [];
     let squishies = [];
