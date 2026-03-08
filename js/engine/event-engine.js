@@ -270,7 +270,12 @@ const EventEngine = {
         const newsItem = document.createElement('div');
         newsItem.className = 'news-item-rich';
 
-        // Use a color vibe if possible
+        // Apply team-colored border
+        if (team && team.primaryColor) {
+            newsItem.style.borderLeftColor = team.primaryColor;
+        }
+
+        // Use a color vibe if possible (now secondary to team color if specified)
         if (outcome.hp && outcome.hp < 0) newsItem.classList.add('news-negative');
         if (outcome.hp && outcome.hp > 0) newsItem.classList.add('news-positive');
         if (outcome.gold && outcome.gold > 0) newsItem.classList.add('news-gold');

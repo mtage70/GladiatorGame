@@ -51,12 +51,12 @@ function setupCombatControls() {
             const combatScreen = document.getElementById('combatScreen');
             if (combatState.timeMultiplier === 1) {
                 combatState.timeMultiplier = 5;
-                ffBtn.textContent = '1x Speed';
+                ffBtn.textContent = 'SLOW';
                 ffBtn.classList.add('active');
                 if (combatScreen) combatScreen.style.setProperty('--combat-speed', '5');
             } else {
                 combatState.timeMultiplier = 1;
-                ffBtn.textContent = '5x Speed';
+                ffBtn.textContent = 'FAST';
                 ffBtn.classList.remove('active');
                 if (combatScreen) combatScreen.style.setProperty('--combat-speed', '1');
             }
@@ -877,6 +877,13 @@ function finishCombatTransition() {
 
         const newsItem = document.createElement('div');
         newsItem.className = 'news-item';
+
+        // Find player team color
+        const playerTeam = TEAMS.find(t => t.id === combatState.saveContext.teamId);
+        if (playerTeam && playerTeam.primaryColor) {
+            newsItem.style.borderLeftColor = playerTeam.primaryColor;
+        }
+
         if (isCup && lastResult.won) {
             newsItem.style.borderLeft = '4px solid gold';
             newsItem.style.background = 'rgba(255, 215, 0, 0.1)';
@@ -920,7 +927,15 @@ function finishCombatTransition() {
                 if (newsList) {
                     const deathEntry = document.createElement('div');
                     deathEntry.className = 'news-item';
-                    deathEntry.style.borderLeftColor = '#ff4444';
+
+                    // Apply player team color to tragedy
+                    const playerTeam = TEAMS.find(t => t.id === combatState.saveContext.teamId);
+                    if (playerTeam && playerTeam.primaryColor) {
+                        deathEntry.style.borderLeftColor = playerTeam.primaryColor;
+                    } else {
+                        deathEntry.style.borderLeftColor = '#ff4444';
+                    }
+
                     deathEntry.innerHTML = `<p><strong>Tragedy</strong>: ${fallenGlad.name} ${fallenGlad.surname} was slain in the arena and did not survive.</p>`;
                     if (newsList.firstChild) {
                         newsList.insertBefore(deathEntry, newsList.firstChild);

@@ -863,7 +863,14 @@ function advanceTime(saveContext) {
                     if (newsList) {
                         const newsItem = document.createElement('div');
                         newsItem.className = 'news-item';
-                        newsItem.style.borderLeft = '4px solid gold';
+
+                        // Use winning AI team color
+                        if (typeof TEAMS !== 'undefined' && winner && winner.team) {
+                            newsItem.style.borderLeftColor = winner.team.primaryColor || 'gold';
+                        } else {
+                            newsItem.style.borderLeft = '4px solid gold';
+                        }
+
                         newsItem.innerHTML = `<p><strong>AOWAN CUP RESULT:</strong> <strong>${winner.team.name}</strong> has defeated ${loser.team.name} to claim the Grand Trophy!</p>`;
                         newsList.insertBefore(newsItem, newsList.firstChild);
                     }
@@ -956,7 +963,19 @@ function finishAdvancing(saveContext, daysAdvanced) {
     if (newsList && daysAdvanced > 0) {
         const newsItem = document.createElement('div');
         newsItem.className = 'news-item';
-        newsItem.style.borderLeftColor = 'var(--color-text-muted)';
+
+        // Use player team color
+        if (typeof TEAMS !== 'undefined' && saveContext.teamId) {
+            const playerTeam = TEAMS.find(t => t.id === saveContext.teamId);
+            if (playerTeam && playerTeam.primaryColor) {
+                newsItem.style.borderLeftColor = playerTeam.primaryColor;
+            } else {
+                newsItem.style.borderLeftColor = 'var(--color-text-muted)';
+            }
+        } else {
+            newsItem.style.borderLeftColor = 'var(--color-text-muted)';
+        }
+
         newsItem.innerHTML = `<p><em>Time passes... Your gladiators trained and rested for ${daysAdvanced} days.</em></p>`;
         newsList.insertBefore(newsItem, newsList.firstChild);
     }
@@ -976,7 +995,19 @@ function startNewSeason(saveContext) {
     if (newsList) {
         const newsItem = document.createElement('div');
         newsItem.className = 'news-item';
-        newsItem.style.borderLeft = '4px solid #4CAF50';
+
+        // Use player team color
+        if (typeof TEAMS !== 'undefined' && saveContext.teamId) {
+            const playerTeam = TEAMS.find(t => t.id === saveContext.teamId);
+            if (playerTeam && playerTeam.primaryColor) {
+                newsItem.style.borderLeftColor = playerTeam.primaryColor;
+            } else {
+                newsItem.style.borderLeftColor = '#4CAF50';
+            }
+        } else {
+            newsItem.style.borderLeftColor = '#4CAF50';
+        }
+
         newsItem.innerHTML = `<p><strong>HAPPY NEW YEAR!</strong> Year ${saveContext.year} has begun. A fresh season of glory awaits!</p>`;
         newsList.insertBefore(newsItem, newsList.firstChild);
     }

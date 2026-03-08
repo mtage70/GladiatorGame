@@ -82,7 +82,19 @@ function simulateLeagueMatches(saveContext, weekIndex) {
     if (newsList) {
         const newsItem = document.createElement('div');
         newsItem.className = 'news-item';
-        newsItem.style.borderLeftColor = 'var(--color-accent-warning)';
+
+        // Apply player team color
+        if (typeof TEAMS !== 'undefined' && saveContext.teamId) {
+            const playerTeam = TEAMS.find(t => t.id === saveContext.teamId);
+            if (playerTeam && playerTeam.primaryColor) {
+                newsItem.style.borderLeftColor = playerTeam.primaryColor;
+            } else {
+                newsItem.style.borderLeftColor = 'var(--color-accent-warning)';
+            }
+        } else {
+            newsItem.style.borderLeftColor = 'var(--color-accent-warning)';
+        }
+
         newsItem.innerHTML = `<p><em>Results for Week ${weekIndex + 1} are in. Check the standings for the latest rankings!</em></p>`;
         newsList.insertBefore(newsItem, newsList.firstChild);
     }

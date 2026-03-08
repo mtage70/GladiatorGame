@@ -592,6 +592,15 @@ function confirmForfeitMatch() {
     if (newsList) {
         const newsItem = document.createElement('div');
         newsItem.className = 'news-item';
+
+        // Apply player team color
+        if (typeof TEAMS !== 'undefined' && currentMatchState.saveContext.teamId) {
+            const playerTeam = TEAMS.find(t => t.id === currentMatchState.saveContext.teamId);
+            if (playerTeam && playerTeam.primaryColor) {
+                newsItem.style.borderLeftColor = playerTeam.primaryColor;
+            }
+        }
+
         newsItem.innerHTML = `<p><strong>Match Result</strong>: Your team forfeited the match. You earned <span style="color:var(--color-gold-primary);">500 G</span>.</p>`;
 
         if (newsList.firstChild) {
