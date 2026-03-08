@@ -317,6 +317,13 @@
     box-shadow: var(--glass-shadow);
     letter-spacing: 1px;
     font-size: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.combat-control-btn .material-icons {
+    font-size: 1.2rem;
 }
 
 .combat-control-btn:hover {

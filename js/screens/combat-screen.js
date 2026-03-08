@@ -37,7 +37,9 @@ function setupCombatControls() {
     if (pauseBtn) {
         pauseBtn.addEventListener('click', () => {
             combatState.isPaused = !combatState.isPaused;
-            pauseBtn.textContent = combatState.isPaused ? 'Resume' : 'Pause';
+            pauseBtn.innerHTML = combatState.isPaused
+                ? '<span class="material-icons">play_arrow</span>'
+                : '<span class="material-icons">pause</span>';
             pauseBtn.classList.toggle('paused', combatState.isPaused);
             if (!combatState.isPaused) {
                 // If we were waiting for a turn, trigger it check
@@ -51,12 +53,12 @@ function setupCombatControls() {
             const combatScreen = document.getElementById('combatScreen');
             if (combatState.timeMultiplier === 1) {
                 combatState.timeMultiplier = 5;
-                ffBtn.textContent = 'SLOW';
+                ffBtn.innerHTML = '<span class="material-icons">fast_forward</span><span style="font-size: 0.6rem; margin-left: 2px;">5X</span>';
                 ffBtn.classList.add('active');
                 if (combatScreen) combatScreen.style.setProperty('--combat-speed', '5');
             } else {
                 combatState.timeMultiplier = 1;
-                ffBtn.textContent = 'FAST';
+                ffBtn.innerHTML = '<span class="material-icons">fast_forward</span>';
                 ffBtn.classList.remove('active');
                 if (combatScreen) combatScreen.style.setProperty('--combat-speed', '1');
             }
@@ -92,11 +94,11 @@ function initializeCombat(playerFormation, opponentFormation, saveContext, oppon
     const pauseBtn = document.getElementById('combatPauseBtn');
     const ffBtn = document.getElementById('combatFastForwardBtn');
     if (pauseBtn) {
-        pauseBtn.textContent = 'Pause';
+        pauseBtn.innerHTML = '<span class="material-icons">pause</span>';
         pauseBtn.classList.remove('paused');
     }
     if (ffBtn) {
-        ffBtn.textContent = 'Fast';
+        ffBtn.innerHTML = '<span class="material-icons">fast_forward</span>';
         ffBtn.classList.remove('active');
     }
 
