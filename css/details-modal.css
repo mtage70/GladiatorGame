@@ -150,9 +150,52 @@
 
 .glad-details-ovr::after {
     content: ' OVR';
-    font-size: 0.7rem;
+    font-size: 0.8rem;
+    opacity: 0.8;
+}
+
+/* Personality Traits */
+.glad-details-traits {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 0.5rem;
+}
+
+.trait-badge {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    padding: 0.5rem 0.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    cursor: help;
+    transition: all var(--transition-fast);
+    min-width: 100px;
+}
+
+.trait-badge:hover {
+    background: rgba(255, 215, 0, 0.1);
+    border-color: var(--color-gold-primary);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.trait-name {
+    color: var(--color-gold-light);
+    font-family: var(--font-title);
+    font-weight: bold;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.trait-category {
     color: var(--color-text-muted);
-    letter-spacing: 1px;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    font-weight: 600;
 }
 
 .glad-details-hp {
@@ -257,4 +300,38 @@
 /* Traits placeholder */
 .glad-details-traits {
     min-height: 40px;
+}
+
+/* Trait Detail Modal */
+.trait-detail-modal {
+    position: relative;
+    width: 320px;
+    background: linear-gradient(to bottom, #2a2d36 0%, #1a1c23 100%);
+    border: 2px solid var(--color-gold-primary);
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 24px 72px rgba(0, 0, 0, 0.9);
+    animation: detailsSlideIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.trait-detail-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.trait-name-large {
+    font-family: var(--font-title);
+    font-size: 1.4rem;
+    color: var(--color-gold-light);
+    margin: 0;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.trait-description {
+    color: var(--color-text-main);
+    font-size: 0.95rem;
+    line-height: 1.5;
+    margin: 0.5rem 0 0;
 }

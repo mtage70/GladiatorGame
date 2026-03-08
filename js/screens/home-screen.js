@@ -289,6 +289,33 @@ function openGladiatorDetails(glad) {
         </div>
     `).join('');
 
+    // Traits
+    const traitsContainer = document.getElementById('detailsTraits');
+    if (traitsContainer) {
+        if (glad.traits && glad.traits.length > 0) {
+            traitsContainer.innerHTML = '';
+            glad.traits.forEach(traitId => {
+                const trait = GLADIATOR_TRAITS.find(t => t.id === traitId);
+                if (!trait) return;
+
+                const badge = document.createElement('div');
+                badge.className = 'trait-badge';
+                badge.title = trait.description;
+                badge.innerHTML = `
+                    <span class="trait-name">${trait.name}</span>
+                    <span class="trait-category">${trait.category}</span>
+                `;
+                badge.onclick = (e) => {
+                    e.stopPropagation();
+                    openTraitDetail(trait);
+                };
+                traitsContainer.appendChild(badge);
+            });
+        } else {
+            traitsContainer.innerHTML = '<p style="color: var(--color-text-muted); font-style: italic;">No known personality traits...</p>';
+        }
+    }
+
     // Show modal
     modal.classList.remove('hidden');
 
@@ -322,6 +349,22 @@ function openGladiatorDetails(glad) {
     }
 
     document.getElementById('closeDetailsBtn').onclick = () => modal.classList.add('hidden');
+    modal.onclick = (e) => {
+        if (e.target === modal) modal.classList.add('hidden');
+    };
+}
+
+function openTraitDetail(trait) {
+    const modal = document.getElementById('traitDetailModal');
+    document.getElementById('traitDetailName').textContent = trait.name;
+    document.getElementById('traitDetailCategory').textContent = trait.category;
+    document.getElementById('traitDetailDescription').textContent = trait.description;
+
+    modal.classList.remove('hidden');
+
+    const closeBtn = document.getElementById('closeTraitDetailBtn');
+    closeBtn.onclick = () => modal.classList.add('hidden');
+
     modal.onclick = (e) => {
         if (e.target === modal) modal.classList.add('hidden');
     };

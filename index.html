@@ -456,6 +456,18 @@
         </div>
     </div>
 
+    <!-- Trait Detail Modal -->
+    <div id="traitDetailModal" class="glad-details-overlay hidden" style="z-index: 3000;">
+        <div class="trait-detail-modal">
+            <button id="closeTraitDetailBtn" class="glad-details-close">&times;</button>
+            <div class="trait-detail-content">
+                <span id="traitDetailCategory" class="trait-category"></span>
+                <h2 id="traitDetailName" class="trait-name-large"></h2>
+                <p id="traitDetailDescription" class="trait-description"></p>
+            </div>
+        </div>
+    </div>
+
     <!-- Context Menu Template -->
     <div id="gladiatorContextMenu" class="gladiator-context-menu hidden">
         <div class="menu-header" style="display: flex; justify-content: space-between; align-items: center;">
@@ -473,6 +485,7 @@
     <!-- Data -->
     <script src="js/data/classes.js"></script>
     <script src="js/data/names.js"></script>
+    <script src="js/data/traits.js"></script>
     <script src="js/data/teams.js"></script>
 
     <!-- Utilities -->

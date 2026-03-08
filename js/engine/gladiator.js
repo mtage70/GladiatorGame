@@ -59,6 +59,11 @@ function generateGladiator() {
     }
     const maxHp = calculateMaxHp({ class: charClass, stats: { con } });
 
+    // Assign 1-3 random traits
+    const shuffledTraits = [...GLADIATOR_TRAITS].sort(() => 0.5 - Math.random());
+    const numTraits = Math.floor(Math.random() * 3) + 1;
+    const traits = shuffledTraits.slice(0, numTraits).map(t => t.id);
+
     return {
         id: 'glad_' + Math.random().toString(36).substr(2, 9),
         name: name,
@@ -68,6 +73,7 @@ function generateGladiator() {
         portrait: portrait,
         stats: { str, dex, int, wis, con },
         baseStats: { str, dex, int, wis, con },
+        traits: traits,
         battles: 0,
         maxHp: maxHp,
         hp: maxHp
