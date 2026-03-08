@@ -5,12 +5,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gladiator Manager</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="css/variables.css">
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/main-menu.css">
+    <link rel="stylesheet" href="css/home-screen.css">
+    <link rel="stylesheet" href="css/match-screen.css">
+    <link rel="stylesheet" href="css/combat-screen.css">
+    <link rel="stylesheet" href="css/responsive.css">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#222">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="apple-touch-icon" href="icon-192.png">
+    <link rel="apple-touch-icon" href="assets/icons/icon-192.png">
     <link
         href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Inter:wght@300;400;600&display=swap"
         rel="stylesheet">
@@ -19,7 +26,7 @@
 <body>
 
 
-    <div class="pan-background" id="panBackground" style="background-image: url('colosseum.png');"></div>
+    <div class="pan-background" id="panBackground" style="background-image: url('assets/ui/colosseum.png');"></div>
 
     <div class="main-container" id="mainContainer">
         <header class="game-header">
@@ -59,7 +66,7 @@
     </div>
 
     <!-- Home Screen -->
-    <div id="homeScreen" class="home-screen hidden" style="background-image: url('colosseum_interior.png');">
+    <div id="homeScreen" class="home-screen hidden" style="background-image: url('assets/ui/colosseum_interior.png');">
         <header class="home-header">
             <h2 class="home-title">Gladiator Manager</h2>
             <div class="header-stats">
@@ -420,13 +427,27 @@
         </div>
     </div>
 
-    <!-- Scripts -->
-    <script src="constants.js"></script>
-    <script src="gladiator_generation.js"></script>
-    <script src="home_screen.js"></script>
-    <script src="main_menu.js"></script>
-    <script src="match_screen.js"></script>
-    <script src="combat_screen.js"></script>
+    <!-- Data -->
+    <script src="js/data/classes.js"></script>
+    <script src="js/data/names.js"></script>
+    <script src="js/data/teams.js"></script>
+
+    <!-- Utilities -->
+    <script src="js/utils.js"></script>
+
+    <!-- Engine -->
+    <script src="js/engine/gladiator.js"></script>
+    <script src="js/engine/season.js"></script>
+
+    <!-- UI Components -->
+    <script src="js/ui/components.js"></script>
+    <script src="js/ui/audio.js"></script>
+
+    <!-- Screens -->
+    <script src="js/screens/home-screen.js"></script>
+    <script src="js/screens/main-menu.js"></script>
+    <script src="js/screens/match-screen.js"></script>
+    <script src="js/screens/combat-screen.js"></script>
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {

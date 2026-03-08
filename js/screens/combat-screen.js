@@ -54,10 +54,10 @@ function initializeCombat(playerFormation, opponentFormation, saveContext, oppon
 
     // Set dynamic combat background
     if (isCup) {
-        combatScreen.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('colosseum.png')`;
+        combatScreen.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('assets/ui/colosseum.png')`;
     } else {
         const arenaId = isHome ? saveContext.teamId : opponentTeamInfo.id;
-        combatScreen.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('arenas/arena_${arenaId}.png')`;
+        combatScreen.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('assets/arenas/arena_${arenaId}.png')`;
     }
     combatScreen.style.backgroundSize = 'cover';
     combatScreen.style.backgroundPosition = 'center bottom';
@@ -154,46 +154,14 @@ function setupCombatant(glad, side) {
     glad.baseDamage = Math.floor(primaryStat * damageScale);
 }
 
-// Utility function to build the square formation widget (used here and in Match Prep)
-function buildSquareGladiatorCard(glad, prefix = '') {
-    let portraitImg = glad.portrait ? `<img src="${glad.portrait}" alt="portrait" style="width:100%; height:100%; object-fit:cover; display:block; border-radius:4px;" />` : `<div style="width:100%;height:100%;background:#333;border-radius:4px;"></div>`;
-    const battlesBadge = (glad.battles > 0) ? `<div class="battles-badge">${glad.battles}</div>` : '';
-
-    // We only need maxHp if it's already calculated, otherwise just show stats.
-    const hasHp = glad.hp !== undefined && glad.maxHp !== undefined;
-    const hpPercent = hasHp ? Math.max(0, Math.floor((glad.hp / glad.maxHp) * 100)) : 100;
-
-    // Only show HP text if we're actually in combat and tracking HP
-    const hpHtml = hasHp
-        ? `<div class="hp-text" id="${prefix}hp-text-${glad.id}">${glad.hp} / ${glad.maxHp}</div>`
-        : ``;
-
-    return `
-        ${portraitImg}
-        ${battlesBadge}
-        <div class="combat-card-hover-stats">
-            <div>STR: ${glad.stats.str}</div>
-            <div>DEX: ${glad.stats.dex}</div>
-            <div>INT: ${glad.stats.int}</div>
-            <div>WIS: ${glad.stats.wis}</div>
-            <div>CON: ${glad.stats.con || 25}</div>
-        </div>
-        <div class="combat-card-overlay">
-            <div class="combat-card-name">${glad.name}</div>
-            <div class="hp-bar-container" style="height: 12px;">
-                <div class="hp-fill" id="${prefix}hp-fill-${glad.id}" style="width: ${hpPercent}%"></div>
-                ${hpHtml}
-            </div>
-        </div>
-    `;
-}
+// buildSquareGladiatorCard moved to js/ui/components.js
 
 function renderCombatSide(side) {
     const container = document.getElementById(side === 'player' ? 'combatPlayerTeam' : 'combatOpponentTeam');
 
     // Clear all slots first (set to empty slot graphic)
     const slots = container.querySelectorAll('.formation-slot');
-    slots.forEach(slot => slot.innerHTML = '<img src="empty_slot.png" alt="Empty Slot" style="width:100%;height:100%;object-fit:cover;border-radius:4px;opacity:0.6;">');
+    slots.forEach(slot => slot.innerHTML = '<img src="assets/ui/empty_slot.png" alt="Empty Slot" style="width:100%;height:100%;object-fit:cover;border-radius:4px;opacity:0.6;">');
 
     // Get characters for this side
     const sideCombatants = combatState.combatants.filter(c => c.side === side);
@@ -338,7 +306,7 @@ function executeTurn() {
             projectile.className = 'projectile';
 
             // Adjust dimensions based on the sprite
-            if (imageUrl === 'arrow.png') {
+            if (imageUrl === 'assets/ui/arrow.png') {
                 projectile.style.width = '60px';
                 projectile.style.height = '60px';
             } else {
@@ -616,7 +584,7 @@ function executeTurn() {
                     logCombat(`<strong>${attacker.name}</strong> hurls a <span style="color:#ff8800">Fireball</span> at <strong>${target.name}</strong>, scorching ${totalTargetsCaught} enemies for ${splitDamage} damage each!`);
 
                     // Phase 1: Animate primary fireball
-                    await animateProjectile(attackerCard, targetCard, 'fireball.png', 400);
+                    await animateProjectile(attackerCard, targetCard, 'assets/ui/fireball.png', 400);
 
                     // Phase 2: Damage primary
                     if (targetCard) targetCard.classList.add('taking-damage');
@@ -633,7 +601,7 @@ function executeTurn() {
                     if (splashTargets.length > 0) {
                         const splashAnimations = splashTargets.map(st => {
                             const stCard = document.getElementById(`combatant-${st.id}`);
-                            return animateProjectile(targetCard, stCard, 'fireball.png', 250);
+                            return animateProjectile(targetCard, stCard, 'assets/ui/fireball.png', 250);
                         });
                         await Promise.all(splashAnimations);
                     }
@@ -671,7 +639,7 @@ function executeTurn() {
                     effectAmount = Math.floor(attacker.baseDamage * variance);
 
                     // Phase 1: Animate arrow projectile
-                    await animateProjectile(attackerCard, targetCard, 'arrow.png', 300);
+                    await animateProjectile(attackerCard, targetCard, 'assets/ui/arrow.png', 300);
 
                     if (targetDodged) {
                         showFloatingText(target.id, 'Dodge!', 'dodge');

@@ -1,0 +1,26 @@
+/* === Design Tokens & CSS Variables === */
+:root {
+    --color-bg-base: #0f1014;
+    --color-text-main: #fcfcfc;
+    --color-text-muted: #a3a3a3;
+
+    --team-primary: #3a3f47;
+    --team-secondary: #252830;
+
+    --color-gold-light: #f7d070;
+    --color-gold-primary: #d4af37;
+    --color-gold-dark: #aa8620;
+
+    --color-accent-danger: #e63946;
+    --color-accent-danger-hover: #ff4d5a;
+
+    --glass-bg: rgba(20, 22, 28, 0.4);
+    --glass-border: rgba(255, 255, 255, 0.08);
+    --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+
+    --font-title: 'Cinzel', serif;
+    --font-body: 'Inter', sans-serif;
+
+    --transition-fast: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-medium: 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}

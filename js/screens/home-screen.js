@@ -417,7 +417,7 @@ function transitionToHome() {
 
     const saveContext = JSON.parse(localStorage.getItem('gladiatorSaveContext'));
     if (saveContext && saveContext.teamId) {
-        homeScreen.style.backgroundImage = `url('arenas/arena_${saveContext.teamId}.png')`;
+        homeScreen.style.backgroundImage = `url('assets/arenas/arena_${saveContext.teamId}.png')`;
     }
 
     // Ensure BGM is playing if they click before fanfare ends

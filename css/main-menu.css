@@ -1,0 +1,305 @@
+/* === Main Menu & Team Selection === */
+
+.main-container {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4rem;
+    padding: 3rem 4rem;
+
+    /* Removed glassmorphism panel to let background image shine */
+    background: transparent;
+    border: none;
+    box-shadow: none;
+
+    opacity: 0;
+    transform: translateY(30px);
+    pointer-events: none;
+    transition: opacity 1.5s ease, transform 1.5s ease;
+}
+
+.main-container.show-menu {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+
+.game-header {
+    text-align: center;
+    background: linear-gradient(to bottom, color-mix(in srgb, var(--team-primary) 30%, rgba(58, 63, 71, 0.95)) 0%, color-mix(in srgb, var(--team-secondary) 30%, rgba(37, 40, 48, 0.95)) 100%);
+    border: 2px solid #1a1c23;
+    border-top: 2px solid #505560;
+    border-radius: 8px;
+    padding: 1.5rem 3rem;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.8), inset 0 2px 4px rgba(255, 255, 255, 0.1);
+}
+
+.game-title {
+    font-family: var(--font-title);
+    font-size: 4.5rem;
+    font-weight: 900;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    background: linear-gradient(135deg, var(--color-gold-light) 0%, var(--color-gold-primary) 50%, var(--color-gold-dark) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+    margin-bottom: 0.5rem;
+}
+
+.game-subtitle {
+    font-family: var(--font-body);
+    font-size: 1.1rem;
+    font-weight: 300;
+    letter-spacing: 6px;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+}
+
+.main-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    width: 100%;
+    max-width: 320px;
+}
+
+.menu-btn {
+    position: relative;
+    /* Dark stone block aesthetic merged with team color tint */
+    background: linear-gradient(to bottom, color-mix(in srgb, var(--team-primary) 40%, #3a3f47) 0%, color-mix(in srgb, var(--team-secondary) 40%, #252830) 100%);
+    border: 2px solid #1a1c23;
+    border-top: 2px solid #505560;
+    border-radius: 4px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.6), inset 0 2px 4px rgba(255, 255, 255, 0.1);
+    padding: 1rem 2rem;
+    cursor: pointer;
+    overflow: hidden;
+    transition: all var(--transition-fast);
+
+    font-family: var(--font-title);
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: var(--color-text-main);
+    text-transform: uppercase;
+    outline: none;
+}
+
+.menu-btn::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 3px;
+    height: 100%;
+    background-color: var(--color-gold-primary);
+    transform: scaleY(0);
+    transform-origin: bottom;
+    transition: transform var(--transition-medium);
+}
+
+.menu-btn .btn-glow {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at center, rgba(212, 175, 55, 0.2) 0%, transparent 60%);
+    opacity: 0;
+    transition: opacity var(--transition-medium);
+    pointer-events: none;
+}
+
+.menu-btn:hover {
+    /* Slightly lighter stone on hover */
+    background: linear-gradient(to bottom, #4a505a 0%, #30343e 100%);
+    border-top: 2px solid #656b78;
+    border-color: #1a1c23;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.8), inset 0 2px 4px rgba(255, 255, 255, 0.15);
+}
+
+.menu-btn:hover::before {
+    transform: scaleY(1);
+}
+
+.menu-btn:hover .btn-glow {
+    opacity: 1;
+}
+
+.menu-btn:active {
+    transform: translateY(2px);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.8), inset 0 4px 8px rgba(0, 0, 0, 0.4);
+    border-top: 2px solid #1a1c23;
+}
+
+/* Primary btn styling (New Game) */
+.menu-btn.primary {
+    background: linear-gradient(to bottom, #45402f 0%, #2a261a 100%);
+    border: 2px solid #1a1810;
+    border-top: 2px solid #6b6449;
+    color: var(--color-gold-light);
+}
+
+.menu-btn.primary:hover {
+    background: linear-gradient(to bottom, #5a543e 0%, #383321 100%);
+    border-top: 2px solid #857e5b;
+    border-color: #1a1810;
+    color: #fff;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.8), inset 0 2px 4px rgba(255, 255, 255, 0.15), 0 0 15px rgba(212, 175, 55, 0.2);
+}
+
+.menu-btn.primary::before {
+    background-color: var(--color-gold-light);
+    width: 4px;
+}
+
+/* Danger btn styling (Exit) */
+.menu-btn.danger {
+    background: linear-gradient(to bottom, #4a2f32 0%, #2a1a1d 100%);
+    border: 2px solid #1a1012;
+    border-top: 2px solid #70474b;
+}
+
+.menu-btn.danger:hover {
+    background: linear-gradient(to bottom, #5f3c40 0%, #382226 100%);
+    border-top: 2px solid #8e5a5e;
+    border-color: #1a1012;
+    color: #fff;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.8), inset 0 2px 4px rgba(255, 255, 255, 0.15), 0 0 15px rgba(230, 57, 70, 0.2);
+}
+
+.menu-btn.danger:hover::before {
+    background-color: var(--color-accent-danger);
+}
+
+/* Animations */
+@keyframes fade-in-up {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Stagger button animations on load */
+.menu-btn {
+    opacity: 0;
+}
+
+.main-container.show-menu .menu-btn {
+    animation: fade-in-up 0.6s var(--transition-medium) forwards;
+}
+
+.main-container.show-menu .menu-btn:nth-child(1) {
+    animation-delay: 0.2s;
+}
+
+.main-container.show-menu .menu-btn:nth-child(2) {
+    animation-delay: 0.3s;
+}
+
+.main-container.show-menu .menu-btn:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+.main-container.show-menu .menu-btn:nth-child(4) {
+    animation-delay: 0.5s;
+}
+
+/* Start Overlay */
+.start-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(15, 16, 20, 0.7);
+    color: var(--color-gold-light);
+    font-family: var(--font-title);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+    cursor: pointer;
+    transition: opacity 1s ease;
+    backdrop-filter: blur(4px);
+}
+
+.start-overlay h2 {
+    font-size: 2rem;
+    letter-spacing: 4px;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 0.3;
+    }
+
+    50% {
+        opacity: 1;
+    }
+}
+
+.start-overlay.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* Team Selection Screen */
+.team-selection-screen {
+    position: absolute;
+    inset: 0;
+    z-index: 20;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2rem;
+    padding: 2rem;
+    background: rgba(15, 16, 20, 0.85);
+    opacity: 1;
+    transition: opacity var(--transition-medium);
+}
+
+.team-selection-screen.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.team-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+    max-width: 900px;
+    width: 100%;
+}
+
+.team-btn {
+    background: linear-gradient(to bottom, #2a2d36 0%, #1a1c23 100%);
+    border: 2px solid #505560;
+    border-radius: 8px;
+    padding: 1rem 1.5rem;
+    cursor: pointer;
+    text-align: left;
+    transition: all var(--transition-fast);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.6);
+}
+
+.team-btn:hover {
+    background: linear-gradient(to bottom, #3a3f47 0%, #252830 100%);
+    border-color: var(--color-gold-primary);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.8), 0 0 15px rgba(212, 175, 55, 0.2);
+}
+
+.team-btn h3 {
+    font-family: var(--font-title);
+    font-size: 1.25rem;
+    color: var(--color-gold-light);
+    margin-bottom: 0.25rem;
+}
+
+.team-btn p {
+    font-size: 0.9rem;
+    color: var(--color-text-muted);
+}

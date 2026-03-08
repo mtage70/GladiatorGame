@@ -69,9 +69,9 @@ function initializeMatchScreen(saveContext) {
 
     // Set dynamic match background
     if (isCup) {
-        matchScreen.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('colosseum.png')`;
+        matchScreen.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('assets/ui/colosseum.png')`;
     } else {
-        matchScreen.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('arenas/arena_${arenaTeamId}.png')`;
+        matchScreen.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('assets/arenas/arena_${arenaTeamId}.png')`;
     }
     matchScreen.style.backgroundSize = 'cover';
     matchScreen.style.backgroundPosition = 'center bottom';
@@ -282,7 +282,7 @@ function renderOpponentFormation() {
     const slots = document.getElementById('opponentFormation').querySelectorAll('.formation-slot');
     slots.forEach((slot, index) => {
         const glad = currentMatchState.opponentFormation[index];
-        slot.innerHTML = glad ? buildGladiatorCardSmall(glad, 'opponent') : '<img src="empty_slot.png" alt="Empty Slot" style="width:100%;height:100%;object-fit:cover;border-radius:4px;opacity:0.6;">';
+        slot.innerHTML = glad ? buildGladiatorCardSmall(glad, 'opponent') : '<img src="assets/ui/empty_slot.png" alt="Empty Slot" style="width:100%;height:100%;object-fit:cover;border-radius:4px;opacity:0.6;">';
     });
 }
 
@@ -308,7 +308,7 @@ function renderPlayerFormation() {
     const slots = document.getElementById('playerFormation').querySelectorAll('.formation-slot');
     slots.forEach((slot, index) => {
         const glad = currentMatchState.playerFormation[index];
-        slot.innerHTML = glad ? buildGladiatorCardSmall(glad, 'player') : '<img src="empty_slot.png" alt="Empty Slot" style="width:100%;height:100%;object-fit:cover;border-radius:4px;opacity:0.6;">';
+        slot.innerHTML = glad ? buildGladiatorCardSmall(glad, 'player') : '<img src="assets/ui/empty_slot.png" alt="Empty Slot" style="width:100%;height:100%;object-fit:cover;border-radius:4px;opacity:0.6;">';
 
         slot.onclick = () => {
             if (currentMatchState.playerFormation[index]) {
@@ -447,50 +447,7 @@ function renderMatchRoster() {
     });
 }
 
-function buildGladiatorCardSmall(glad, side = 'player') {
-    // We now share the same widget builder as the Combat Screen
-    let innerContent = '';
-    if (typeof buildSquareGladiatorCard === 'function') {
-        innerContent = buildSquareGladiatorCard(glad, 'match-');
-    } else {
-        // Fallback if combat script isn't loaded for some reason
-        let portraitImg = '';
-        if (glad.portrait) {
-            const battlesBadge = (glad.battles > 0) ? `<div class="battles-badge-small" style="position:absolute; bottom:-4px; right:-4px; background:var(--color-accent-danger); border-radius:50%; width:14px; height:14px; font-size:9px; display:flex; align-items:center; justify-content:center;">${glad.battles}</div>` : '';
-            portraitImg = `<div style="position:relative;display:inline-block;"><img src="${glad.portrait}" style="width: 48px; border-radius: 4px; margin-bottom: 5px; display:block;" />${battlesBadge}</div>`;
-        }
-        innerContent = `
-            <div style="text-align: center; font-size: 0.8rem; height: 100%; display: flex; flex-direction: column; justify-content: center;">
-                ${portraitImg}
-                <span class="glad-class ${glad.class.toLowerCase()}" style="font-size: 0.7rem; padding: 1px 4px; margin: 4px 0;">${glad.class.substring(0, 3).toUpperCase()}</span>
-                <div>${glad.name.substring(0, 10)}</div>
-            </div>
-        `;
-    }
-
-    const borderColor = side === 'opponent' ? currentMatchState.opponentTeam.primaryColor : 'var(--team-primary)';
-    return `<div class="combatant-card full-slot" style="border-color: ${borderColor};">${innerContent}</div>`;
-}
-
-// Ensure the standard card function is available or duplicated here temporarily if not globally accessible
-function buildGladiatorCardMarkup(glad) {
-    let portraitImg = '';
-    if (glad.portrait) {
-        portraitImg = `<img src="${glad.portrait}" class="gladiator-portrait" />`;
-    }
-    return `
-        ${portraitImg}
-        <span class="glad-class ${glad.class.toLowerCase()}" style="font-size: 0.8rem; margin: 4px auto;">${glad.class}</span>
-        <div class="gladiator-name">${glad.name}</div>
-        <div class="gladiator-name" style="font-size:0.8rem">${glad.surname}</div>
-        <div class="gladiator-stats">
-            <span>💪 ${glad.stats.str}</span>
-            <span>🏃 ${glad.stats.dex}</span>
-            <span>🧠 ${glad.stats.int}</span>
-            <span>✨ ${glad.stats.wis}</span>
-        </div>
-                `;
-}
+// buildGladiatorCardSmall and buildGladiatorCardMarkup moved to js/ui/components.js
 
 function startCombat() {
     // Validate formation

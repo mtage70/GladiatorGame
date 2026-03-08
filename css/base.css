@@ -1,0 +1,47 @@
+/* === Reset & Base Styles === */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: var(--color-bg-base);
+    color: var(--color-text-main);
+    font-family: var(--font-body);
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    position: relative;
+    /* Adding a subtle radial gradient to simulate dark arena lighting */
+    background: radial-gradient(circle at 50% 50%, #2a2d36 0%, #0f1014 100%);
+}
+
+.pan-background {
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center 0%;
+    background-repeat: no-repeat;
+    z-index: 1;
+}
+
+.pan-background.animate-pan {
+    animation: panDown 6s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
+}
+
+@keyframes panDown {
+    0% {
+        background-position: center 0%;
+    }
+
+    100% {
+        background-position: center 100%;
+    }
+}
+
+.hidden {
+    display: none !important;
+}

@@ -1,0 +1,210 @@
+/* === Match Screen === */
+.match-screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    padding: 1rem;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(15, 16, 20, 0.85);
+    box-sizing: border-box;
+}
+
+.match-screen.hidden {
+    display: none !important;
+}
+
+.match-header {
+    text-align: center;
+}
+
+.match-header h2 {
+    color: var(--color-accent-danger);
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+}
+
+.match-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 2rem;
+}
+
+.team-side {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 400px;
+}
+
+.versus-divider {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+
+.versus-divider h1 {
+    font-size: 4rem;
+    color: var(--color-text-title);
+    text-shadow: 2px 2px 8px #000;
+}
+
+.cup-title-special {
+    color: var(--color-gold-light);
+    font-size: 2.5rem;
+    line-height: 1.1;
+    text-shadow: 0 0 20px gold, 0 0 10px rgba(0, 0, 0, 0.8);
+    letter-spacing: 6px;
+}
+
+@media (max-width: 600px) {
+    .cup-title-special {
+        font-size: 1.8rem !important;
+        letter-spacing: 4px;
+    }
+}
+
+/* Formation Grid (shared between Match & Combat) */
+.formation-grid {
+    display: grid;
+    grid-template-columns: repeat(3, max-content);
+    justify-content: center;
+    grid-gap: 2rem;
+    margin-top: 1rem;
+    width: 100%;
+}
+
+/* Place slots in a 2-3 somewhat staggered formation pattern using grid layout */
+.formation-slot:nth-child(1) {
+    grid-column: 2;
+    grid-row: 1;
+}
+
+.formation-slot:nth-child(2) {
+    grid-column: 1;
+    grid-row: 2;
+}
+
+.formation-slot:nth-child(3) {
+    grid-column: 3;
+    grid-row: 2;
+}
+
+.formation-slot:nth-child(4) {
+    grid-column: 2;
+    grid-row: 3;
+}
+
+.formation-slot:nth-child(5) {
+    grid-column: 2;
+    grid-row: 2;
+}
+
+/* Center slot */
+
+.formation-slot {
+    width: 150px;
+    height: 200px;
+    background: rgba(0, 0, 0, 0.4);
+    border: 2px dashed var(--color-text-muted);
+    border-radius: 4px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: var(--transition-speed);
+}
+
+.formation-slot:hover {
+    border-color: var(--color-accent-primary);
+    background: rgba(42, 63, 84, 0.3);
+}
+
+.formation-slot.next-slot-highlight {
+    border-color: var(--color-gold-primary) !important;
+    background: rgba(212, 175, 55, 0.15) !important;
+    box-shadow: 0 0 12px rgba(212, 175, 55, 0.5), inset 0 0 8px rgba(212, 175, 55, 0.2);
+    animation: pulse-slot 1s ease-in-out infinite;
+}
+
+@keyframes pulse-slot {
+
+    0%,
+    100% {
+        box-shadow: 0 0 8px rgba(212, 175, 55, 0.4), inset 0 0 6px rgba(212, 175, 55, 0.1);
+    }
+
+    50% {
+        box-shadow: 0 0 18px rgba(212, 175, 55, 0.8), inset 0 0 12px rgba(212, 175, 55, 0.3);
+    }
+}
+
+/* Match Screen overrides for formation slots */
+.match-screen .formation-slot {
+    border: none;
+    background: transparent;
+    position: relative;
+}
+
+/* Gladiator Card (horizontal) for match prep roster */
+.gladiator-card-horizontal {
+    display: flex;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid var(--color-text-muted);
+    border-radius: 4px;
+    padding: 0.5rem;
+    cursor: pointer;
+    transition: var(--transition-speed);
+    gap: 1rem;
+}
+
+.gladiator-card-horizontal:hover {
+    border-color: var(--color-accent-primary);
+    background: rgba(42, 63, 84, 0.3);
+}
+
+.gladiator-card-horizontal img {
+    height: 48px;
+    width: 48px;
+    border-radius: 4px;
+    object-fit: cover;
+}
+
+.gladiator-card-horizontal .info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.gladiator-card-horizontal .info .glad-class {
+    align-self: flex-start;
+}
+
+.gladiator-card-horizontal .stats {
+    font-size: 0.8rem;
+    display: flex;
+    gap: 0.5rem;
+    color: var(--color-text-body);
+}
+
+.gladiator-card-horizontal.assigned {
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+.gladiator-list-vertical {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding-right: 0.5rem;
+}
