@@ -356,6 +356,18 @@ function renderOpponentFormation() {
     slots.forEach((slot, index) => {
         const glad = currentMatchState.opponentFormation[index];
         slot.innerHTML = glad ? buildGladiatorCardSmall(glad, 'opponent') : '<img src="assets/ui/empty_slot.png" alt="Empty Slot" style="width:100%;height:100%;object-fit:cover;border-radius:4px;opacity:0.6;">';
+
+        if (glad) {
+            slot.style.cursor = 'pointer';
+            slot.onclick = () => {
+                if (typeof openGladiatorDetails === 'function') {
+                    openGladiatorDetails(glad);
+                }
+            };
+        } else {
+            slot.style.cursor = 'default';
+            slot.onclick = null;
+        }
     });
 }
 

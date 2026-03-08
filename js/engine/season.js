@@ -400,7 +400,7 @@ function simulateLeagueMatches(saveContext, weekIndex) {
                 wis: Math.min(99, glad.baseStats.wis + b),
                 con: Math.min(99, glad.baseStats.con + b)
             };
-            glad.maxHp = Math.floor(50 + (glad.stats.con * 2));
+            glad.maxHp = calculateMaxHp({ class: glad.class, stats: { con: glad.stats.con } });
 
             // Survivors get HP set to 1 if they were knocked out
             if (!c.isDead && glad.hp <= 0) {

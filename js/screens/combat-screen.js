@@ -31,25 +31,34 @@ let combatState = {
 
 // Initialize Combat Controls
 function setupCombatControls() {
+    setupPauseBtn();
+    setupFFBtn();
+}
+
+function setupPauseBtn() {
     const pauseBtn = document.getElementById('combatPauseBtn');
-    const ffBtn = document.getElementById('combatFastForwardBtn');
-
     if (pauseBtn) {
-        pauseBtn.addEventListener('click', () => {
+        pauseBtn.onclick = () => {
             combatState.isPaused = !combatState.isPaused;
-            pauseBtn.innerHTML = combatState.isPaused
-                ? '<span class="material-icons">play_arrow</span>'
-                : '<span class="material-icons">pause</span>';
-            pauseBtn.classList.toggle('paused', combatState.isPaused);
-            if (!combatState.isPaused) {
-                // If we were waiting for a turn, trigger it check
-                // (Though the wait function handles the loop)
-            }
-        });
+            updatePauseBtnUI();
+        };
     }
+}
 
+function updatePauseBtnUI() {
+    const pauseBtn = document.getElementById('combatPauseBtn');
+    if (pauseBtn) {
+        pauseBtn.innerHTML = combatState.isPaused
+            ? '<span class="material-icons">play_arrow</span>'
+            : '<span class="material-icons">pause</span>';
+        pauseBtn.classList.toggle('paused', combatState.isPaused);
+    }
+}
+
+function setupFFBtn() {
+    const ffBtn = document.getElementById('combatFastForwardBtn');
     if (ffBtn) {
-        ffBtn.addEventListener('click', () => {
+        ffBtn.onclick = () => {
             const combatScreen = document.getElementById('combatScreen');
             if (combatState.timeMultiplier === 1) {
                 combatState.timeMultiplier = 5;
@@ -62,9 +71,27 @@ function setupCombatControls() {
                 ffBtn.classList.remove('active');
                 if (combatScreen) combatScreen.style.setProperty('--combat-speed', '1');
             }
-        });
+        };
     }
 }
+
+function resumeCombat() {
+    if (!combatState.isCombatActive) return;
+    combatState.isPaused = false;
+    combatState.timeMultiplier = 1;
+
+    updatePauseBtnUI();
+
+    const ffBtn = document.getElementById('combatFastForwardBtn');
+    if (ffBtn) {
+        ffBtn.innerHTML = '<span class="material-icons">fast_forward</span>';
+        ffBtn.classList.remove('active');
+    }
+
+    const combatScreen = document.getElementById('combatScreen');
+    if (combatScreen) combatScreen.style.setProperty('--combat-speed', '1');
+}
+
 setupCombatControls();
 
 const wait = ms => new Promise(res => {
@@ -285,6 +312,26 @@ function renderCombatSide(side) {
 
         // Use the shared square widget builder
         card.innerHTML = buildSquareGladiatorCard(glad, 'combat-');
+
+        // Add click listener to show details and pause combat
+        card.addEventListener('click', () => {
+            if (!combatState.isCombatActive) return;
+
+            // Pause combat if it's not already paused
+            if (!combatState.isPaused) {
+                combatState.isPaused = true;
+                const pauseBtn = document.getElementById('combatPauseBtn');
+                if (pauseBtn) {
+                    pauseBtn.innerHTML = '<span class="material-icons">play_arrow</span>';
+                    pauseBtn.classList.add('paused');
+                }
+            }
+
+            // Open gladiator details
+            if (typeof openGladiatorDetails === 'function') {
+                openGladiatorDetails(glad);
+            }
+        });
 
         slotDiv.appendChild(card);
     });
@@ -618,14 +665,17 @@ async function executeTurn() {
     if (actionType === 'heal') {
         if (targetCard) targetCard.classList.add('receiving-heal');
 
-        // Apply dampener
-        effectAmount = Math.max(1, Math.floor(effectAmount * (combatState.healingDampener / 100)));
+        // Apply dampener and Wisdom bonus
+        const wisBonus = Math.floor(target.stats.wis / 10);
+        effectAmount = Math.max(1, Math.floor(effectAmount * (combatState.healingDampener / 100)) + wisBonus);
 
         target.hp += effectAmount;
         if (target.hp > target.maxHp) target.hp = target.maxHp;
 
         showFloatingText(target.id, `+${effectAmount}`, 'heal');
-        logCombat(`<strong>${attacker.name}</strong> casts Heal on <strong>${target.name}</strong> for <span style="color:#4caf50">${effectAmount} HP</span>!`);
+        let healMsg = `<strong>${attacker.name}</strong> casts Heal on <strong>${target.name}</strong> for <span style="color:#4caf50">${effectAmount} HP</span>!`;
+        if (wisBonus > 0) healMsg += ` <span style="font-size: 0.8rem; color: var(--color-gold-light);">(+${wisBonus} Wis Bonus)</span>`;
+        logCombat(healMsg);
         updateCombatantUI(target);
 
         // Reduce dampener
@@ -683,15 +733,22 @@ async function executeTurn() {
             const totalTargetsCaught = 1 + splashTargets.length;
             const splitDamage = Math.max(1, Math.floor(effectAmount / totalTargetsCaught));
 
-            logCombat(`<strong>${attacker.name}</strong> hurls a <span style="color:#ff8800">Fireball</span> at <strong>${target.name}</strong>, scorching ${totalTargetsCaught} enemies for ${splitDamage} damage each!`);
+            logCombat(`<strong>${attacker.name}</strong> hurls a <span style="color:#ff8800">Fireball</span> at <strong>${target.name}</strong>, scorching ${totalTargetsCaught} enemies!`);
 
             await animateProjectile(attackerCard, targetCard, 'assets/ui/fireball.png', 400);
 
             if (targetCard) targetCard.classList.add('taking-damage');
-            target.hp -= splitDamage;
-            showFloatingText(target.id, `-${splitDamage}`, 'damage');
+
+            // Intelligence Mitigation
+            const targetMitigation = Math.floor(target.stats.int / 10);
+            const finalTargetDmg = Math.max(1, splitDamage - targetMitigation);
+
+            target.hp -= finalTargetDmg;
+            showFloatingText(target.id, `-${finalTargetDmg}`, 'damage');
             if (applyLethalCheck(target)) {
                 logCombat(`--> <strong>${target.name}</strong> was burned to ashes!`, 'death');
+            } else if (targetMitigation > 0) {
+                logCombat(`   <span style="font-size: 0.8rem; color: #60a5fa;">* <strong>${target.name}</strong> mitigated ${targetMitigation} damage with Intelligence!</span>`);
             }
             updateCombatantUI(target);
 
@@ -706,10 +763,17 @@ async function executeTurn() {
             splashTargets.forEach(st => {
                 const stCard = document.getElementById(`combatant-${st.id}`);
                 if (stCard) stCard.classList.add('taking-damage');
-                st.hp -= splitDamage;
-                showFloatingText(st.id, `-${splitDamage}`, 'damage');
+
+                // Intelligence Mitigation for splash targets
+                const stMitigation = Math.floor(st.stats.int / 10);
+                const finalStDmg = Math.max(1, splitDamage - stMitigation);
+
+                st.hp -= finalStDmg;
+                showFloatingText(st.id, `-${finalStDmg}`, 'damage');
                 if (applyLethalCheck(st)) {
                     logCombat(`--> <strong>${st.name}</strong> was caught in the blast and died!`, 'death');
+                } else if (stMitigation > 0) {
+                    logCombat(`   <span style="font-size: 0.8rem; color: #60a5fa;">* <strong>${st.name}</strong> mitigated ${stMitigation} damage with Intelligence!</span>`);
                 }
                 updateCombatantUI(st);
             });
@@ -1000,7 +1064,7 @@ function finishCombatTransition() {
             con: Math.min(99, glad.baseStats.con + b)
         };
         // Recalculate maxHP from new CON
-        glad.maxHp = Math.floor(50 + (glad.stats.con * 2));
+        glad.maxHp = calculateMaxHp({ class: glad.class, stats: { con: glad.stats.con } });
     });
 
     // Display Casualties Modal if present
@@ -1009,11 +1073,13 @@ function finishCombatTransition() {
         const casualtiesList = document.getElementById('casualtiesList');
         if (casualtiesModal && casualtiesList) {
             casualtiesList.innerHTML = '';
+            casualtiesList.style.display = 'flex';
+            casualtiesList.style.flexWrap = 'wrap';
+            casualtiesList.style.gap = '1rem';
+            casualtiesList.style.justifyContent = 'center';
             permadeaths.forEach(g => {
                 const d = document.createElement('div');
-                d.style.color = 'var(--color-accent-danger)';
-                d.style.marginBottom = '0.5rem';
-                d.textContent = `- ${g.name} ${g.surname} (${g.class})`;
+                d.innerHTML = buildDeceasedGladiatorCard(g);
                 casualtiesList.appendChild(d);
             });
             casualtiesModal.classList.remove('hidden');

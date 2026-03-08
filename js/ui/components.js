@@ -60,3 +60,22 @@ function buildGladiatorCardMarkup(glad) {
         </div>
                 `;
 }
+
+// Card markup for deceased gladiators
+function buildDeceasedGladiatorCard(glad) {
+    let portraitImg = glad.portrait ? `<img src="${glad.portrait}" alt="portrait" style="width:100%; height:100%; object-fit:cover; display:block; border-radius:4px; filter: grayscale(100%);" />` : `<div style="width:100%;height:100%;background:#222;border-radius:4px; display:flex; align-items:center; justify-content:center; color:#555;">RIP</div>`;
+    const battlesBadge = (glad.battles > 0) ? `<div class="battles-badge" style="background: #555; color: #ccc;">${glad.battles}</div>` : '';
+    const ovr = (typeof getPrimaryStat === 'function') ? getPrimaryStat(glad) : '?';
+
+    return `
+        <div class="combatant-card full-slot" style="border-color: #333; filter: grayscale(100%); opacity: 0.8; width: 100px; height: 100px; flex-shrink: 0;">
+            ${portraitImg}
+            <div class="card-ovr-badge ${glad.class.toLowerCase()}">${ovr}</div>
+            ${battlesBadge}
+            <div class="combat-card-overlay">
+                <div class="combat-card-name" style="font-size: 0.7rem;">${glad.name}</div>
+                <div style="font-size: 0.6rem; color: #aaa; text-align: center;">RIP</div>
+            </div>
+        </div>
+    `;
+}

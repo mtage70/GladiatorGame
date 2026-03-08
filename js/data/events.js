@@ -114,7 +114,7 @@ const TRAIT_EVENTS = {
             id: "phlegmatic_ignore",
             title: "Unfazed",
             description: "A rival tried to taunt $NAME. They didn't even look up from their bowl of porridge.",
-            outcome: { wis: 1, news: "$NAME's steady aura calmed the team." }
+            outcome: { teamWide: true, stat: { wis: 1 }, hp: 60, news: "$NAME's steady aura calmed the team." }
         },
         {
             id: "phlegmatic_slow_and_steady",
@@ -180,7 +180,7 @@ const TRAIT_EVENTS = {
             id: "earnest_confession",
             title: "The Honest Truth",
             description: "$NAME confessed they accidentally dented a shield. You appreciate the honesty.",
-            outcome: { news: "$NAME's integrity impressed the roster." }
+            outcome: { stat: { wis: 1 }, news: "$NAME's integrity impressed the roster." }
         },
         {
             id: "earnest_pledge",
@@ -369,7 +369,7 @@ const TRAIT_EVENTS = {
             id: "arrogant_boast",
             title: "Tall Tales",
             description: "$NAME spent the day telling anyone who would listen how they're the best the arena has ever seen.",
-            outcome: { news: "$NAME's ego is reaching new heights." }
+            outcome: { stat: { str: -1, con: -1, wis: -1, int: -1, dex: -1 }, news: "$NAME's ego is reaching new heights." }
         },
         {
             id: "arrogant_clash",
@@ -634,7 +634,7 @@ const TRAIT_EVENTS = {
             id: "precise_anatomy",
             title: "Vital Knowledge",
             description: "$NAME spent hours studying anatomical diagrams, learning exactly where to strike for maximum effect.",
-            outcome: { stat: { int: 1, wis: 1 }, news: "$NAME studied the body's weak points." }
+            outcome: { stat: { dex: 2, int: 1, wis: 1 }, news: "$NAME studied the body's weak points." }
         },
         {
             id: "precise_mending",
@@ -661,7 +661,7 @@ const TRAIT_EVENTS = {
             title: "Weird Idea",
             description: "$NAME suggests we change our defensive formations to something totally illogical.",
             choices: [
-                { text: "Try it", outcome: { chance: 0.5, news: "$NAME's weird formation was a genius move!", alt_news: "The new formation was a disaster." } },
+                { text: "Try it", outcome: { teamWide: true, chance: 0.5, stat: { con: 1 }, news: "$NAME's weird formation was a genius move!", alt_hp: -120, alt_news: "The new formation was a disaster." } },
                 { text: "Reject it", outcome: { news: "You stuck to traditional methods." } }
             ]
         }
@@ -807,7 +807,7 @@ const TRAIT_EVENTS = {
             title: "A Risky Plan",
             description: "$NAME has a complex plan to rig a local minor match to our advantage.",
             choices: [
-                { text: "Agree", outcome: { chance: 0.4, news: "The plan worked! You made a killing.", alt_news: "The authorities caught wind of the scheme!" } },
+                { text: "Agree", outcome: { chance: 0.4, gold: 1000, news: "The plan worked! You made a killing.", alt_news: "The authorities caught wind of the scheme!", alt_gold: -1000 } },
                 { text: "Reject", outcome: { news: "You played it safe." } }
             ]
         }
@@ -986,14 +986,14 @@ const TRAIT_EVENTS = {
         {
             id: "vengeful_scout",
             title: "Old Grudge",
-            description: "$NAME found the person who sold them into slavery and... 'dealt' with them.",
+            description: "$NAME found a person who wronged them in the past and... 'dealt' with them.",
             outcome: { stat: { str: 1, dex: 1 }, news: "$NAME found closure through violence." }
         },
         {
             id: "vengeful_sabotage",
             title: "Get Even",
             description: "$NAME sabotaged the equipment of a gladiator who beat them last season.",
-            outcome: { news: "$NAME's pursuit of revenge is relentless." }
+            outcome: { stat: { str: 1, dex: 1, int: 1, wis: -3 }, news: "$NAME's pursuit of revenge is relentless." }
         },
         {
             id: "vengeful_fire",
@@ -1007,19 +1007,19 @@ const TRAIT_EVENTS = {
             id: "honest_report",
             title: "The Truth Hurts",
             description: "$NAME admitted they were the one who broke the training dummy, even though no one saw.",
-            outcome: { news: "$NAME's honesty is commendable." }
+            outcome: { stat: { wis: 1 }, news: "$NAME's honesty is commendable." }
         },
         {
             id: "honest_witness",
             title: "Pure Testimony",
             description: "$NAME's honest account of a street fight saved a teammate from a jail sentence.",
-            outcome: { news: "$NAME's integrity saved a teammate." }
+            outcome: { teamWide: true, stat: { wis: 1 }, news: "$NAME's integrity saved a teammate." }
         },
         {
             id: "honest_fail",
             title: "Brutal Honesty",
             description: "$NAME told the coach exactly why their new strategy is terrible. It was awkward.",
-            outcome: { news: "$NAME's honesty caused some social tension." }
+            outcome: { teamWide: true, stat: { wis: -1 }, news: "$NAME's honesty caused some social tension." }
         }
     ],
     "deceptive": [
@@ -1133,7 +1133,7 @@ const TRAIT_EVENTS = {
             id: "selfish_glory",
             title: "All Me",
             description: "$NAME hogged the center of the training ring all day, preventing others from practicing.",
-            outcome: { stat: { str: 1 }, news: "$NAME's ego is getting in the way." }
+            outcome: { teamWide: true, stat: { str: -1, con: -1 }, news: "$NAME's ego is getting in the way." }
         },
         {
             id: "selfish_theft",
@@ -1278,7 +1278,7 @@ const TRAIT_EVENTS = {
             id: "gourmet_feast",
             title: "True Flavor",
             description: "$NAME found a rare spice in the market and prepared an amazing meal. Everyone feels great.",
-            outcome: { hp: 300, news: "$NAME's cooking revitalized the team." }
+            outcome: { teamWide: true, hp: 300, news: "$NAME's cooking revitalized the team." }
         },
         {
             id: "gourmet_hunger",

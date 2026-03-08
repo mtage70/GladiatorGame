@@ -30,7 +30,7 @@
 
 .event-header {
     background: linear-gradient(to right, #2a2d35, #1a1c22);
-    padding: 1.5rem 2rem;
+    padding: 0.5rem;
     border-bottom: 1px solid rgba(212, 175, 55, 0.2);
     text-align: center;
 }
@@ -156,6 +156,11 @@
 .outcome-detail-item.gold {
     color: #facc15;
     border-color: rgba(250, 204, 21, 0.3);
+}
+
+.outcome-detail-item.info {
+    color: #60a5fa;
+    border-color: rgba(96, 165, 250, 0.3);
 }
 
 .outcome-detail-icon {

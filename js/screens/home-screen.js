@@ -330,7 +330,15 @@ function openGladiatorDetails(glad) {
 
     // Close handlers
     const detailsSellBtn = document.getElementById('detailsSellBtn');
+    const isCombat = !document.getElementById('combatScreen').classList.contains('hidden');
+    const isMatchPrep = !document.getElementById('matchScreen').classList.contains('hidden');
+
+    const saveContext = JSON.parse(localStorage.getItem('gladiatorSaveContext'));
+    const isPlayerOwned = saveContext && saveContext.roster && saveContext.roster.some(g => g.id === glad.id);
+
     if (detailsSellBtn) {
+        // Only show sell button if player-owned AND not in combat/match-prep screens
+        detailsSellBtn.style.display = (isPlayerOwned && !isCombat && !isMatchPrep) ? 'block' : 'none';
         detailsSellBtn.onclick = () => {
             const saveContext = JSON.parse(localStorage.getItem('gladiatorSaveContext'));
             const rosterIndex = saveContext.roster.findIndex(g => g.id === glad.id);
@@ -348,9 +356,15 @@ function openGladiatorDetails(glad) {
         };
     }
 
-    document.getElementById('closeDetailsBtn').onclick = () => modal.classList.add('hidden');
+    document.getElementById('closeDetailsBtn').onclick = () => {
+        modal.classList.add('hidden');
+        if (typeof resumeCombat === 'function') resumeCombat();
+    };
     modal.onclick = (e) => {
-        if (e.target === modal) modal.classList.add('hidden');
+        if (e.target === modal) {
+            modal.classList.add('hidden');
+            if (typeof resumeCombat === 'function') resumeCombat();
+        }
     };
 }
 
@@ -380,22 +394,7 @@ function renderGraveyard() {
     if (saveContext && saveContext.graveyard && saveContext.graveyard.length > 0) {
         saveContext.graveyard.forEach(glad => {
             const slot = document.createElement('div');
-            slot.className = 'roster-slot filled';
-            slot.style.filter = 'grayscale(100%)';
-
-            const portraitHtml = glad.portrait
-                ? `<div class="glad-portrait"><img src="${glad.portrait}" alt="${glad.name}" /></div>`
-                : `<div class="glad-portrait blank"></div>`;
-
-            const battlesCount = glad.battles || 0;
-            slot.innerHTML = `
-                <div class="glad-info" style="opacity: 0.8;">
-                    ${portraitHtml}
-                    <span class="glad-class ${glad.class.toLowerCase()}">${glad.class}</span>
-                    <span class="glad-name" title="${glad.name}">${glad.name} <br/> <span style="font-size:0.75rem;">(RIP)</span></span>
-                    <span style="font-size:0.8rem; color:var(--color-text-muted); margin-top:2px;">Battles: ${battlesCount}</span>
-                </div>
-            `;
+            slot.innerHTML = buildDeceasedGladiatorCard(glad);
             graveyardGrid.appendChild(slot);
         });
     } else {
@@ -990,6 +989,7 @@ function finishAdvancing(saveContext, daysAdvanced) {
 
     localStorage.setItem('gladiatorSaveContext', JSON.stringify(saveContext));
     renderCalendar(saveContext);
+    renderRoster();
     setupAdvanceTimeBtn();
 }
 
