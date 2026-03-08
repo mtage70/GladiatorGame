@@ -96,7 +96,7 @@ function initializeCombat(playerFormation, opponentFormation, saveContext, oppon
         pauseBtn.classList.remove('paused');
     }
     if (ffBtn) {
-        ffBtn.textContent = '5x Speed';
+        ffBtn.textContent = 'Fast';
         ffBtn.classList.remove('active');
     }
 
@@ -212,10 +212,6 @@ function setupCombatant(glad, side) {
             break;
     }
 
-    // Base damage scaling factor reduced for longer fights
-    // Paladins deal less damage to enforce their role as pure tanks
-    // Rogues deal slightly less base damage but can crit
-    // Hunters deal less damage to offset their free targeting ability
     const damageScale = (glad.class === 'Paladin' || glad.class === 'Rogue') ? 0.7 : 1.0;
     glad.baseDamage = Math.floor(primaryStat * damageScale);
 }

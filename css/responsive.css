@@ -85,10 +85,9 @@ screen and (max-width: 950px) {
     }
 
     #advanceTimeBtn {
-        font-size: 0.85rem !important;
+        font-size: 0.75rem !important;
         padding: 0.4rem !important;
-        white-space: normal;
-        word-wrap: break-word;
+        white-space: nowrap !important;
         line-height: 1.1;
     }
 

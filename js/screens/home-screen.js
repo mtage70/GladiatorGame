@@ -779,7 +779,7 @@ function setupAdvanceTimeBtn() {
             }
         };
     } else {
-        advanceBtn.textContent = "Advance Time";
+        advanceBtn.textContent = "Advance";
         advanceBtn.style.background = ""; // Reset to CSS default class
         advanceBtn.style.borderColor = "";
         advanceBtn.onclick = () => advanceTime(saveContext);
