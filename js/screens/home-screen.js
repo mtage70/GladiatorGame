@@ -247,9 +247,14 @@ function openGladiatorDetails(glad) {
         classEl.className = `glad-class ${glad.class.toLowerCase()}`;
     }
 
-    // Name & Surname
+    // Name, Surname & OVR
     document.getElementById('detailsName').textContent = glad.name;
     document.getElementById('detailsSurname').textContent = glad.surname || '';
+
+    const ovrEl = document.getElementById('detailsOvr');
+    if (ovrEl) {
+        ovrEl.textContent = getPrimaryStat(glad);
+    }
 
     // HP Bar
     const maxHp = glad.maxHp || calculateMaxHp(glad);
@@ -297,6 +302,25 @@ function openGladiatorDetails(glad) {
     });
 
     // Close handlers
+    const detailsSellBtn = document.getElementById('detailsSellBtn');
+    if (detailsSellBtn) {
+        detailsSellBtn.onclick = () => {
+            const saveContext = JSON.parse(localStorage.getItem('gladiatorSaveContext'));
+            const rosterIndex = saveContext.roster.findIndex(g => g.id === glad.id);
+            if (rosterIndex !== -1) {
+                saveContext.roster.splice(rosterIndex, 1);
+                saveContext.gold += 250;
+                localStorage.setItem('gladiatorSaveContext', JSON.stringify(saveContext));
+                renderRoster(); // re-render UI immediately
+
+                if (typeof setupAdvanceTimeBtn === 'function') {
+                    setupAdvanceTimeBtn();
+                }
+            }
+            modal.classList.add('hidden');
+        };
+    }
+
     document.getElementById('closeDetailsBtn').onclick = () => modal.classList.add('hidden');
     modal.onclick = (e) => {
         if (e.target === modal) modal.classList.add('hidden');

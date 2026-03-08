@@ -134,6 +134,27 @@
     font-style: italic;
 }
 
+.glad-details-name-row {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+}
+
+.glad-details-ovr {
+    font-family: var(--font-title);
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--color-gold-light);
+    text-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
+}
+
+.glad-details-ovr::after {
+    content: ' OVR';
+    font-size: 0.7rem;
+    color: var(--color-text-muted);
+    letter-spacing: 1px;
+}
+
 .glad-details-hp {
     margin-top: 0.4rem;
 }

@@ -416,10 +416,18 @@
 
             <!-- Top Section: Portrait + Identity -->
             <div class="glad-details-header">
-                <div class="glad-details-portrait" id="detailsPortrait"></div>
+                <div style="display: flex; flex-direction: column; gap: 0.75rem; align-items: center; flex-shrink: 0;">
+                    <div class="glad-details-portrait" id="detailsPortrait"></div>
+                    <button id="detailsSellBtn" class="action-btn danger-btn"
+                        style="width: 100%; font-size: 0.8rem; padding: 0.5rem; white-space: nowrap;">Sell (250
+                        G)</button>
+                </div>
                 <div class="glad-details-identity">
                     <span class="glad-class" id="detailsClass"></span>
-                    <h2 id="detailsName" class="glad-details-name"></h2>
+                    <div class="glad-details-name-row">
+                        <h2 id="detailsName" class="glad-details-name"></h2>
+                        <span id="detailsOvr" class="glad-details-ovr"></span>
+                    </div>
                     <p id="detailsSurname" class="glad-details-surname"></p>
                     <div class="glad-details-hp">
                         <div class="hp-bar-container" style="height: 14px; width: 100%;">
