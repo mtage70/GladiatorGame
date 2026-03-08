@@ -83,6 +83,10 @@ const EventEngine = {
         choiceContainer.classList.remove('hidden');
         overlay.classList.remove('hidden');
 
+        // Scroll to the top of the popup widget
+        if (modal) modal.scrollTop = 0;
+        if (overlay) overlay.scrollTop = 0;
+
         // Populate Gladiator Info
         if (gladInfo) {
             gladInfo.innerHTML = `
@@ -188,7 +192,11 @@ const EventEngine = {
                 actualGlad.hp = Math.max(0, Math.min(maxHp, (actualGlad.hp || maxHp) + finalOutcome.hp));
 
                 // Death check
-                if (actualGlad.hp <= 0) {
+                let deathChance = 0.30 - (((actualGlad.stats.con || 25) - 25) * 0.003);
+                if (deathChance < 0.10) {
+                    deathChance = 0.10;
+                }
+                if (actualGlad.hp <= 0 && Math.random() < deathChance) {
                     if (glad.isPlayer) {
                         finalOutcome.news += ` ${actualGlad.name} has DIED from their wounds.`;
                         if (!saveContext.graveyard) saveContext.graveyard = [];
@@ -203,37 +211,37 @@ const EventEngine = {
                         else saveContext.opposingRosters[glad.teamId] = roster.filter(g => g.id !== actualGlad.id);
                     }
                 }
-            }
 
-            // Apply Stats
-            if (finalOutcome.stat) {
-                Object.keys(finalOutcome.stat).forEach(s => {
-                    if (actualGlad.stats[s] !== undefined) {
-                        actualGlad.stats[s] = Math.max(1, Math.min(100, actualGlad.stats[s] + finalOutcome.stat[s]));
-                    }
-                });
-            }
-
-            // Recruitment (Player Only)
-            if (finalOutcome.recruit && glad.isPlayer && typeof generateGladiator === 'function') {
-                if (saveContext.roster.length < 10) {
-                    const newGlad = generateGladiator();
-                    saveContext.roster.push(newGlad);
-                    finalOutcome.news += ` ${newGlad.name} has joined your ranks!`;
-                } else {
-                    finalOutcome.news += ` Your roster was full, so the recruit walked away.`;
+                // Apply Stats
+                if (finalOutcome.stat) {
+                    Object.keys(finalOutcome.stat).forEach(s => {
+                        if (actualGlad.stats[s] !== undefined) {
+                            actualGlad.stats[s] = Math.max(1, Math.min(100, actualGlad.stats[s] + finalOutcome.stat[s]));
+                        }
+                    });
                 }
-            }
 
-            // Removal (AI mostly, or player punishment)
-            if (finalOutcome.remove) {
-                if (glad.isPlayer) {
-                    saveContext.roster = saveContext.roster.filter(g => g.id !== actualGlad.id);
-                } else {
-                    const team = saveContext.opposingRosters[glad.teamId];
-                    const roster = team.roster || team;
-                    if (team.roster) team.roster = team.roster.filter(g => g.id !== actualGlad.id);
-                    else saveContext.opposingRosters[glad.teamId] = roster.filter(g => g.id !== actualGlad.id);
+                // Recruitment (Player Only)
+                if (finalOutcome.recruit && glad.isPlayer && typeof generateGladiator === 'function') {
+                    if (saveContext.roster.length < 10) {
+                        const newGlad = generateGladiator();
+                        saveContext.roster.push(newGlad);
+                        finalOutcome.news += ` ${newGlad.name} has joined your ranks!`;
+                    } else {
+                        finalOutcome.news += ` Your roster was full, so the recruit walked away.`;
+                    }
+                }
+
+                // Removal (AI mostly, or player punishment)
+                if (finalOutcome.remove) {
+                    if (glad.isPlayer) {
+                        saveContext.roster = saveContext.roster.filter(g => g.id !== actualGlad.id);
+                    } else {
+                        const team = saveContext.opposingRosters[glad.teamId];
+                        const roster = team.roster || team;
+                        if (team.roster) team.roster = team.roster.filter(g => g.id !== actualGlad.id);
+                        else saveContext.opposingRosters[glad.teamId] = roster.filter(g => g.id !== actualGlad.id);
+                    }
                 }
             }
         }

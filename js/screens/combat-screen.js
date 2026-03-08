@@ -212,8 +212,42 @@ function setupCombatant(glad, side) {
             break;
     }
 
-    const damageScale = (glad.class === 'Paladin' || glad.class === 'Rogue') ? 0.7 : 1.0;
+    const damageScale = 1.0;
     glad.baseDamage = Math.floor(primaryStat * damageScale);
+
+    // Paladin Divine Shield state
+    glad.divineShieldAvailable = (glad.class === 'Paladin');
+    glad.divineShieldActive = false;
+}
+
+/**
+ * Checks if a target should die or if Divine Shield saves them.
+ * Call after reducing target.hp. Returns true if the target died.
+ */
+function applyLethalCheck(target) {
+    if (target.hp <= 0) {
+        // Check for Paladin Divine Shield activation
+        if (target.class === 'Paladin' && target.divineShieldAvailable) {
+            target.hp = 1;
+            target.divineShieldActive = true;
+            target.divineShieldAvailable = false;
+            showFloatingText(target.id, 'Divine Shield!', 'divine');
+            logCombat(`<strong>${target.name}</strong> calls upon <span style="color:#ffd700">Divine Shield</span>! Death is denied until their next turn!`, 'critical');
+            const card = document.getElementById(`combatant-${target.id}`);
+            if (card) card.classList.add('divine-shield');
+            return false; // Not dead
+        }
+        // Check if Divine Shield is already active (absorbs subsequent lethal hits)
+        if (target.divineShieldActive) {
+            target.hp = 1;
+            showFloatingText(target.id, 'Shielded!', 'divine');
+            return false;
+        }
+        target.hp = 0;
+        target.isDead = true;
+        return true; // Died
+    }
+    return false; // Didn't reach 0 HP
 }
 
 // buildSquareGladiatorCard moved to js/ui/components.js
@@ -351,6 +385,15 @@ async function executeTurn() {
     if (attacker.isDead) {
         executeTurn(); // immediately go to next turn
         return;
+    }
+
+    // Consume Divine Shield at the start of the Paladin's turn
+    if (attacker.divineShieldActive) {
+        attacker.divineShieldActive = false;
+        const card = document.getElementById(`combatant-${attacker.id}`);
+        if (card) card.classList.remove('divine-shield');
+        showFloatingText(attacker.id, 'Shield Faded', 'divine-fade');
+        logCombat(`<strong>${attacker.name}</strong>'s <span style="color:#aaa">Divine Shield</span> fades away.`);
     }
 
     setCardActiveState(attacker.id, true);
@@ -645,9 +688,7 @@ async function executeTurn() {
             if (targetCard) targetCard.classList.add('taking-damage');
             target.hp -= splitDamage;
             showFloatingText(target.id, `-${splitDamage}`, 'damage');
-            if (target.hp <= 0) {
-                target.hp = 0;
-                target.isDead = true;
+            if (applyLethalCheck(target)) {
                 logCombat(`--> <strong>${target.name}</strong> was burned to ashes!`, 'death');
             }
             updateCombatantUI(target);
@@ -665,9 +706,7 @@ async function executeTurn() {
                 if (stCard) stCard.classList.add('taking-damage');
                 st.hp -= splitDamage;
                 showFloatingText(st.id, `-${splitDamage}`, 'damage');
-                if (st.hp <= 0) {
-                    st.hp = 0;
-                    st.isDead = true;
+                if (applyLethalCheck(st)) {
                     logCombat(`--> <strong>${st.name}</strong> was caught in the blast and died!`, 'death');
                 }
                 updateCombatantUI(st);
@@ -697,9 +736,7 @@ async function executeTurn() {
                 showFloatingText(target.id, `-${effectAmount}`, 'damage');
                 logCombat(`<strong>${attacker.name}</strong> shoots an arrow at <strong>${target.name}</strong> for ${effectAmount} damage!`);
 
-                if (target.hp <= 0) {
-                    target.hp = 0;
-                    target.isDead = true;
+                if (applyLethalCheck(target)) {
                     logCombat(`--> <strong>${target.name}</strong> was shot down!`, 'death');
                 }
                 updateCombatantUI(target);
@@ -744,9 +781,7 @@ async function executeTurn() {
                 if (targetCard) targetCard.classList.add('taking-damage');
                 target.hp -= splitDamage;
                 showFloatingText(target.id, `-${splitDamage}`, 'damage');
-                if (target.hp <= 0) {
-                    target.hp = 0;
-                    target.isDead = true;
+                if (applyLethalCheck(target)) {
                     logCombat(`--> <strong>${target.name}</strong> has been struck down!`, 'death');
                 }
                 updateCombatantUI(target);
@@ -757,9 +792,7 @@ async function executeTurn() {
                 if (ctCard) ctCard.classList.add('taking-damage');
                 ct.hp -= splitDamage;
                 showFloatingText(ct.id, `-${splitDamage}`, 'damage');
-                if (ct.hp <= 0) {
-                    ct.hp = 0;
-                    ct.isDead = true;
+                if (applyLethalCheck(ct)) {
                     logCombat(`--> <strong>${ct.name}</strong> was caught in the cleave and died!`, 'death');
                 }
                 updateCombatantUI(ct);
@@ -796,9 +829,7 @@ async function executeTurn() {
                     logCombat(`<strong>${attacker.name}</strong> attacks <strong>${target.name}</strong> for ${effectAmount} damage!`);
                 }
 
-                if (target.hp <= 0) {
-                    target.hp = 0;
-                    target.isDead = true;
+                if (applyLethalCheck(target)) {
                     logCombat(`--> <strong>${target.name}</strong> has been struck down!`, 'death');
                 }
 

@@ -19,7 +19,7 @@ function getContrastColor(hexColor) {
 }
 
 function calculateMaxHp(glad) {
-    let baseHp = Math.floor(50 + ((glad.stats.con || 25) * 2));
+    let baseHp = Math.floor(100 + ((glad.stats.con || 25) * 2));
     if (glad.class === 'Warrior') baseHp += 25;
     if (glad.class === 'Paladin') baseHp += 50;
     return baseHp;

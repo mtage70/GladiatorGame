@@ -11,7 +11,7 @@ const TRAIT_EVENTS = {
             id: "stoic_endurance",
             title: "Silent Resilience",
             description: "A heavy beam fell during training, but $NAME simply shrugged it off and kept working. The display of grit impressed the team.",
-            outcome: { hp: 30, news: "$NAME's stoicism boosted team resolve." }
+            outcome: { teamWide: true, hp: 120, news: "$NAME's stoicism boosted team resolve." }
         },
         {
             id: "stoic_meditation",
@@ -31,7 +31,7 @@ const TRAIT_EVENTS = {
             id: "hot_headed_brawl",
             title: "Tavern Scuffle",
             description: "$NAME took offense at a minor comment and started a brawl. They won, but took some bruises.",
-            outcome: { hp: -45, news: "$NAME got into a fight at the local tavern." }
+            outcome: { hp: -50, news: "$NAME got into a fight at the local tavern." }
         },
         {
             id: "hot_headed_risk",
@@ -51,7 +51,7 @@ const TRAIT_EVENTS = {
             id: "jovial_feast",
             title: "Impromptu Celebration",
             description: "$NAME organized a small feast with some hidden wine. Everyone is in high spirits!",
-            outcome: { hp: 60, news: "$NAME's feast raised everyone's spirits." }
+            outcome: { teamWide: true, hp: 240, news: "$NAME's feast raised everyone's spirits." }
         },
         {
             id: "jovial_prank",
@@ -63,7 +63,7 @@ const TRAIT_EVENTS = {
             id: "jovial_bond",
             title: "Hearty Laughter",
             description: "$NAME spent the day telling stories. The camaraderie has never been better.",
-            outcome: { stat: { wis: 1 }, news: "$NAME's stories improved team cohesion." }
+            outcome: { teamWide: true, stat: { wis: 1 }, news: "$NAME's stories improved team cohesion." }
         }
     ],
     "melancholic": [
@@ -71,7 +71,7 @@ const TRAIT_EVENTS = {
             id: "melancholic_poetry",
             title: "Somber Reflections",
             description: "$NAME spent the day writing mournful poetry. It was beautiful, but draining.",
-            outcome: { hp: -15, stat: { int: 2 }, news: "$NAME reflected on the tragedy of the arena." }
+            outcome: { hp: -60, stat: { int: 2 }, news: "$NAME reflected on the tragedy of the arena." }
         },
         {
             id: "melancholic_solitude",
@@ -83,7 +83,7 @@ const TRAIT_EVENTS = {
             id: "melancholic_withdrawal",
             title: "Deep Despair",
             description: "$NAME stayed in their room all day, refusing to eat. They seem physically weaker.",
-            outcome: { hp: -60, news: "$NAME was overcome by a fit of melancholy." }
+            outcome: { hp: -100, news: "$NAME was overcome by a fit of melancholy." }
         }
     ],
     "sanguine": [
@@ -91,7 +91,7 @@ const TRAIT_EVENTS = {
             id: "sanguine_rush",
             title: "Bounding Energy",
             description: "$NAME woke up feeling invincible and ran twice the normal laps. They are brimming with vitality.",
-            outcome: { hp: 90, news: "$NAME's optimism is restorative." }
+            outcome: { hp: 360, news: "$NAME's optimism is restorative." }
         },
         {
             id: "sanguine_investment",
@@ -106,7 +106,7 @@ const TRAIT_EVENTS = {
             id: "sanguine_rebound",
             title: "Always Next Time",
             description: "$NAME failed a drill but insisted they'll get it right tomorrow. Their spirit is infectious.",
-            outcome: { hp: 30, news: "$NAME's positivity boosted the barracks." }
+            outcome: { hp: 120, news: "$NAME's positivity boosted the barracks." }
         }
     ],
     "phlegmatic": [
@@ -126,7 +126,7 @@ const TRAIT_EVENTS = {
             id: "phlegmatic_efficiency",
             title: "Minimum Effort",
             description: "$NAME found the most efficient way to finish their chores, giving them more time for rest.",
-            outcome: { hp: 45, news: "$NAME optimized their rest time." }
+            outcome: { hp: 180, news: "$NAME optimized their rest time." }
         }
     ],
     "volatile": [
@@ -134,13 +134,13 @@ const TRAIT_EVENTS = {
             id: "volatile_high",
             title: "Peak Performance",
             description: "$NAME is in an amazing mood today and is training like a demon.",
-            outcome: { stat: { str: 2 }, hp: -30, news: "$NAME is on a high today." }
+            outcome: { stat: { str: 2 }, news: "$NAME is on a high today." }
         },
         {
             id: "volatile_low",
             title: "The Deep Slump",
             description: "$NAME is in a terrible mood and won't leave their bunk.",
-            outcome: { hp: -75, news: "$NAME is having a rough day emotionally." }
+            outcome: { hp: -100, news: "$NAME is having a rough day emotionally." }
         },
         {
             id: "volatile_outburst",
@@ -174,7 +174,7 @@ const TRAIT_EVENTS = {
             id: "earnest_overtime",
             title: "Extra Miles",
             description: "$NAME stayed late to practice their footwork. They are determined to do their best for you.",
-            outcome: { stat: { dex: 1 }, hp: -15, news: "$NAME worked twice as hard today." }
+            outcome: { stat: { dex: 1 }, hp: -60, news: "$NAME worked twice as hard today." }
         },
         {
             id: "earnest_confession",
@@ -200,7 +200,7 @@ const TRAIT_EVENTS = {
             id: "flippant_gamble",
             title: "Careless Bet",
             description: "$NAME bet their breakfast on a coin toss and lost. Now they're hungry.",
-            outcome: { hp: -30, news: "$NAME's carelessness cost them a meal." }
+            outcome: { hp: -60, news: "$NAME's carelessness cost them a meal." }
         },
         {
             id: "flippant_lucky_break",
@@ -220,7 +220,7 @@ const TRAIT_EVENTS = {
             id: "curious_injury",
             title: "Forbidden Door",
             description: "$NAME touched something they shouldn't have in the blacksmith's shop and got a nasty burn.",
-            outcome: { hp: -45, news: "$NAME's curiosity got them into trouble." }
+            outcome: { hp: -120, news: "$NAME's curiosity got them into trouble." }
         },
         {
             id: "curious_info",
@@ -234,7 +234,7 @@ const TRAIT_EVENTS = {
             id: "apathetic_rest",
             title: "Minimum Necessary",
             description: "$NAME did the bare minimum and spent the rest of the day napping.",
-            outcome: { hp: 45, news: "$NAME took it very easy today." }
+            outcome: { hp: 180, news: "$NAME took it very easy today." }
         },
         {
             id: "apathetic_miss",
@@ -326,7 +326,7 @@ const TRAIT_EVENTS = {
             id: "competitive_push",
             title: "Beating the Best",
             description: "$NAME pushed themselves to the limit to beat a rival's record.",
-            outcome: { stat: { str: 1, con: 1 }, hp: -30, news: "$NAME broke a training record." }
+            outcome: { stat: { str: 1, con: 1 }, hp: -60, news: "$NAME broke a training record." }
         },
         {
             id: "competitive_jealousy",
@@ -352,7 +352,7 @@ const TRAIT_EVENTS = {
             id: "humble_service",
             title: "Silent Labor",
             description: "$NAME did the most difficult chores without being asked, just because it needed doing.",
-            outcome: { hp: 30, news: "$NAME's quiet work kept the barracks running." }
+            outcome: { hp: 120, news: "$NAME's quiet work kept the barracks running." }
         }
     ],
     "arrogant": [
@@ -389,7 +389,7 @@ const TRAIT_EVENTS = {
             id: "neurotic_panic",
             title: "Night Terrors",
             description: "$NAME had a panic attack about the upcoming match and didn't sleep.",
-            outcome: { hp: -60, news: "$NAME is frayed and anxious." }
+            outcome: { hp: -180, news: "$NAME is frayed and anxious." }
         },
         {
             id: "neurotic_cleaning",
@@ -403,7 +403,7 @@ const TRAIT_EVENTS = {
             id: "resilient_bounce",
             title: "Quick Recovery",
             description: "$NAME was injured in a spar but was back on their feet in hours. Impressive.",
-            outcome: { hp: 90, news: "$NAME's body heals remarkably fast." }
+            outcome: { hp: 360, news: "$NAME's body heals remarkably fast." }
         },
         {
             id: "resilient_mind",
@@ -425,7 +425,7 @@ const TRAIT_EVENTS = {
             id: "bloodthirsty_frenzy",
             title: "Blood Moon",
             description: "$NAME spent hours sharpening their blade, muttering about the glory of the kill. They are unnervingly ready.",
-            outcome: { stat: { str: 2 }, hp: -30, news: "$NAME's bloodlust is reaching a fever pitch." }
+            outcome: { stat: { str: 2 }, news: "$NAME's bloodlust is reaching a fever pitch." }
         },
         {
             id: "bloodthirsty_bounty",
@@ -451,13 +451,13 @@ const TRAIT_EVENTS = {
             id: "cautious_retreat",
             title: "Safe Path",
             description: "$NAME mapped out the quickest exits from the barracks. They feel more secure tonight.",
-            outcome: { hp: 45, news: "$NAME made safety preparations." }
+            outcome: { hp: 180, news: "$NAME made safety preparations." }
         },
         {
             id: "cautious_delay",
             title: "Over-analyzing",
             description: "$NAME spent so long checking for traps that they missed the morning training session entirely.",
-            outcome: { hp: -15, news: "$NAME's caution delayed their training." }
+            outcome: { hp: -60, news: "$NAME's caution delayed their training." }
         }
     ],
     "frenzied": [
@@ -465,7 +465,7 @@ const TRAIT_EVENTS = {
             id: "frenzied_bash",
             title: "Berserker Rage",
             description: "$NAME went into a trance-like state during drills and smashed a stone pillar. Terrifying.",
-            outcome: { stat: { str: 3 }, hp: -60, news: "$NAME's wild energy is peaking." }
+            outcome: { stat: { str: 3 }, hp: -120, news: "$NAME's wild energy is peaking." }
         },
         {
             id: "frenzied_scare",
@@ -477,7 +477,7 @@ const TRAIT_EVENTS = {
             id: "frenzied_exhaustion",
             title: "The Crash",
             description: "$NAME pushed themselves so hard they collapsed and slept for 14 hours straight.",
-            outcome: { hp: -90, news: "$NAME collapsed from pure exhaustion." }
+            outcome: { hp: -120, news: "$NAME collapsed from pure exhaustion." }
         }
     ],
     "tactical": [
@@ -511,7 +511,7 @@ const TRAIT_EVENTS = {
             id: "defensive_parry",
             title: "Perfect Parry",
             description: "$NAME spent the day teaching the juniors how to turn a strike aside rather than taking it full on.",
-            outcome: { hp: 30, news: "$NAME's defensive tips helped the whole roster." }
+            outcome: { hp: 120, news: "$NAME's defensive tips helped the whole roster." }
         },
         {
             id: "defensive_slow",
@@ -537,7 +537,7 @@ const TRAIT_EVENTS = {
             id: "aggressive_injury",
             title: "Over-extension",
             description: "$NAME swung so hard they pulled a muscle. They need to learn when to stop.",
-            outcome: { hp: -75, news: "$NAME over-exerted themselves in a fit of aggression." }
+            outcome: { hp: -60, news: "$NAME over-exerted themselves in a fit of aggression." }
         }
     ],
     "opportunistic": [
@@ -568,7 +568,7 @@ const TRAIT_EVENTS = {
             id: "reckless_leap",
             title: "Leap of Faith",
             description: "$NAME jumped off the barracks roof for a dare. It was impressive, but they broke a toe.",
-            outcome: { hp: -60, news: "$NAME did something incredibly stupid for a dare." }
+            outcome: { hp: -120, news: "$NAME did something incredibly stupid for a dare." }
         },
         {
             id: "reckless_gambit",
@@ -580,7 +580,7 @@ const TRAIT_EVENTS = {
             id: "reckless_charge",
             title: "No Fear",
             description: "$NAME charged headfirst into a training obstacle. They're battered, but their courage is higher than ever.",
-            outcome: { hp: -30, stat: { str: 2 }, news: "$NAME's recklessness grew their strength." }
+            outcome: { hp: -60, stat: { str: 2 }, news: "$NAME's recklessness grew their strength." }
         }
     ],
     "mercy_giver": [
@@ -620,7 +620,7 @@ const TRAIT_EVENTS = {
             id: "ruthless_poison",
             title: "Back Alley Deal",
             description: "$NAME was seen buying 'supplements' from a shady merchant. Best not to ask what they are.",
-            outcome: { gold: -100, stat: { con: 2 }, hp: -30, news: "$NAME compromised their health for power." }
+            outcome: { gold: -100, stat: { con: 2 }, hp: -120, news: "$NAME compromised their health for power." }
         }
     ],
     "precise": [
@@ -671,7 +671,7 @@ const TRAIT_EVENTS = {
             id: "relentless_overdrive",
             title: "No Sleep",
             description: "$NAME has been training for 24 hours straight. They are practically a machine.",
-            outcome: { stat: { con: 2 }, hp: -120, news: "$NAME's relentless drive is literal." }
+            outcome: { stat: { con: 2 }, hp: -60, news: "$NAME's relentless drive is literal." }
         },
         {
             id: "relentless_pursuit",
@@ -691,7 +691,7 @@ const TRAIT_EVENTS = {
             id: "skittish_flee",
             title: "Shadows and Dust",
             description: "$NAME was spooked by a loud bang and hid in the cellar for the rest of the day.",
-            outcome: { hp: -15, news: "$NAME was easily rattled today." }
+            outcome: { hp: -60, news: "$NAME was easily rattled today." }
         },
         {
             id: "skittish_awareness",
@@ -704,8 +704,8 @@ const TRAIT_EVENTS = {
             title: "Warm Meal",
             description: "$NAME needs some reassurance. A good meal and some kind words would go a long way.",
             choices: [
-                { text: "Support them (30 G)", outcome: { gold: -30, hp: 90, news: "You helped $NAME find their courage." } },
-                { text: "Let them be", outcome: { hp: -30, news: "$NAME is feeling neglected." } }
+                { text: "Support them (30 G)", outcome: { gold: -30, hp: 360, news: "You helped $NAME find their courage." } },
+                { text: "Let them be", outcome: { hp: -120, news: "$NAME is feeling neglected." } }
             ]
         }
     ],
@@ -726,7 +726,7 @@ const TRAIT_EVENTS = {
             id: "valiant_inspiration",
             title: "Inner Light",
             description: "$NAME's sheer presence makes everyone feel braver. It's almost magical.",
-            outcome: { hp: 30, news: "$NAME's valor gave the team a boost." }
+            outcome: { hp: 120, news: "$NAME's valor gave the team a boost." }
         }
     ],
     "efficient": [
@@ -734,7 +734,7 @@ const TRAIT_EVENTS = {
             id: "efficient_shortcut",
             title: "Maximum Gain",
             description: "$NAME figured out how to do the entire training routine in half the time with double the results.",
-            outcome: { stat: { str: 1, dex: 1 }, hp: 60, news: "$NAME found an efficient training path." }
+            outcome: { stat: { str: 1, dex: 1 }, hp: 240, news: "$NAME found an efficient training path." }
         },
         {
             id: "efficient_save",
@@ -746,7 +746,7 @@ const TRAIT_EVENTS = {
             id: "efficient_minimalism",
             title: "Done and Dusted",
             description: "$NAME finished their work early and spent the rest of the day resting. Wise.",
-            outcome: { hp: 90, news: "$NAME managed their energy perfectly." }
+            outcome: { hp: 360, news: "$NAME managed their energy perfectly." }
         }
     ],
     "showy": [
@@ -766,7 +766,7 @@ const TRAIT_EVENTS = {
             id: "showy_accident",
             title: "The Wrong Move",
             description: "$NAME tried a flashy flip during practice and landed on their head. Embarrassing and painful.",
-            outcome: { hp: -45, news: "$NAME's style got the better of them." }
+            outcome: { hp: -180, news: "$NAME's style got the better of them." }
         }
     ],
     "determined": [
@@ -780,7 +780,7 @@ const TRAIT_EVENTS = {
             id: "determined_recovery",
             title: "Will to Live",
             description: "$NAME simply refused to stay sick today. They willed their body back to health.",
-            outcome: { hp: 120, news: "$NAME's iron will sped up their recovery." }
+            outcome: { hp: 480, news: "$NAME's iron will sped up their recovery." }
         },
         {
             id: "determined_stand",
@@ -817,7 +817,7 @@ const TRAIT_EVENTS = {
             id: "feral_instinct",
             title: "Wild Hunter",
             description: "$NAME disappeared into the woods and came back with a fresh deer and some mountain herbs.",
-            outcome: { hp: 60, gold: 30, news: "$NAME's hunting provided for the team." }
+            outcome: { hp: 240, gold: 30, news: "$NAME's hunting provided for the team." }
         },
         {
             id: "feral_bite",
@@ -850,7 +850,7 @@ const TRAIT_EVENTS = {
             id: "honorable_stand",
             title: "Defense of the Weak",
             description: "$NAME stood up for a local servant being harassed by guards. They were bruised but the servant is safe.",
-            outcome: { hp: -30, news: "$NAME's honor is the talk of the town." }
+            outcome: { hp: -120, news: "$NAME's honor is the talk of the town." }
         }
     ],
     "mercenary": [
@@ -881,7 +881,7 @@ const TRAIT_EVENTS = {
             id: "loyal_shield",
             title: "Human Shield",
             description: "During a riot near the barracks, $NAME stood in front of you, taking a stone to the head.",
-            outcome: { hp: -60, news: "$NAME's loyalty is beyond question." }
+            outcome: { hp: -240, news: "$NAME's loyalty is beyond question." }
         },
         {
             id: "loyal_refusal",
@@ -893,7 +893,7 @@ const TRAIT_EVENTS = {
             id: "loyal_extra_effort",
             title: "For the Team",
             description: "$NAME inspired the roster with a speech about brotherhood. Everyone is training harder.",
-            outcome: { hp: 30, news: "$NAME's devotion is infectious." }
+            outcome: { hp: 120, news: "$NAME's devotion is infectious." }
         }
     ],
     "treacherous": [
@@ -902,7 +902,7 @@ const TRAIT_EVENTS = {
             title: "Broken Trust",
             description: "$NAME was caught stealing from the team's medical supplies to sell them.",
             choices: [
-                { text: "Lash them", outcome: { hp: -150, news: "You punished $NAME for their betrayal." } },
+                { text: "Lash them", outcome: { hp: -100, news: "You punished $NAME for their betrayal." } },
                 { text: "Banish them", outcome: { remove: true, news: "You kicked $NAME off the team." } }
             ]
         },
@@ -930,13 +930,13 @@ const TRAIT_EVENTS = {
             id: "idealistic_speech",
             title: "Better World",
             description: "$NAME gave a speech about how gladiators should be honored as heroes, not slaves.",
-            outcome: { hp: 30, news: "$NAME's words raised team morale." }
+            outcome: { hp: 120, news: "$NAME's words raised team morale." }
         },
         {
             id: "idealistic_loss",
             title: "Shattered Dreams",
             description: "$NAME witnessed a fixed match and is deeply depressed by the lack of honor.",
-            outcome: { hp: -30, news: "$NAME's ideals are taking a hit." }
+            outcome: { hp: -60, news: "$NAME's ideals are taking a hit." }
         }
     ],
     "greedy": [
@@ -967,7 +967,7 @@ const TRAIT_EVENTS = {
             id: "selfless_ration",
             title: "Giving Soul",
             description: "$NAME gave their meat ration to a hungry teammate who was struggling with recovery.",
-            outcome: { hp: -30, news: "$NAME's sacrifice helped a teammate." }
+            outcome: { hp: -60, news: "$NAME's sacrifice helped a teammate." }
         },
         {
             id: "selfless_training",
@@ -979,7 +979,7 @@ const TRAIT_EVENTS = {
             id: "selfless_risk",
             title: "Took the Blow",
             description: "In a training accident, $NAME pushed a teammate out of the way of a falling gate.",
-            outcome: { hp: -90, news: "$NAME risked themselves for another." }
+            outcome: { stat: { con: 2 }, hp: -120, news: "$NAME risked themselves for another." }
         }
     ],
     "vengeful": [
@@ -999,7 +999,7 @@ const TRAIT_EVENTS = {
             id: "vengeful_fire",
             title: "Burning Hate",
             description: "$NAME spent the day training harder than anyone, fueled by pure spite.",
-            outcome: { stat: { str: 2 }, hp: -30, news: "$NAME's hatred is a powerful motivator." }
+            outcome: { stat: { str: 2 }, hp: -120, news: "$NAME's hatred is a powerful motivator." }
         }
     ],
     "honest": [
@@ -1033,7 +1033,7 @@ const TRAIT_EVENTS = {
             id: "deceptive_frown",
             title: "Fake Injury",
             description: "$NAME pretended to be sick to skip training. They spent the day at the docks.",
-            outcome: { hp: 30, news: "$NAME's deceit gave them a day of rest." }
+            outcome: { hp: 120, news: "$NAME's deceit gave them a day of rest." }
         },
         {
             id: "deceptive_scout",
@@ -1047,7 +1047,7 @@ const TRAIT_EVENTS = {
             id: "pious_blessing",
             title: "Divine Favor",
             description: "$NAME spent the day in prayer. They claim they feel the gods watching over them.",
-            outcome: { hp: 60, news: "$NAME's faith is restorative." }
+            outcome: { hp: 240, news: "$NAME's faith is restorative." }
         },
         {
             id: "pious_tithe",
@@ -1079,7 +1079,7 @@ const TRAIT_EVENTS = {
             id: "rebellious_escape",
             title: "Night Out",
             description: "$NAME snuck out of the barracks at night. They came back tired but happy.",
-            outcome: { hp: -30, news: "$NAME broke curfew." }
+            outcome: { hp: -60, news: "$NAME broke curfew." }
         }
     ],
     "disciplined": [
@@ -1093,7 +1093,7 @@ const TRAIT_EVENTS = {
             id: "disciplined_routine",
             title: "Clockwork",
             description: "$NAME organized the barracks, making sure everything is in its proper place.",
-            outcome: { hp: 15, news: "$NAME's orderliness improved the living space." }
+            outcome: { hp: 60, news: "$NAME's orderliness improved the living space." }
         },
         {
             id: "disciplined_wait",
@@ -1127,7 +1127,7 @@ const TRAIT_EVENTS = {
             id: "selfish_meal",
             title: "Extra Rations",
             description: "$NAME stole an extra meal from the stores, leaving a teammate hungry.",
-            outcome: { hp: 60, news: "$NAME prioritized their own hunger." }
+            outcome: { hp: 240, news: "$NAME prioritized their own hunger." }
         },
         {
             id: "selfish_glory",
@@ -1153,7 +1153,7 @@ const TRAIT_EVENTS = {
             id: "ambitious_training",
             title: "Overdrive",
             description: "$NAME took on a significantly more dangerous training regime to speed up their growth.",
-            outcome: { stat: { str: 1, dex: 1, con: 1 }, hp: -90, news: "$NAME's ambition is pushing them hard." }
+            outcome: { stat: { str: 1, dex: 1, con: 1 }, hp: -180, news: "$NAME's ambition is pushing them hard." }
         },
         {
             id: "ambitious_scheme",
@@ -1199,7 +1199,7 @@ const TRAIT_EVENTS = {
             id: "corruptible_shortcut",
             title: "Easy Path",
             description: "$NAME was caught using illegal performance stimulants from a back-alley merchant.",
-            outcome: { stat: { str: 2 }, hp: -60, news: "$NAME chose power over health." }
+            outcome: { stat: { str: 2 }, hp: -120, news: "$NAME chose power over health." }
         },
         {
             id: "corruptible_betrayal",
@@ -1233,13 +1233,13 @@ const TRAIT_EVENTS = {
             id: "empathetic_bond",
             title: "Shared Pain",
             description: "$NAME spent the night by the bedside of a wounded teammate, offering comfort.",
-            outcome: { hp: 30, news: "$NAME's empathy helped a teammate recover." }
+            outcome: { teamWide: true, hp: 120, news: "$NAME's empathy helped a teammate recover." }
         },
         {
             id: "empathetic_distress",
             title: "Heavy Heart",
             description: "$NAME is so affected by a teammate's injury that they can't even train today.",
-            outcome: { hp: -30, news: "$NAME is struggling with their emotions." }
+            outcome: { hp: -60, news: "$NAME is struggling with their emotions." }
         },
         {
             id: "empathetic_aid",
@@ -1278,13 +1278,13 @@ const TRAIT_EVENTS = {
             id: "gourmet_feast",
             title: "True Flavor",
             description: "$NAME found a rare spice in the market and prepared an amazing meal. Everyone feels great.",
-            outcome: { hp: 75, news: "$NAME's cooking revitalized the team." }
+            outcome: { hp: 300, news: "$NAME's cooking revitalized the team." }
         },
         {
             id: "gourmet_hunger",
             title: "Poor Rations",
             description: "$NAME refused to eat the standard gruel and is feeling weak as a result.",
-            outcome: { hp: -45, news: "$NAME is pining for better food." }
+            outcome: { hp: -60, news: "$NAME is pining for better food." }
         },
         {
             id: "gourmet_expensive",
@@ -1298,13 +1298,13 @@ const TRAIT_EVENTS = {
             id: "insomniac_training",
             title: "Night Drills",
             description: "$NAME couldn't sleep, so they spent the night practicing by moonlight.",
-            outcome: { stat: { dex: 1 }, hp: -30, news: "$NAME's sleeplessness led to extra practice." }
+            outcome: { stat: { dex: 1 }, hp: -60, news: "$NAME's sleeplessness led to extra practice." }
         },
         {
             id: "insomniac_exhaustion",
             title: "Sleep Deprivation",
             description: "$NAME's lack of sleep has finally caught up with them. They are a mess.",
-            outcome: { hp: -90, news: "$NAME is suffering from extreme fatigue." }
+            outcome: { hp: -180, news: "$NAME is suffering from extreme fatigue." }
         },
         {
             id: "insomniac_watch",
@@ -1318,13 +1318,13 @@ const TRAIT_EVENTS = {
             id: "superstitious_ritual",
             title: "Lucky Ritual",
             description: "$NAME insists on wearing their socks inside out for 'luck'. Others are laughing, but $NAME feels great.",
-            outcome: { hp: 30, news: "$NAME's strange ritual gave them a mental boost." }
+            outcome: { hp: 120, news: "$NAME's strange ritual gave them a mental boost." }
         },
         {
             id: "superstitious_omen",
             title: "Dark Crow",
             description: "$NAME saw a black bird and refuses to train today, fearing it's a sign of death.",
-            outcome: { hp: -15, news: "$NAME is spooked by an omen." }
+            outcome: { hp: -60, news: "$NAME is spooked by an omen." }
         },
         {
             id: "superstitious_shrine",
@@ -1358,7 +1358,7 @@ const TRAIT_EVENTS = {
             id: "musician_song",
             title: "Comforting Tune",
             description: "$NAME played a soft melody on their flute, helping everyone sleep better tonight.",
-            outcome: { hp: 45, news: "$NAME's music was very restful." }
+            outcome: { hp: 180, news: "$NAME's music was very restful." }
         },
         {
             id: "musician_street",
@@ -1370,7 +1370,7 @@ const TRAIT_EVENTS = {
             id: "musician_disraction",
             title: "Loud Practice",
             description: "$NAME's late-night practice on the drums kept everyone awake.",
-            outcome: { hp: -30, news: "$NAME's music was a bit much today." }
+            outcome: { teamWide: true, hp: -60, news: "$NAME's music was a bit much today." }
         }
     ],
     "early_bird": [
@@ -1384,13 +1384,13 @@ const TRAIT_EVENTS = {
             id: "early_bird_setup",
             title: "Early Prep",
             description: "$NAME had all the training equipment ready before anyone else even woke up.",
-            outcome: { hp: 15, news: "$NAME organized the morning session early." }
+            outcome: { hp: 60, news: "$NAME organized the morning session early." }
         },
         {
             id: "early_bird_tired",
             title: "Early Crash",
             description: "$NAME started so early they are completely exhausted by mid-afternoon.",
-            outcome: { hp: -30, news: "$NAME ran out of steam today." }
+            outcome: { hp: -60, news: "$NAME ran out of steam today." }
         }
     ],
     "night_owl": [
@@ -1418,7 +1418,7 @@ const TRAIT_EVENTS = {
             id: "neat_freak_polish",
             title: "Shining Armor",
             description: "$NAME spent the day polishing every surface in the barracks. It's spotless.",
-            outcome: { hp: 15, news: "$NAME's cleaning made for a better environment." }
+            outcome: { hp: 60, news: "$NAME's cleaning made for a better environment." }
         },
         {
             id: "neat_freak_tinker",
@@ -1444,13 +1444,13 @@ const TRAIT_EVENTS = {
             id: "slovenly_nap",
             title: "Lazy Day",
             description: "$NAME spent the day lying in the dirt instead of training.",
-            outcome: { hp: 30, news: "$NAME took a very lazy break." }
+            outcome: { hp: 120, news: "$NAME took a very lazy break." }
         },
         {
             id: "slovenly_infestation",
             title: "Uninvited Guests",
             description: "$NAME's pile of dirty laundry attracted a swarm of flies to the barracks.",
-            outcome: { hp: -15, news: "$NAME's lack of hygiene is a problem." }
+            outcome: { hp: -60, news: "$NAME's lack of hygiene is a problem." }
         }
     ],
     "talkative": [
@@ -1498,7 +1498,7 @@ const TRAIT_EVENTS = {
             id: "jinxed_accident",
             title: "Broken Bench",
             description: "$NAME sat down and the bench immediately shattered. Then a bird pooped on them.",
-            outcome: { hp: -30, news: "Bad luck is following $NAME today." }
+            outcome: { hp: -60, news: "Bad luck is following $NAME today." }
         },
         {
             id: "jinxed_spill",
@@ -1510,7 +1510,7 @@ const TRAIT_EVENTS = {
             id: "jinxed_narrow_miss",
             title: "Almost Died",
             description: "A loose tile nearly hit $NAME's head. They look shaken.",
-            outcome: { hp: -15, news: "$NAME narrowly avoided a freak accident." }
+            outcome: { hp: -60, news: "$NAME narrowly avoided a freak accident." }
         }
     ],
     "lucky": [
@@ -1538,7 +1538,7 @@ const TRAIT_EVENTS = {
             id: "obsessive_perfection",
             title: "One Thousand Strikes",
             description: "$NAME performed the exact same strike until their hands bled. It's now perfect.",
-            outcome: { stat: { str: 1, dex: 1 }, hp: -45, news: "$NAME is obsessed with a single move." }
+            outcome: { stat: { str: 1, dex: 1 }, hp: -60, news: "$NAME is obsessed with a single move." }
         },
         {
             id: "obsessive_cleaning",
@@ -1578,7 +1578,7 @@ const TRAIT_EVENTS = {
             id: "fastidious_accuracy",
             title: "Exact Measurement",
             description: "$NAME weighed every ration to the gram, ensuring everyone got exactly their share.",
-            outcome: { hp: 15, news: "$NAME's precision is helping the barracks." }
+            outcome: { hp: 60, news: "$NAME's precision is helping the barracks." }
         },
         {
             id: "fastidious_repair",
@@ -1610,7 +1610,7 @@ const TRAIT_EVENTS = {
             id: "bibliophile_story",
             title: "Inspiration",
             description: "$NAME read a story of a legendary gladiator to the team, boosting morale.",
-            outcome: { hp: 30, news: "$NAME's books are a source of team spirit." }
+            outcome: { teamWide: true, hp: 120, news: "$NAME's books are a source of team spirit." }
         }
     ],
     "wanderer": [
@@ -1624,13 +1624,13 @@ const TRAIT_EVENTS = {
             id: "wanderer_absence",
             title: "Gone Fishin'",
             description: "$NAME disappeared for several hours and missed a crucial drill.",
-            outcome: { news: "$NAME's restless feet are causing problems." }
+            outcome: { state: { dex: -1 }, news: "$NAME's restless feet are causing problems." }
         },
         {
             id: "wanderer_gift",
             title: "Roadside Find",
             description: "While wandering the docks, $NAME found a crate of high-quality medicinal herbs.",
-            outcome: { hp: 60, news: "$NAME's exploration paid off." }
+            outcome: { teamWide: true, hp: 240, news: "$NAME's exploration paid off." }
         }
     ],
     "stout": [
@@ -1638,7 +1638,7 @@ const TRAIT_EVENTS = {
             id: "stout_feast",
             title: "Bottomless Pit",
             description: "$NAME ate an entire roast pig by themselves. They are now glowing with health.",
-            outcome: { hp: 120, gold: -80, news: "$NAME's appetite is legendary." }
+            outcome: { hp: 480, gold: -80, news: "$NAME's appetite is legendary." }
         },
         {
             id: "stout_strength",
@@ -1650,7 +1650,7 @@ const TRAIT_EVENTS = {
             id: "stout_broken_chair",
             title: "Timber!",
             description: "$NAME sat on a training stool and it splintered into a thousand pieces.",
-            outcome: { news: "$NAME's size is a bit much for the furniture." }
+            outcome: { state: { con: 1 }, news: "$NAME's size is a bit much for the furniture." }
         }
     ],
 
@@ -1660,13 +1660,13 @@ const TRAIT_EVENTS = {
             id: "ex_soldier_drill",
             title: "Military Precision",
             description: "$NAME ran a formal military drill for the whole team. Coordination has spiked.",
-            outcome: { stat: { dex: 1, wis: 1 }, news: "$NAME brought some army discipline to the group." }
+            outcome: { teamWide: true, stat: { dex: 1, wis: 1 }, news: "$NAME brought some army discipline to the group." }
         },
         {
             id: "ex_soldier_medals",
             title: "Old Stories",
             description: "$NAME showed off their old medals, inspiring the younger gladiators.",
-            outcome: { hp: 30, news: "$NAME's service record is a point of pride." }
+            outcome: { hp: 120, news: "$NAME's service record is a point of pride." }
         },
         {
             id: "ex_soldier_pains",
@@ -1680,7 +1680,7 @@ const TRAIT_EVENTS = {
             id: "noble_born_etiquette",
             title: "High Society",
             description: "$NAME convinced a local noble to grant us access to a private training ground.",
-            outcome: { stat: { int: 1 }, news: "$NAME's connections are useful." }
+            outcome: { teamWide: true, stat: { str: 1, dex: 1, con: 1, int: 1, wis: 1 }, news: "$NAME's connections are useful." }
         },
         {
             id: "noble_born_arrogance",
@@ -1712,7 +1712,7 @@ const TRAIT_EVENTS = {
             id: "orphan_resilience",
             title: "Hard Knock Life",
             description: "$NAME has been through worse. They simply ignored a minor infection that would've laid out another.",
-            outcome: { hp: 60, news: "$NAME is tough as nails." }
+            outcome: { hp: 240, news: "$NAME is tough as nails." }
         }
     ],
     "scholar": [
@@ -1752,7 +1752,7 @@ const TRAIT_EVENTS = {
             id: "blacksmith_burn",
             title: "Soot and Fire",
             description: "$NAME spent too long at the forge and is suffering from heat exhaustion.",
-            outcome: { hp: -45, news: "$NAME pushed themselves too hard in the shop." }
+            outcome: { hp: -60, news: "$NAME pushed themselves too hard in the shop." }
         }
     ],
     "hermit": [
@@ -1760,7 +1760,7 @@ const TRAIT_EVENTS = {
             id: "hermit_herbs",
             title: "Forest Medicine",
             description: "$NAME brought back several rare plants that have incredible healing properties.",
-            outcome: { hp: 120, news: "$NAME's knowledge of the wild is a lifesaver." }
+            outcome: { hp: 480, news: "$NAME's knowledge of the wild is a lifesaver." }
         },
         {
             id: "hermit_isolation",
@@ -1780,7 +1780,7 @@ const TRAIT_EVENTS = {
             id: "sailor_knots",
             title: "Tight Straps",
             description: "$NAME used nautical knots to secure everyone's armor. It's not going anywhere.",
-            outcome: { stat: { def: 1 }, news: "$NAME's sailor skills were useful." }
+            outcome: { teamWide: true, stat: { def: 1 }, news: "$NAME's sailor skills were useful." }
         },
         {
             id: "sailor_mouth",
@@ -1820,19 +1820,19 @@ const TRAIT_EVENTS = {
             id: "zealot_drive",
             title: "Divine Fury",
             description: "$NAME believes they are fighting for a holy cause. They are unstoppable today.",
-            outcome: { stat: { str: 2 }, hp: -30, news: "$NAME's fervor is a powerful force." }
+            outcome: { stat: { str: 2, wis: 2 }, news: "$NAME's fervor is a powerful force." }
         },
         {
             id: "zealot_preach",
             title: "The Word",
             description: "$NAME spent the day shouting scripture at the other gladiators.",
-            outcome: { news: "$NAME's zeal is a bit overwhelming." }
+            outcome: { stat: { wis: 1 }, news: "$NAME's zeal is a bit overwhelming." }
         },
         {
             id: "zealot_miracle",
             title: "True Believer",
             description: "$NAME's conviction in the afterlife gave them the courage to take a massive hit during a spar.",
-            outcome: { stat: { con: 2 }, news: "$NAME's faith is their strongest armor." }
+            outcome: { stat: { con: 2, wis: 2 }, news: "$NAME's faith is their strongest armor." }
         }
     ],
     "pacifist_at_heart": [
@@ -1846,13 +1846,13 @@ const TRAIT_EVENTS = {
             id: "pacifist_hesitation",
             title: "Weak Hand",
             description: "$NAME hesitated during a finishing strike, failing the assessment.",
-            outcome: { news: "$NAME's heart isn't in the killing business." }
+            outcome: { state: { str: -2, wis: 2 }, news: "$NAME's heart isn't in the killing business." }
         },
         {
             id: "pacifist_comfort",
             title: "A Kind Word",
             description: "$NAME spent the day caring for the animals in the stables. They seem more at peace now.",
-            outcome: { hp: 45, news: "$NAME find solace in non-violence." }
+            outcome: { hp: 180, news: "$NAME find solace in non-violence." }
         }
     ],
     "outlaw": [
@@ -1920,7 +1920,7 @@ const TRAIT_EVENTS = {
             id: "tribal_rites",
             title: "Ancient Rites",
             description: "$NAME performed a traditional ceremony that invigorated the whole team.",
-            outcome: { hp: 90, news: "$NAME's tribal wisdom is restorative." }
+            outcome: { hp: 360, news: "$NAME's tribal wisdom is restorative." }
         },
         {
             id: "tribal_scout",
@@ -1946,7 +1946,7 @@ const TRAIT_EVENTS = {
             id: "exiled_sorrow",
             title: "Homesick",
             description: "$NAME spent the day staring at the horizon, missing their homeland.",
-            outcome: { hp: -30, news: "$NAME is feeling the weight of their exile." }
+            outcome: { hp: -60, news: "$NAME is feeling the weight of their exile." }
         },
         {
             id: "exiled_strength",
@@ -1960,7 +1960,7 @@ const TRAIT_EVENTS = {
             id: "widowed_memento",
             title: "Lost Love",
             description: "$NAME spent the day staring at a faded portrait. It was heartbreaking.",
-            outcome: { hp: -15, news: "$NAME is mourning." }
+            outcome: { hp: -60, news: "$NAME is mourning." }
         },
         {
             id: "widowed_drive",
@@ -1972,7 +1972,7 @@ const TRAIT_EVENTS = {
             id: "widowed_kindness",
             title: "Gentle Spirit",
             description: "$NAME's shared understanding of loss helped a teammate through a difficult time.",
-            outcome: { hp: 60, news: "$NAME's empathy is a gift to the team." }
+            outcome: { hp: 240, news: "$NAME's empathy is a gift to the team." }
         }
     ],
     "vengeful_spirit": [
@@ -1980,7 +1980,7 @@ const TRAIT_EVENTS = {
             id: "vengeful_spirit_focus",
             title: "Dark Drive",
             description: "$NAME is purely driven by the need for revenge. They are training like a demon.",
-            outcome: { stat: { str: 2 }, hp: -60, news: "$NAME is consumed by their quest." }
+            outcome: { stat: { str: 2, dex: 2, int: 2 }, news: "$NAME is consumed by their quest." }
         },
         {
             id: "vengeful_spirit_intel",
@@ -1992,7 +1992,7 @@ const TRAIT_EVENTS = {
             id: "vengeful_spirit_loss",
             title: "Burning Out",
             description: "$NAME's need for revenge is starting to affect their physical health.",
-            outcome: { hp: -30, news: "$NAME is being consumed by their hate." }
+            outcome: { hp: -60, news: "$NAME is being consumed by their hate." }
         }
     ],
     "mystic": [
@@ -2006,13 +2006,13 @@ const TRAIT_EVENTS = {
             id: "mystic_offering",
             title: "Sacrifice",
             description: "$NAME was seen talking to a wall. They claim it was 'the spirits'.",
-            outcome: { news: "$NAME is acting very strange today." }
+            outcome: { stat: { wis: 2, int: -2 }, news: "$NAME is acting very strange today." }
         },
         {
             id: "mystic_blessing",
             title: "Otherworldly Aid",
             description: "$NAME performed a ritual that seemingly healed a teammate's old injury over night.",
-            outcome: { hp: 90, news: "$NAME's powers are truly mysterious." }
+            outcome: { hp: 360, news: "$NAME's powers are truly mysterious." }
         }
     ],
     "mercenary_vet": [
@@ -2032,7 +2032,7 @@ const TRAIT_EVENTS = {
             id: "mercenary_vet_price",
             title: "The Cost of War",
             description: "$NAME is feeling the years in their joints today and needs extra rest.",
-            outcome: { hp: -30, news: "$NAME is showing their age." }
+            outcome: { hp: -60, news: "$NAME is showing their age." }
         }
     ],
     "redeemed": [
@@ -2040,7 +2040,7 @@ const TRAIT_EVENTS = {
             id: "redeemed_act",
             title: "Second Chance",
             description: "$NAME performed an amazing act of heroism, trying to make up for their past crimes.",
-            outcome: { hp: 90, news: "$NAME's quest for redemption is inspiring." }
+            outcome: { hp: 360, news: "$NAME's quest for redemption is inspiring." }
         },
         {
             id: "redeemed_guilt",

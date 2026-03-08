@@ -279,6 +279,25 @@
     background: rgba(20, 100, 20, 0.7) !important;
 }
 
+/* Paladin Divine Shield */
+.combatant-card.divine-shield {
+    border-color: #ffd700 !important;
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.8), inset 0 0 10px rgba(255, 215, 0, 0.2) !important;
+    animation: divineShieldPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes divineShieldPulse {
+
+    0%,
+    100% {
+        box-shadow: 0 0 15px rgba(255, 215, 0, 0.6), inset 0 0 8px rgba(255, 215, 0, 0.15);
+    }
+
+    50% {
+        box-shadow: 0 0 30px rgba(255, 215, 0, 1.0), inset 0 0 15px rgba(255, 215, 0, 0.3);
+    }
+}
+
 /* Combat Controls */
 .combat-control-btn {
     position: absolute;

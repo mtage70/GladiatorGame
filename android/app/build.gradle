@@ -24,7 +24,7 @@ def twaManifest = [
     applicationId: 'io.github.mtage70.twa',
     hostName: 'mtage70.github.io', // The domain being opened in the TWA.
     launchUrl: '/GladiatorGame/index.html', // The start path for the TWA. Must be relative to the domain.
-    name: 'Gladiator Manager', // The application name.
+    name: 'Arena Manager', // The application name.
     launcherName: 'Gladiator', // The name shown on the Android Launcher.
     themeColor: '#222222', // The color used for the status bar.
     themeColorDark: '#000000', // The color used for the dark status bar.
