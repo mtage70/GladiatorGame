@@ -104,7 +104,7 @@ const EventEngine = {
         desc.textContent = event.description.replace(/\$NAME/g, glad.name);
 
         if (event.choices && event.choices.length > 0) {
-            // Multiple choices
+            // Multiple choices — hide outcome until player decides
             event.choices.forEach(choice => {
                 const btn = document.createElement('button');
                 btn.className = 'action-btn';
@@ -115,14 +115,15 @@ const EventEngine = {
                 choiceContainer.appendChild(btn);
             });
         } else {
-            // Single "Continue" button for events without choices
-            const btn = document.createElement('button');
-            btn.className = 'action-btn primary';
-            btn.textContent = "See Outcome";
-            btn.onclick = () => {
-                this.handleChoice({ outcome: event.outcome }, glad, saveContext, resolve);
-            };
-            choiceContainer.appendChild(btn);
+            // No choices — apply and show outcome immediately
+            choiceContainer.classList.add('hidden');
+            outcomeContainer.classList.remove('hidden');
+
+            let result = this.applyOutcome(glad, event.outcome, saveContext);
+            outcomeText.textContent = result.news.replace(/\$NAME/g, glad.name);
+            this.displayOutcomeDetails(result);
+            this.logRichNews(result, glad, saveContext);
+            if (typeof renderRoster === 'function') renderRoster();
         }
 
         // Close logic (only after outcome is displayed)
@@ -214,9 +215,12 @@ const EventEngine = {
 
                 // Apply Stats
                 if (finalOutcome.stat) {
+                    finalOutcome.statChanges = [];
                     Object.keys(finalOutcome.stat).forEach(s => {
                         if (actualGlad.stats[s] !== undefined) {
+                            const oldVal = actualGlad.stats[s];
                             actualGlad.stats[s] = Math.max(1, Math.min(100, actualGlad.stats[s] + finalOutcome.stat[s]));
+                            finalOutcome.statChanges.push({ stat: s, oldVal: oldVal, newVal: actualGlad.stats[s] });
                         }
                     });
                 }
@@ -332,8 +336,15 @@ const EventEngine = {
             </span>`;
         }
 
-        // Stats
-        if (outcome.stat) {
+        // Stats (with old → new values if available)
+        if (outcome.statChanges && outcome.statChanges.length > 0) {
+            outcome.statChanges.forEach(sc => {
+                const isPositive = sc.newVal > sc.oldVal;
+                html += `<span class="outcome-detail-item ${isPositive ? 'positive' : 'negative'}">
+                    <span class="outcome-detail-icon">📊</span> ${sc.stat.toUpperCase()}: ${sc.oldVal} → ${sc.newVal}
+                </span>`;
+            });
+        } else if (outcome.stat) {
             Object.keys(outcome.stat).forEach(stat => {
                 const val = outcome.stat[stat];
                 if (val !== 0) {

@@ -11,7 +11,7 @@ const TRAIT_EVENTS = {
             id: "stoic_endurance",
             title: "Silent Resilience",
             description: "A heavy beam fell during training, but $NAME simply shrugged it off and kept working. The display of grit impressed the team.",
-            outcome: { teamWide: true, hp: 120, news: "$NAME's stoicism boosted team resolve." }
+            outcome: { teamWide: true, stat: { con: 2 }, hp: 120, news: "$NAME's stoicism boosted team resolve." }
         },
         {
             id: "stoic_meditation",
@@ -340,7 +340,7 @@ const TRAIT_EVENTS = {
             id: "humble_aid",
             title: "Quiet Help",
             description: "$NAME spent the day helping a teammate fix their armor, asking for nothing in return.",
-            outcome: { news: "$NAME's kindness improved team morale." }
+            outcome: { teamWide: true, hp: 100, news: "$NAME's kindness improved team morale." }
         },
         {
             id: "humble_refusal",
