@@ -795,7 +795,7 @@ function advanceTime(saveContext) {
 
     let daysAdvanced = 0;
 
-    function tickDay() {
+    async function tickDay() {
         // Safety cap: Advance at most 28 days (one month) at a time
         if (daysAdvanced >= 28) {
             finishAdvancing(saveContext, daysAdvanced);
@@ -817,6 +817,18 @@ function advanceTime(saveContext) {
             }
         }
         daysAdvanced++;
+
+        // --- RANDOM TRAIT EVENT SYSTEM ---
+        // Every day, there's a chance or a guarantee of an event.
+        // User said: "Every day, pick a gladiator in the league..."
+        const eventPromise = EventEngine.triggerDailyEvent(saveContext);
+        if (eventPromise) {
+            // This was a player event that needs interaction
+            await eventPromise;
+            // Stop advancing as per user request: "do not resume time advancement after an event"
+            finishAdvancing(saveContext, daysAdvanced);
+            return;
+        }
 
         // Process Match Day Logic (Sundays)
         const totalDaysElapsed = ((saveContext.year - 1) * MONTHS_PER_YEAR * 28) + ((saveContext.month - 1) * 28) + (saveContext.day - 1);

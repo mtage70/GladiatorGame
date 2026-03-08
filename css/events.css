@@ -1,0 +1,317 @@
+/* css/events.css */
+
+.event-modal {
+    position: relative;
+    background: linear-gradient(135deg, #1a1c22 0%, #101114 100%);
+    width: 90vw;
+    max-width: 550px;
+    border: 2px solid var(--color-gold-dark);
+    border-radius: 8px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), inset 0 0 20px rgba(212, 175, 55, 0.1);
+    animation: modalSlideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    overflow: hidden;
+    color: var(--color-text-body);
+}
+
+@keyframes modalSlideIn {
+    from {
+        transform: translateY(30px) scale(0.95);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+    }
+}
+
+.event-header {
+    background: linear-gradient(to right, #2a2d35, #1a1c22);
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+    text-align: center;
+}
+
+.event-category {
+    display: block;
+    font-family: var(--font-title);
+    font-size: 0.8rem;
+    color: var(--color-gold);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 0.5rem;
+    opacity: 0.8;
+}
+
+.event-title {
+    margin: 0;
+    font-family: var(--font-title);
+    font-size: 1.8rem;
+    color: var(--color-gold-light);
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.event-content {
+    padding: 2rem;
+}
+
+.event-gladiator-info {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5rem;
+    background: rgba(0, 0, 0, 0.3);
+    padding: 1rem;
+    border-radius: 6px;
+    border: 1px solid rgba(212, 175, 55, 0.1);
+    margin-bottom: 1.5rem;
+}
+
+.modal-glad-portrait {
+    width: 80px;
+    height: 80px;
+    border: 2px solid var(--color-gold-dark);
+    border-radius: 4px;
+    object-fit: cover;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+}
+
+.modal-glad-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: flex-start;
+}
+
+.modal-glad-name {
+    font-family: var(--font-title);
+    font-size: 1.4rem;
+    color: #fff;
+    margin: 0;
+}
+
+.event-body {
+    font-size: 1.1rem;
+    line-height: 1.6;
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.event-choices {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.event-outcome {
+    text-align: center;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+#eventOutcomeText {
+    font-size: 1.1rem;
+    margin-bottom: 1.5rem;
+    font-style: italic;
+    color: var(--color-gold-light);
+}
+
+.event-outcome-details {
+    display: flex;
+    justify-content: center;
+    gap: 0.75rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+}
+
+.outcome-detail-item {
+    background: rgba(0, 0, 0, 0.4);
+    padding: 0.5rem 0.8rem;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    border: 1px solid rgba(212, 175, 55, 0.2);
+    font-family: var(--font-title);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.outcome-detail-item.positive {
+    color: #4ade80;
+    border-color: rgba(74, 222, 128, 0.3);
+}
+
+.outcome-detail-item.negative {
+    color: #f87171;
+    border-color: rgba(248, 113, 113, 0.3);
+}
+
+.outcome-detail-item.gold {
+    color: #facc15;
+    border-color: rgba(250, 204, 21, 0.3);
+}
+
+.outcome-detail-icon {
+    font-size: 1.1rem;
+}
+
+/* Outcome Vibes */
+.outcome-positive {
+    border-left: 4px solid var(--color-accent-success);
+}
+
+.outcome-negative {
+    border-left: 4px solid var(--color-accent-danger);
+}
+
+/* Animation for choices */
+.event-choices .action-btn {
+    width: 100%;
+    transform: translateY(0);
+    transition: all 0.2s ease;
+}
+
+.event-choices .action-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+/* Rich News Items */
+.news-item-rich {
+    background: rgba(30, 32, 38, 0.8);
+    border: 1px solid #333;
+    border-radius: 6px;
+    margin-bottom: 1rem;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    transition: all 0.2s ease;
+    border-left: 4px solid var(--color-gold-dark);
+}
+
+.news-item-rich:hover {
+    background: rgba(40, 44, 52, 0.9);
+    border-color: var(--color-gold-dark);
+    transform: translateX(4px);
+}
+
+.news-rich-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    padding-bottom: 0.5rem;
+}
+
+.news-team-logo {
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
+}
+
+.news-team-name {
+    font-family: var(--font-title);
+    font-size: 0.9rem;
+    color: var(--color-gold-light);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.news-rich-content {
+    display: flex;
+    gap: 1.25rem;
+    align-items: flex-start;
+}
+
+.news-glad-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    flex-shrink: 0;
+    width: 64px;
+}
+
+.news-portrait-container {
+    position: relative;
+    width: 48px;
+    height: 48px;
+    border: 1px solid var(--color-gold-dark);
+    border-radius: 4px;
+    background: #000;
+}
+
+.news-glad-portrait {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 3px;
+}
+
+.news-glad-portrait-blank {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #444;
+    font-size: 1.5rem;
+}
+
+.news-glad-meta {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.news-glad-name {
+    font-size: 0.75rem;
+    font-weight: bold;
+    color: #fff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 64px;
+}
+
+.news-text-content {
+    flex: 1;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    color: var(--color-text-body);
+    padding-top: 4px;
+}
+
+.news-outcome-mini-details {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    flex-wrap: wrap;
+}
+
+.news-outcome-mini-details .outcome-detail-item {
+    font-size: 0.75rem;
+    padding: 0.3rem 0.5rem;
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.news-outcome-mini-details .outcome-detail-icon {
+    font-size: 0.85rem;
+}
+
+/* Vibe Overrides */
+.news-negative {
+    border-left-color: var(--color-accent-danger);
+}
+
+.news-positive {
+    border-left-color: var(--color-accent-success);
+}
+
+.news-gold {
+    border-left-color: #ffd700;
+}

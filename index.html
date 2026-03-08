@@ -14,6 +14,7 @@
     <link rel="stylesheet" href="css/combat-screen.css">
     <link rel="stylesheet" href="css/responsive.css">
     <link rel="stylesheet" href="css/details-modal.css">
+    <link rel="stylesheet" href="css/events.css">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#222">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -482,10 +483,35 @@
         </div>
     </div>
 
+    <!-- Random Event Popup -->
+    <div id="eventOverlay" class="glad-details-overlay hidden">
+        <div id="eventModal" class="event-modal">
+            <div class="event-header" id="eventHeader">
+                <span class="event-category" id="eventCategory">Trait Event</span>
+                <h2 class="event-title" id="eventTitle">Event Title</h2>
+            </div>
+            <div class="event-content">
+                <div id="eventGladiatorInfo" class="event-gladiator-info"></div>
+                <div class="event-body" id="eventDescription">
+                    <p>Something happened in the barracks today...</p>
+                </div>
+                <div id="eventChoiceContainer" class="event-choices">
+                    <!-- Buttons injected here -->
+                </div>
+                <div id="eventOutcomeContainer" class="event-outcome hidden">
+                    <p id="eventOutcomeText"></p>
+                    <div id="eventOutcomeDetails" class="event-outcome-details"></div>
+                    <button id="closeEventBtn" class="action-btn primary">Acknowledge</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Data -->
     <script src="js/data/classes.js"></script>
     <script src="js/data/names.js"></script>
     <script src="js/data/traits.js"></script>
+    <script src="js/data/events.js"></script>
     <script src="js/data/teams.js"></script>
 
     <!-- Utilities -->
@@ -494,6 +520,7 @@
     <!-- Engine -->
     <script src="js/engine/gladiator.js"></script>
     <script src="js/engine/season.js"></script>
+    <script src="js/engine/event-engine.js"></script>
 
     <!-- UI Components -->
     <script src="js/ui/components.js"></script>
