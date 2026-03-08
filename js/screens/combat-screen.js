@@ -567,7 +567,7 @@ async function executeTurn() {
                 });
                 actionType = 'heal';
                 const variance = (0.8 + (Math.random() * 0.4));
-                effectAmount = Math.floor(attacker.baseDamage * 1.0 * variance); // Heals equivalent to base damage
+                effectAmount = Math.floor(attacker.baseDamage * 1.5 * variance); // Heals equivalent to base damage
             }
         }
     }

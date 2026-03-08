@@ -166,43 +166,49 @@ function initializeMatchScreen(saveContext) {
             activeFighters.push(pool.shift());
         }
 
-        // Separate them into Tanks vs Squishies
-        // Clerics and Mages are inherently squishy backliners. Warriors/Paladins are tanks.
-        let tanks = [];
-        let squishies = [];
-        let flexible = [];
+        // Separate by formation role
+        // Paladins are the best frontline due to Divine Shield.
+        // Warriors are secondary frontline/midline tanks.
+        // Clerics belong in backline to maximize healing uptime.
+        // Mages, Rogues, Hunters are flexible midline.
+        let paladins = [];
+        let warriors = [];
+        let clerics = [];
+        let midliners = []; // Mages, Rogues, Hunters
 
         activeFighters.forEach(g => {
-            if (g.class === 'Mage' || g.class === 'Cleric') {
-                squishies.push(g);
-            } else if (g.class === 'Warrior' || g.class === 'Paladin') {
-                tanks.push(g);
-            } else {
-                flexible.push(g);
-            }
+            if (g.class === 'Paladin') paladins.push(g);
+            else if (g.class === 'Warrior') warriors.push(g);
+            else if (g.class === 'Cleric') clerics.push(g);
+            else midliners.push(g);
         });
 
-        // Re-sort to prioritize highest current HP tank, lowest current HP squishy
-        tanks.sort((a, b) => (b.hp !== undefined ? b.hp : (b.maxHp || 0)) - (a.hp !== undefined ? a.hp : (a.maxHp || 0)));
-        squishies.sort((a, b) => (a.hp !== undefined ? a.hp : (a.maxHp || 0)) - (b.hp !== undefined ? b.hp : (b.maxHp || 0)));
+        // Sort each group by HP descending (healthiest first)
+        const hpSort = (a, b) => (b.hp !== undefined ? b.hp : (b.maxHp || 0)) - (a.hp !== undefined ? a.hp : (a.maxHp || 0));
+        paladins.sort(hpSort);
+        warriors.sort(hpSort);
+        clerics.sort(hpSort);
+        midliners.sort(hpSort);
 
         // Opponent Formation (right side — player attacks them from the left):
-        // Slot 1 (left col)  = Frontline  → tanks go here
-        // Slot 2 (right col) = Backline   → squishies go here
+        // Slot 1 (left col)  = Frontline  → Paladins first, then Warriors
+        // Slot 2 (right col) = Backline   → Clerics first
         // Slots 0, 3, 4     = Midline
 
-        // 1. Assign Frontline — slot 1
-        if (tanks.length > 0) currentMatchState.opponentFormation[1] = tanks.shift();
-        else if (flexible.length > 0) currentMatchState.opponentFormation[1] = flexible.shift();
-        else currentMatchState.opponentFormation[1] = squishies.shift();
+        // 1. Assign Frontline — slot 1 (Paladin > Warrior > flexible > anyone)
+        if (paladins.length > 0) currentMatchState.opponentFormation[1] = paladins.shift();
+        else if (warriors.length > 0) currentMatchState.opponentFormation[1] = warriors.shift();
+        else if (midliners.length > 0) currentMatchState.opponentFormation[1] = midliners.shift();
+        else currentMatchState.opponentFormation[1] = clerics.shift();
 
-        // 2. Assign Backline — slot 2
-        if (squishies.length > 0) currentMatchState.opponentFormation[2] = squishies.shift();
-        else if (flexible.length > 0) currentMatchState.opponentFormation[2] = flexible.shift();
-        else currentMatchState.opponentFormation[2] = tanks.shift();
+        // 2. Assign Backline — slot 2 (Cleric > Mage/ranged > anyone)
+        if (clerics.length > 0) currentMatchState.opponentFormation[2] = clerics.shift();
+        else if (midliners.length > 0) currentMatchState.opponentFormation[2] = midliners.shift();
+        else if (warriors.length > 0) currentMatchState.opponentFormation[2] = warriors.shift();
+        else currentMatchState.opponentFormation[2] = paladins.shift();
 
         // 3. Assign Midline — slots 0, 3, 4
-        let remaining = [...tanks, ...flexible, ...squishies];
+        let remaining = [...warriors, ...paladins, ...midliners, ...clerics];
         currentMatchState.opponentFormation[0] = remaining.shift() || null;
         currentMatchState.opponentFormation[3] = remaining.shift() || null;
         currentMatchState.opponentFormation[4] = remaining.shift() || null;
@@ -298,40 +304,43 @@ function autoFillPlayerFormation() {
         activeFighters.push(pool.shift());
     }
 
-    let tanks = [];
-    let squishies = [];
-    let flexible = [];
+    let paladins = [];
+    let warriors = [];
+    let clerics = [];
+    let midliners = [];
 
     activeFighters.forEach(g => {
-        if (g.class === 'Mage' || g.class === 'Cleric') {
-            squishies.push(g);
-        } else if (g.class === 'Warrior' || g.class === 'Paladin') {
-            tanks.push(g);
-        } else {
-            flexible.push(g);
-        }
+        if (g.class === 'Paladin') paladins.push(g);
+        else if (g.class === 'Warrior') warriors.push(g);
+        else if (g.class === 'Cleric') clerics.push(g);
+        else midliners.push(g);
     });
 
-    tanks.sort((a, b) => (b.hp !== undefined ? b.hp : (b.maxHp || 0)) - (a.hp !== undefined ? a.hp : (a.maxHp || 0)));
-    squishies.sort((a, b) => (a.hp !== undefined ? a.hp : (a.maxHp || 0)) - (b.hp !== undefined ? b.hp : (b.maxHp || 0)));
+    const hpSort = (a, b) => (b.hp !== undefined ? b.hp : (b.maxHp || 0)) - (a.hp !== undefined ? a.hp : (a.maxHp || 0));
+    paladins.sort(hpSort);
+    warriors.sort(hpSort);
+    clerics.sort(hpSort);
+    midliners.sort(hpSort);
 
     // Player Formation Indices (Left attacking Right):
     // Slot 2 (right col) = Frontline
     // Slot 1 (left col)  = Backline
     // Slots 0, 3, 4     = Midline
 
-    // 1. Assign Frontline — slot 2
-    if (tanks.length > 0) currentMatchState.playerFormation[2] = tanks.shift();
-    else if (flexible.length > 0) currentMatchState.playerFormation[2] = flexible.shift();
-    else currentMatchState.playerFormation[2] = squishies.shift();
+    // 1. Assign Frontline — slot 2 (Paladin > Warrior > flexible > anyone)
+    if (paladins.length > 0) currentMatchState.playerFormation[2] = paladins.shift();
+    else if (warriors.length > 0) currentMatchState.playerFormation[2] = warriors.shift();
+    else if (midliners.length > 0) currentMatchState.playerFormation[2] = midliners.shift();
+    else currentMatchState.playerFormation[2] = clerics.shift();
 
-    // 2. Assign Backline — slot 1
-    if (squishies.length > 0) currentMatchState.playerFormation[1] = squishies.shift();
-    else if (flexible.length > 0) currentMatchState.playerFormation[1] = flexible.shift();
-    else currentMatchState.playerFormation[1] = tanks.shift();
+    // 2. Assign Backline — slot 1 (Cleric > Mage/ranged > anyone)
+    if (clerics.length > 0) currentMatchState.playerFormation[1] = clerics.shift();
+    else if (midliners.length > 0) currentMatchState.playerFormation[1] = midliners.shift();
+    else if (warriors.length > 0) currentMatchState.playerFormation[1] = warriors.shift();
+    else currentMatchState.playerFormation[1] = paladins.shift();
 
     // 3. Assign Midline
-    let remaining = [...tanks, ...flexible, ...squishies];
+    let remaining = [...warriors, ...paladins, ...midliners, ...clerics];
     currentMatchState.playerFormation[0] = remaining.shift() || null;
     currentMatchState.playerFormation[3] = remaining.shift() || null;
     currentMatchState.playerFormation[4] = remaining.shift() || null;

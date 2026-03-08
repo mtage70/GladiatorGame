@@ -88,8 +88,42 @@ function simulateAICombat(teamAGlads, teamBGlads) {
         return c;
     }
 
-    teamAGlads.forEach((g, i) => { if (g) combatants.push(setupSim(g, 'A', i)); });
-    teamBGlads.forEach((g, i) => { if (g) combatants.push(setupSim(g, 'B', i)); });
+    // --- Assign smart formation positions ---
+    function assignFormation(glads, side) {
+        // For side A (home): frontline=1, backline=2, midline=0,3,4
+        // For side B (away): frontline=2, backline=1, midline=0,3,4
+        const frontSlot = (side === 'A') ? 1 : 2;
+        const backSlot = (side === 'A') ? 2 : 1;
+        const midSlots = [0, 3, 4];
+
+        let paladins = [], warriors = [], clerics = [], others = [];
+        glads.forEach(g => {
+            if (!g) return;
+            if (g.class === 'Paladin') paladins.push(g);
+            else if (g.class === 'Warrior') warriors.push(g);
+            else if (g.class === 'Cleric') clerics.push(g);
+            else others.push(g);
+        });
+
+        const assigned = [];
+        // Frontline: Paladin > Warrior > other > Cleric
+        let front = paladins.shift() || warriors.shift() || others.shift() || clerics.shift();
+        if (front) { assigned.push(setupSim(front, side, frontSlot)); }
+        // Backline: Cleric > other > Warrior > Paladin
+        let back = clerics.shift() || others.shift() || warriors.shift() || paladins.shift();
+        if (back) { assigned.push(setupSim(back, side, backSlot)); }
+        // Midline: fill remaining
+        let remaining = [...warriors, ...paladins, ...others, ...clerics];
+        let midIdx = 0;
+        while (remaining.length > 0 && midIdx < midSlots.length) {
+            assigned.push(setupSim(remaining.shift(), side, midSlots[midIdx]));
+            midIdx++;
+        }
+        return assigned;
+    }
+
+    combatants.push(...assignFormation(teamAGlads, 'A'));
+    combatants.push(...assignFormation(teamBGlads, 'B'));
 
     // Sort by DEX descending for turn order
     combatants.sort((a, b) => b.stats.dex - a.stats.dex);
@@ -190,7 +224,7 @@ function simulateAICombat(teamAGlads, teamBGlads) {
                     );
                     actionType = 'heal';
                     const variance = 0.8 + Math.random() * 0.4;
-                    effectAmount = Math.floor(attacker.baseDamage * 1.0 * variance);
+                    effectAmount = Math.floor(attacker.baseDamage * 1.5 * variance);
                 }
             }
         }
