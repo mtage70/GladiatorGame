@@ -923,7 +923,7 @@ function advanceTime(saveContext) {
         // Render UI for current iterative day
         localStorage.setItem('gladiatorSaveContext', JSON.stringify(saveContext));
         renderCalendar(saveContext);
-        if (healedAnyone) renderRoster();
+        renderRoster(); // Update gold and stats every day
 
         // DETERMINE IF WE SHOULD STOP ADVANCING
         let shouldStop = false;
