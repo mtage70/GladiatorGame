@@ -783,7 +783,13 @@ function advanceTime(saveContext) {
         if (dayOfWeek === 0) {
             // It is match day (Sunday)
             if (currentWeekIndex < saveContext.schedule.length) {
-                if (typeof simulateLeagueMatches === 'function') {
+                const weekObj = saveContext.schedule[currentWeekIndex];
+                const weekMatches = (weekObj && weekObj.matches) ? weekObj.matches : (Array.isArray(weekObj) ? weekObj : []);
+                const myMatch = weekMatches.find ? weekMatches.find(m => m.home === saveContext.teamId || m.away === saveContext.teamId) : null;
+
+                // Only auto-simulate if the player has NO match this week.
+                // If they DO have a match, simulation is triggered by match completion/forfeit instead.
+                if (!myMatch && typeof simulateLeagueMatches === 'function') {
                     simulateLeagueMatches(saveContext, currentWeekIndex);
                 }
             } else if (currentWeekIndex === 19) {

@@ -97,8 +97,8 @@
 /* Team Colored Buttons (Recruit, Graveyard, Match Prep, Combat) */
 #recruitBtn,
 #viewGraveyardBtn,
-#matchScreen .action-btn,
-#combatScreen .action-btn,
+#startCombatBtn,
+#finishCombatBtn,
 #forfeitModal .action-btn,
 #rosterSelectionModal .action-btn,
 #casualtiesModal .action-btn,
@@ -112,8 +112,8 @@
 
 #recruitBtn:hover,
 #viewGraveyardBtn:hover,
-#matchScreen .action-btn:hover,
-#combatScreen .action-btn:hover,
+#startCombatBtn:hover,
+#finishCombatBtn:hover,
 #forfeitModal .action-btn:hover,
 #rosterSelectionModal .action-btn:hover,
 #casualtiesModal .action-btn:hover,
