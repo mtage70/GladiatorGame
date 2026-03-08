@@ -253,7 +253,7 @@
 }
 
 .combatant-card.attacking {
-    animation: wiggleAttack 0.4s ease-in-out;
+    animation: wiggleAttack calc(0.4s / var(--combat-speed, 1)) ease-in-out;
     z-index: 10;
 }
 
@@ -261,20 +261,87 @@
     position: fixed;
     z-index: 1000;
     pointer-events: none;
-    transition: left 0.4s linear, top 0.4s linear;
+    transition: left calc(0.4s / var(--combat-speed, 1)) linear, top calc(0.4s / var(--combat-speed, 1)) linear;
     transform: translate(-50%, -50%);
 }
 
 .combatant-card.taking-damage {
-    animation: wiggleHit 0.4s ease-in-out;
+    animation: wiggleHit calc(0.4s / var(--combat-speed, 1)) ease-in-out;
     border-color: #ff4444 !important;
     box-shadow: 0 0 15px rgba(255, 68, 68, 0.8) !important;
     background: rgba(100, 20, 20, 0.7) !important;
 }
 
 .combatant-card.receiving-heal {
-    animation: wiggleHeal 0.4s ease-in-out;
+    animation: wiggleHeal calc(0.4s / var(--combat-speed, 1)) ease-in-out;
     border-color: #4caf50 !important;
     box-shadow: 0 0 15px rgba(76, 175, 80, 0.8) !important;
     background: rgba(20, 100, 20, 0.7) !important;
+}
+
+/* Combat Controls */
+.combat-control-btn {
+    position: absolute;
+    bottom: 0.5rem;
+    z-index: 20;
+    background: rgba(0, 0, 0, 0.85);
+    border: 2px solid var(--color-gold-dark);
+    color: var(--color-gold-light);
+    padding: 0.4rem 0.8rem;
+    font-family: var(--font-title);
+    font-weight: bold;
+    text-transform: uppercase;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all var(--transition-fast);
+    min-width: 80px;
+    box-shadow: var(--glass-shadow);
+    letter-spacing: 1px;
+    font-size: 0.75rem;
+}
+
+.combat-control-btn:hover {
+    background: var(--color-gold-dark);
+    color: var(--color-bg-base);
+    box-shadow: 0 0 15px var(--color-gold-light);
+    transform: translateY(-2px);
+}
+
+.combat-control-btn.active {
+    background: var(--color-gold-primary);
+    border-color: var(--color-gold-light);
+    color: var(--color-bg-base);
+    box-shadow: 0 0 20px var(--color-gold-primary);
+}
+
+.pause-btn {
+    left: 0.5rem;
+}
+
+.fast-forward-btn {
+    right: 0.5rem;
+}
+
+.pause-btn.paused {
+    background: var(--color-accent-danger);
+    border-color: var(--color-accent-danger-hover);
+    color: white;
+}
+
+/* Combat controls responsiveness */
+@media screen and (max-width: 600px) {
+    .combat-control-btn {
+        bottom: 0.25rem;
+        min-width: 70px;
+        padding: 0.3rem 0.6rem;
+        font-size: 0.65rem;
+    }
+
+    .pause-btn {
+        left: 0.25rem;
+    }
+
+    .fast-forward-btn {
+        right: 0.25rem;
+    }
 }

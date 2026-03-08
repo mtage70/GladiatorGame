@@ -277,11 +277,14 @@
             style="position: absolute; bottom: 4.5rem; left: 50%; transform: translateX(-50%); z-index: 10; font-size: 1.5rem; padding: 1rem 3rem;">END
             BATTLE</button>
 
-        <!-- Healing Dampener Display -->
         <div id="healingDampenerDisplay"
             style="position: absolute; bottom: 0.5rem; left: 50%; transform: translateX(-50%); z-index: 9; color: var(--color-accent-success); font-weight: bold; font-size: 0.9rem; background: rgba(0,0,0,0.7); padding: 0.4rem 0.8rem; border-radius: 4px; border: 1px solid var(--color-gold-dark); text-align: center; line-height: 1.1;">
             Healing<br>100%
         </div>
+
+        <!-- Combat Controls -->
+        <button id="combatPauseBtn" class="combat-control-btn pause-btn">Pause</button>
+        <button id="combatFastForwardBtn" class="combat-control-btn fast-forward-btn">Fast</button>
         <div class="combat-main">
             <!-- Left Side: Player Team -->
             <div class="team-side player-side" style="flex: 1;">

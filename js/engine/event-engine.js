@@ -166,8 +166,8 @@ const EventEngine = {
             }
         }
 
-        // Apply Gold
-        if (finalOutcome.gold) {
+        // Apply Gold (Player Only)
+        if (finalOutcome.gold && glad.isPlayer) {
             saveContext.gold = Math.max(0, saveContext.gold + finalOutcome.gold);
         }
 
@@ -214,8 +214,8 @@ const EventEngine = {
                 });
             }
 
-            // Recruitment
-            if (finalOutcome.recruit && typeof generateGladiator === 'function') {
+            // Recruitment (Player Only)
+            if (finalOutcome.recruit && glad.isPlayer && typeof generateGladiator === 'function') {
                 if (saveContext.roster.length < 10) {
                     const newGlad = generateGladiator();
                     saveContext.roster.push(newGlad);
