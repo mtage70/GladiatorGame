@@ -85,6 +85,7 @@ document.addEventListener('DOMContentLoaded', () => {
         TEAMS.forEach(team => {
             const btn = document.createElement('button');
             btn.className = 'team-btn';
+            btn.style.borderColor = team.primaryColor;
             btn.innerHTML = `
                 <div class="team-header-container" style="justify-content: center;">
                     <img src="${team.logo}" class="team-logo-small" alt="${team.name} Logo">

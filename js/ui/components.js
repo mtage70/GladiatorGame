@@ -12,8 +12,11 @@ function buildSquareGladiatorCard(glad, prefix = '') {
         ? `<div class="hp-text" id="${prefix}hp-text-${glad.id}">${glad.hp} / ${glad.maxHp}</div>`
         : ``;
 
+    const ovr = (typeof getPrimaryStat === 'function') ? getPrimaryStat(glad) : '?';
+
     return `
         ${portraitImg}
+        <div class="card-ovr-badge ${glad.class.toLowerCase()}">${ovr}</div>
         ${battlesBadge}
         <div class="combat-card-hover-stats">
             <div>STR: ${glad.stats.str}</div>

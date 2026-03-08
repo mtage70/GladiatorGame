@@ -360,6 +360,53 @@
     line-height: 1;
 }
 
+/* OVR Badge (top-left of portrait, colored by class) */
+.card-ovr-badge {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 3px;
+    background: #888;
+    color: #111;
+    font-family: var(--font-title);
+    font-size: 0.65rem;
+    font-weight: 900;
+    border-radius: 3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.7);
+    pointer-events: none;
+    z-index: 10;
+    line-height: 1;
+}
+
+.card-ovr-badge.warrior {
+    background: #a0522d;
+}
+
+.card-ovr-badge.paladin {
+    background: #ff9ff3;
+}
+
+.card-ovr-badge.rogue {
+    background: #feca57;
+}
+
+.card-ovr-badge.hunter {
+    background: #1dd1a1;
+}
+
+.card-ovr-badge.mage {
+    background: #48dbfb;
+}
+
+.card-ovr-badge.cleric {
+    background: #ffffff;
+}
+
 /* Context Menu */
 .gladiator-context-menu {
     position: fixed;

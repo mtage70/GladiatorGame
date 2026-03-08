@@ -106,8 +106,8 @@ function renderRoster() {
         row.className = 'roster-row';
 
         const portraitHtml = glad.portrait
-            ? `<div class="glad-portrait-small" style="position:relative; width:40px; height:40px;"><img src="${glad.portrait}" alt="${glad.name}" style="width:100%; height:100%; object-fit:cover; border-radius:4px;" />${glad.battles > 0 ? `<div class="battles-badge-small" style="position:absolute; bottom:-5px; right:-5px; background:var(--color-accent-danger); border-radius:50%; width:16px; height:16px; font-size:10px; display:flex; align-items:center; justify-content:center;">${glad.battles}</div>` : ''}</div>`
-            : `<div class="glad-portrait-small blank" style="position:relative; width:40px; height:40px; background:#333; border-radius:4px;">${glad.battles > 0 ? `<div class="battles-badge-small" style="position:absolute; bottom:-5px; right:-5px; background:var(--color-accent-danger); border-radius:50%; width:16px; height:16px; font-size:10px; display:flex; align-items:center; justify-content:center;">${glad.battles}</div>` : ''}</div>`;
+            ? `<div class="glad-portrait-small" style="position:relative; width:40px; height:40px;"><img src="${glad.portrait}" alt="${glad.name}" style="width:100%; height:100%; object-fit:cover; border-radius:4px;" />${glad.battles > 0 ? `<div class="battles-badge-small" style="position:absolute; top:-5px; right:-5px; background:var(--color-gold-primary); color:#111; border-radius:50%; width:16px; height:16px; font-size:10px; font-weight:900; display:flex; align-items:center; justify-content:center;">${glad.battles}</div>` : ''}</div>`
+            : `<div class="glad-portrait-small blank" style="position:relative; width:40px; height:40px; background:#333; border-radius:4px;">${glad.battles > 0 ? `<div class="battles-badge-small" style="position:absolute; top:-5px; right:-5px; background:var(--color-gold-primary); color:#111; border-radius:50%; width:16px; height:16px; font-size:10px; font-weight:900; display:flex; align-items:center; justify-content:center;">${glad.battles}</div>` : ''}</div>`;
 
         const displayMaxHp = glad.maxHp || calculateMaxHp(glad);
         const displayHp = glad.hp !== undefined ? glad.hp : displayMaxHp;
@@ -876,6 +876,14 @@ function advanceTime(saveContext) {
                     }
                 }
             }
+        }
+
+        // Grant daily gold to all teams
+        saveContext.gold = (saveContext.gold || 0) + 50;
+        if (saveContext.opposingRosters) {
+            Object.values(saveContext.opposingRosters).forEach(aiTeamData => {
+                aiTeamData.gold = (aiTeamData.gold || 0) + 50;
+            });
         }
 
         // Process daily healing
