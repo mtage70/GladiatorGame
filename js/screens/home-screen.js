@@ -303,6 +303,39 @@ function openGladiatorDetails(glad) {
     };
 }
 
+function renderGraveyard() {
+    const graveyardGrid = document.getElementById('graveyardGrid');
+    if (!graveyardGrid) return;
+
+    const saveContext = JSON.parse(localStorage.getItem('gladiatorSaveContext'));
+    graveyardGrid.innerHTML = '';
+
+    if (saveContext && saveContext.graveyard && saveContext.graveyard.length > 0) {
+        saveContext.graveyard.forEach(glad => {
+            const slot = document.createElement('div');
+            slot.className = 'roster-slot filled';
+            slot.style.filter = 'grayscale(100%)';
+
+            const portraitHtml = glad.portrait
+                ? `<div class="glad-portrait"><img src="${glad.portrait}" alt="${glad.name}" /></div>`
+                : `<div class="glad-portrait blank"></div>`;
+
+            const battlesCount = glad.battles || 0;
+            slot.innerHTML = `
+                <div class="glad-info" style="opacity: 0.8;">
+                    ${portraitHtml}
+                    <span class="glad-class ${glad.class.toLowerCase()}">${glad.class}</span>
+                    <span class="glad-name" title="${glad.name}">${glad.name} <br/> <span style="font-size:0.75rem;">(RIP)</span></span>
+                    <span style="font-size:0.8rem; color:var(--color-text-muted); margin-top:2px;">Battles: ${battlesCount}</span>
+                </div>
+            `;
+            graveyardGrid.appendChild(slot);
+        });
+    } else {
+        graveyardGrid.innerHTML = '<div style="color:var(--color-text-muted); width:100%; text-align:center; margin-top: 2rem;">No gladiators have perished yet.</div>';
+    }
+}
+
 function renderCalendar(saveContext) {
     const dateDisplay = document.getElementById('currentDateDisplay');
     const eventDisplay = document.getElementById('upcomingEventDisplay');
@@ -544,6 +577,11 @@ document.addEventListener('DOMContentLoaded', () => {
             if (targetSection) {
                 targetSection.classList.remove('hidden');
             }
+
+            // Populate graveyard when switching to it
+            if (targetId === 'tab-graveyard') {
+                renderGraveyard();
+            }
         });
     });
 
@@ -583,52 +621,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Modal Events
-    const viewGraveyardBtn = document.getElementById('viewGraveyardBtn');
-    if (viewGraveyardBtn) {
-        viewGraveyardBtn.addEventListener('click', () => {
-            const graveyardModal = document.getElementById('graveyardModal');
-            const graveyardGrid = document.getElementById('graveyardGrid');
-            const saveContext = JSON.parse(localStorage.getItem('gladiatorSaveContext'));
-
-            if (graveyardGrid) {
-                graveyardGrid.innerHTML = '';
-                if (saveContext && saveContext.graveyard && saveContext.graveyard.length > 0) {
-                    saveContext.graveyard.forEach(glad => {
-                        const slot = document.createElement('div');
-                        slot.className = 'roster-slot filled';
-                        slot.style.filter = 'grayscale(100%)';
-
-                        const portraitHtml = glad.portrait
-                            ? `<div class="glad-portrait"><img src="${glad.portrait}" alt="${glad.name}" /></div>`
-                            : `<div class="glad-portrait blank"></div>`;
-
-                        const battlesCount = glad.battles || 0;
-                        slot.innerHTML = `
-                            <div class="glad-info" style="opacity: 0.8;">
-                                ${portraitHtml}
-                                <span class="glad-class ${glad.class.toLowerCase()}">${glad.class}</span>
-                                <span class="glad-name" title="${glad.name}">${glad.name} <br/> <span style="font-size:0.75rem;">(RIP)</span></span>
-                                <span style="font-size:0.8rem; color:var(--color-text-muted); margin-top:2px;">Battles: ${battlesCount}</span>
-                            </div>
-                        `;
-                        graveyardGrid.appendChild(slot);
-                    });
-                } else {
-                    graveyardGrid.innerHTML = '<div style="color:var(--color-text-muted); width:100%; text-align:center; margin-top: 2rem;">No gladiators have perished yet.</div>';
-                }
-            }
-            if (graveyardModal) graveyardModal.classList.remove('hidden');
-        });
-    }
-
-    const closeGraveyardBtn = document.getElementById('closeGraveyardBtn');
-    if (closeGraveyardBtn) {
-        closeGraveyardBtn.addEventListener('click', () => {
-            document.getElementById('graveyardModal').classList.add('hidden');
-        });
-    }
-
+    // Casualties modal close
     const closeCasualtiesBtn = document.getElementById('closeCasualtiesBtn');
     if (closeCasualtiesBtn) {
         closeCasualtiesBtn.addEventListener('click', () => {

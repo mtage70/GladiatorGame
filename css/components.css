@@ -125,25 +125,26 @@
 /* Tab Buttons */
 .tab-btn {
     background: linear-gradient(to bottom, #2a2d36 0%, #1a1c23 100%);
-    border: 2px solid #505560;
+    border: 2px solid #3a3f47;
+    border-left: 3px solid transparent;
     border-radius: 4px;
     padding: 0.5rem 1rem;
     color: var(--color-text-muted);
     font-family: var(--font-title);
     cursor: pointer;
     transition: all var(--transition-fast);
+    text-align: left;
 }
 
 .tab-btn:hover {
     color: var(--color-text-main);
-    border-color: var(--team-primary);
+    background: linear-gradient(to bottom, #33363f 0%, #22252e 100%);
 }
 
 .tab-btn.active {
-    background: linear-gradient(to bottom, color-mix(in srgb, var(--team-primary) 50%, #45402f) 0%, color-mix(in srgb, var(--team-secondary) 50%, #2a261a) 100%);
-    border-color: var(--team-primary);
+    background: linear-gradient(to bottom, #33363f 0%, #22252e 100%);
+    border-left: 3px solid var(--team-primary);
     color: var(--color-text-main);
-    box-shadow: 0 0 10px var(--team-primary);
 }
 
 /* Gladiator Portraits */
