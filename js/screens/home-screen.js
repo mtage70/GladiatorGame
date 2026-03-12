@@ -666,6 +666,15 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    const removeAdsBtnHome = document.getElementById('removeAdsBtnHome');
+    if (removeAdsBtnHome) {
+        removeAdsBtnHome.addEventListener('click', () => {
+            if (typeof purchasePremium === 'function') {
+                purchasePremium();
+            }
+        });
+    }
+
     // Recruit Button
     const recruitBtn = document.getElementById('recruitBtn');
     if (recruitBtn) {

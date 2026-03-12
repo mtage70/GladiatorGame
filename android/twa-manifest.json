@@ -13,20 +13,24 @@
   "backgroundColor": "#0D0D12",
   "enableNotifications": true,
   "startUrl": "/GladiatorGame/index.html",
-  "iconUrl": "https://mtage70.github.io/GladiatorGame/icon-512.png",
-  "maskableIconUrl": "https://mtage70.github.io/GladiatorGame/icon-512.png",
+  "iconUrl": "https://mtage70.github.io/GladiatorGame/assets/icons/icon-512.png",
+  "maskableIconUrl": "https://mtage70.github.io/GladiatorGame/assets/icons/icon-512.png",
   "splashScreenFadeOutDuration": 300,
   "signingKey": {
-    "path": "E:\\AntigravityProjects\\GladiatorGame\\android.keystore",
+    "path": "E:\\AntigravityProjects\\GladiatorGame\\android\\android.keystore",
     "alias": "android"
   },
-  "appVersionName": "1",
-  "appVersionCode": 1,
+  "appVersionName": "4",
+  "appVersionCode": 4,
   "shortcuts": [],
   "generatorApp": "bubblewrap-cli",
   "webManifestUrl": "https://mtage70.github.io/GladiatorGame/manifest.json",
   "fallbackType": "customtabs",
-  "features": {},
+  "features": {
+    "playBilling": {
+      "enabled": true
+    }
+  },
   "alphaDependencies": {
     "enabled": false
   },
@@ -43,5 +47,5 @@
   "fileHandlers": [],
   "launchHandlerClientMode": "",
   "displayOverride": [],
-  "appVersion": "1"
+  "appVersion": "4"
 }

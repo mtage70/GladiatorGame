@@ -214,6 +214,15 @@ document.addEventListener('DOMContentLoaded', () => {
             handleMenuAction(action);
         });
     });
+
+    const removeAdsBtnMainMenu = document.getElementById('removeAdsBtnMainMenu');
+    if (removeAdsBtnMainMenu) {
+        removeAdsBtnMainMenu.addEventListener('click', () => {
+            if (typeof purchasePremium === 'function') {
+                purchasePremium();
+            }
+        });
+    }
 });
 
 function handleMenuAction(action) {

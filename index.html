@@ -54,6 +54,11 @@
                 <span class="btn-text">How To Play</span>
                 <div class="btn-glow"></div>
             </button>
+            <button class="menu-btn" id="removeAdsBtnMainMenu" style="display: none; border-color: #ffd700;">
+                <span class="btn-text" style="color: #ffd700;">⭐ Remove Ads ($1.99)</span>
+                <div class="btn-glow"
+                    style="background: radial-gradient(circle, rgba(255,215,0,0.5) 0%, transparent 60%);"></div>
+            </button>
             <button class="menu-btn danger" data-action="exit">
                 <span class="btn-text">Exit</span>
                 <div class="btn-glow"></div>
@@ -185,6 +190,9 @@
         <header class="home-header">
             <h2 class="home-title">Arena Manager</h2>
             <div class="header-stats">
+                <button class="action-btn" id="removeAdsBtnHome"
+                    style="display: none; border-color: #ffd700; color: #ffd700; font-size: 0.8rem; padding: 0.2rem 0.5rem; margin-right: 1rem;">⭐
+                    Remove Ads</button>
                 <span class="stat-item hidden" id="trophyDisplay" style="color: var(--color-gold);"><span
                         class="stat-icon">🏆</span> <span id="trophyCount">0</span></span>
                 <span class="stat-item" id="goldDisplay"><span class="stat-icon">💰</span> 1000 G</span>
@@ -650,6 +658,19 @@
         </div>
     </div>
 
+    <!-- Interstitial Ad Placeholder -->
+    <div id="interstitialAdModal" class="modal hidden"
+        style="position: absolute; top:0; left:0; width:100%; height:100%; background: #111; z-index: 3000; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+        <span
+            style="color: #666; font-family: monospace; letter-spacing: 3px; font-size: 1.5rem; margin-bottom: 2rem;">ADVERTISEMENT</span>
+        <div
+            style="width: 300px; height: 250px; background: #222; border: 2px dashed #444; display: flex; justify-content: center; align-items: center; margin-bottom: 2rem;">
+            <span style="color: #444;">Ad Content Area</span>
+        </div>
+        <p style="color: #ccc; margin-bottom: 1rem;">Video returning in <span id="adCountdown">3</span>...</p>
+        <button id="skipAdBtn" class="action-btn" style="opacity: 0.5; pointer-events: none;">Skip Ad</button>
+    </div>
+
     <!-- Data -->
     <script src="js/data/classes.js"></script>
     <script src="js/data/names.js"></script>
@@ -661,6 +682,7 @@
     <script src="js/utils.js"></script>
 
     <!-- Engine -->
+    <script src="js/engine/iap.js"></script>
     <script src="js/engine/gladiator.js"></script>
     <script src="js/engine/season.js"></script>
     <script src="js/engine/event-engine.js"></script>
@@ -674,6 +696,7 @@
     <script src="js/screens/main-menu.js"></script>
     <script src="js/screens/match-screen.js"></script>
     <script src="js/screens/combat-screen.js"></script>
+
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {

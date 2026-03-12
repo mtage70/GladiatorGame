@@ -1,4 +1,0 @@
-#Thu Mar 05 21:17:22 CST 2026
-base.0=E\:\\AntigravityProjects\\GladiatorGame\\app\\build\\intermediates\\dex\\release\\minifyReleaseWithR8\\classes.dex
-renamed.0=classes.dex
-path.0=classes.dex

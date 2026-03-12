@@ -1043,7 +1043,7 @@ function endCombat(winningSide) {
     });
 }
 
-function finishCombatTransition() {
+async function finishCombatTransition() {
     document.getElementById('combatScreen').classList.add('hidden');
 
     if (typeof stopBackgroundMusic === 'function') stopBackgroundMusic();
@@ -1225,6 +1225,11 @@ function finishCombatTransition() {
     }
 
     localStorage.setItem('gladiatorSaveContext', JSON.stringify(combatState.saveContext));
+
+    // Show Interstitial Ad for non-premium users before returning
+    if (typeof showInterstitialAd === 'function') {
+        await showInterstitialAd();
+    }
 
     // Go back to Home Screen
     const homeScreen = document.getElementById('homeScreen');
