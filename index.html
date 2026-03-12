@@ -278,9 +278,21 @@
             style="position: absolute; bottom: 4.5rem; left: 50%; transform: translateX(-50%); z-index: 10; font-size: 1.5rem; padding: 1rem 3rem;">END
             BATTLE</button>
 
-        <div id="healingDampenerDisplay"
-            style="position: absolute; bottom: 0.5rem; left: 50%; transform: translateX(-50%); z-index: 9; color: var(--color-accent-success); font-weight: bold; font-size: 0.9rem; background: rgba(0,0,0,0.7); padding: 0.4rem 0.8rem; border-radius: 4px; border: 1px solid var(--color-gold-dark); text-align: center; line-height: 1.1;">
-            Healing<br>100%
+        <div id="combatIndicatorsContainer" style="position: absolute; bottom: 0.5rem; left: 50%; transform: translateX(-50%); z-index: 9; display: flex; gap: 1rem; align-items: flex-end;">
+            
+            <!-- Manual Action Indicator -->
+            <div id="manualActionDisplay" style="text-align: center; background: rgba(0,0,0,0.7); padding: 0.4rem 0.8rem; border-radius: 4px; border: 1px solid var(--color-gold-dark);">
+                <div style="color: var(--color-gold-light); font-weight: bold; font-size: 0.9rem; line-height: 1.1; margin-bottom: 4px;">Manual Action</div>
+                <div id="manualActionStatusText" style="color: var(--color-accent-success); font-size: 0.75rem; font-weight: bold; margin-bottom: 4px;">READY</div>
+                <div style="width: 100%; height: 6px; background: #333; border-radius: 3px; overflow: hidden; border: 1px solid #111;">
+                    <div id="manualActionProgressBar" style="width: 100%; height: 100%; background: var(--color-accent-success); transition: width 0.3s linear, background-color 0.3s; box-shadow: 0 0 5px var(--color-accent-success);"></div>
+                </div>
+            </div>
+
+            <div id="healingDampenerDisplay"
+                style="color: var(--color-accent-success); font-weight: bold; font-size: 0.9rem; background: rgba(0,0,0,0.7); padding: 0.4rem 0.8rem; border-radius: 4px; border: 1px solid var(--color-gold-dark); text-align: center; line-height: 1.1;">
+                Healing<br>100%
+            </div>
         </div>
 
         <!-- Combat Controls -->

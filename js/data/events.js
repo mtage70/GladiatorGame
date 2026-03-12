@@ -99,7 +99,7 @@ const TRAIT_EVENTS = {
             description: "$NAME is sure their new 'surefire' business idea will work. They convinced you to invest.",
             choices: [
                 { text: "Invest (200 G)", outcome: { chance: 0.4, gold: 600, news: "$NAME's idea was a goldmine!", alt_gold: -200, alt_news: "$NAME's business idea failed miserably." } },
-                { text: "Politely Decline", outcome: { news: "You played it safe and declined the investment." } }
+                { text: "Politely Decline", outcome: { stat: { int: 1 }, news: "You played it safe and declined the investment." } }
             ]
         },
         {
@@ -146,7 +146,7 @@ const TRAIT_EVENTS = {
             id: "volatile_outburst",
             title: "Sudden Change",
             description: "During a friendly game, $NAME suddenly flipped the table and walked out.",
-            outcome: { news: "$NAME's mood swung violently today." }
+            outcome: { stat: { agi: 1 }, news: "$NAME's mood swung violently today." }
         }
     ],
     "cynical": [
@@ -160,7 +160,7 @@ const TRAIT_EVENTS = {
             id: "cynical_reject",
             title: "Suspicious Gift",
             description: "A fan tried to give $NAME a lucky charm. They threw it away, calling it a 'tricky bribe'.",
-            outcome: { news: "$NAME rejected a fan's gift." }
+            outcome: { stat: { cha: 1 }, news: "$NAME rejected a fan's gift." }
         },
         {
             id: "cynical_warning",
@@ -194,7 +194,7 @@ const TRAIT_EVENTS = {
             id: "flippant_joke",
             title: "Bad Timing",
             description: "$NAME made a joke while the coach was explaining a life-saving maneuver.",
-            outcome: { news: "$NAME's attitude is grating on the veterans." }
+            outcome: { stat: { int: 1 }, news: "$NAME's attitude is grating on the veterans." }
         },
         {
             id: "flippant_gamble",
@@ -240,7 +240,7 @@ const TRAIT_EVENTS = {
             id: "apathetic_miss",
             title: "Lapsed Guard",
             description: "$NAME forgot to sharpen their blade today. It's dull and useless.",
-            outcome: { news: "$NAME's lack of interest is becoming an issue." }
+            outcome: { stat: { con: 1 }, news: "$NAME's lack of interest is becoming an issue." }
         },
         {
             id: "apathetic_boredom",
@@ -260,7 +260,7 @@ const TRAIT_EVENTS = {
             id: "introspective_quiet",
             title: "The Silent Day",
             description: "$NAME didn't speak a word all day, lost in their own mind.",
-            outcome: { news: "$NAME is deep in thought." }
+            outcome: { gold: 25, news: "$NAME is deep in thought." }
         },
         {
             id: "introspective_journal",
@@ -276,7 +276,7 @@ const TRAIT_EVENTS = {
             description: "$NAME made friends with a wandering gladiator and convinced them to join the team's trials.",
             choices: [
                 { text: "Recruit them (300 G)", outcome: { recruit: true, gold: -300, news: "$NAME brought a new face to the team." } },
-                { text: "Passing by", outcome: { news: "$NAME's new friend moved on." } }
+                { text: "Passing by", outcome: { gold: -25, news: "$NAME's new friend moved on." } }
             ]
         },
         {
@@ -289,7 +289,7 @@ const TRAIT_EVENTS = {
             id: "gregarious_distraction",
             title: "Too Much Talk",
             description: "$NAME's constant talking during drills slowed everyone down.",
-            outcome: { news: "$NAME's social energy was a bit distracting today." }
+            outcome: { stat: { wis: 1 }, news: "$NAME's social energy was a bit distracting today." }
         }
     ],
     "aloof": [
@@ -303,7 +303,7 @@ const TRAIT_EVENTS = {
             id: "aloof_resentment",
             title: "The Outsider",
             description: "$NAME's refusal to join the team meal caused some bad feelings in the barracks.",
-            outcome: { news: "$NAME is distancing themselves from the team." }
+            outcome: { stat: { wis: 1 }, news: "$NAME is distancing themselves from the team." }
         },
         {
             id: "aloof_perfection",
@@ -319,7 +319,7 @@ const TRAIT_EVENTS = {
             description: "$NAME challenged the strongest teammate to a spar for 50 gold.",
             choices: [
                 { text: "Let them fight", outcome: { chance: 0.5, gold: 50, news: "$NAME won the wager!", alt_gold: -50, alt_news: "$NAME lost the wager." } },
-                { text: "Stop them", outcome: { news: "You prevented the internal gambling." } }
+                { text: "Stop them", outcome: { stat: { agi: 1 }, news: "You prevented the internal gambling." } }
             ]
         },
         {
@@ -346,7 +346,7 @@ const TRAIT_EVENTS = {
             id: "humble_refusal",
             title: "No Praise Needed",
             description: "A fan tried to heap praise on $NAME, but they redirected it to the whole team.",
-            outcome: { news: "$NAME's humility is becoming legendary." }
+            outcome: { stat: { cha: 1 }, news: "$NAME's humility is becoming legendary." }
         },
         {
             id: "humble_service",
@@ -362,7 +362,7 @@ const TRAIT_EVENTS = {
             description: "$NAME demands a better weapon, claiming the current one is 'beneath them'.",
             choices: [
                 { text: "Give in (200 G)", outcome: { gold: -200, stat: { str: 2 }, news: "$NAME got their way and feels powerful." } },
-                { text: "Refuse", outcome: { news: "$NAME is sulking after your refusal." } }
+                { text: "Refuse", outcome: { stat: { dex: 1 }, news: "$NAME is sulking after your refusal." } }
             ]
         },
         {
@@ -437,7 +437,7 @@ const TRAIT_EVENTS = {
             id: "bloodthirsty_excess",
             title: "Too Far",
             description: "$NAME nearly killed a training partner in a 'friendly' sparring match. They had to be pulled away.",
-            outcome: { news: "$NAME's aggression is causing fear among the team." }
+            outcome: { stat: { str: 1 }, news: "$NAME's aggression is causing fear among the team." }
         }
     ],
     "cautious": [
@@ -471,7 +471,7 @@ const TRAIT_EVENTS = {
             id: "frenzied_scare",
             title: "Wild Eyes",
             description: "A local gang tried to harass our team. $NAME just stared at them until they ran away in terror.",
-            outcome: { news: "$NAME's intense gaze intimidated some locals." }
+            outcome: { hp: 15, news: "$NAME's intense gaze intimidated some locals." }
         },
         {
             id: "frenzied_exhaustion",
@@ -517,7 +517,7 @@ const TRAIT_EVENTS = {
             id: "defensive_slow",
             title: "Dull Blade",
             description: "$NAME is so focused on shields that they've neglected their offensive training.",
-            outcome: { news: "$NAME is falling behind in offensive drills." }
+            outcome: { gold: -25, news: "$NAME is falling behind in offensive drills." }
         }
     ],
     "aggressive": [
@@ -559,7 +559,7 @@ const TRAIT_EVENTS = {
             description: "$NAME was caught trying to steal from our own supply chest. They claim it was just a 'test' of our security.",
             choices: [
                 { text: "Fine them (200 G)", outcome: { gold: 200, news: "You fined $NAME for their 'test'." } },
-                { text: "Forgive them", outcome: { news: "You let $NAME's shady behavior slide." } }
+                { text: "Forgive them", outcome: { gold: 25, news: "You let $NAME's shady behavior slide." } }
             ]
         }
     ],
@@ -600,7 +600,7 @@ const TRAIT_EVENTS = {
             id: "mercy_hesitation",
             title: "Soft Heart",
             description: "$NAME hesitated during a finishing drill, unable to bring themselves to deliver the killing blow to an animal.",
-            outcome: { news: "$NAME is struggling with the brutal nature of the arena." }
+            outcome: { hp: 15, news: "$NAME is struggling with the brutal nature of the arena." }
         }
     ],
     "ruthless": [
@@ -662,7 +662,7 @@ const TRAIT_EVENTS = {
             description: "$NAME suggests we change our defensive formations to something totally illogical.",
             choices: [
                 { text: "Try it", outcome: { teamWide: true, chance: 0.5, stat: { con: 1 }, news: "$NAME's weird formation was a genius move!", alt_hp: -120, alt_news: "The new formation was a disaster." } },
-                { text: "Reject it", outcome: { news: "You stuck to traditional methods." } }
+                { text: "Reject it", outcome: { gold: -25, news: "You stuck to traditional methods." } }
             ]
         }
     ],
@@ -808,7 +808,7 @@ const TRAIT_EVENTS = {
             description: "$NAME has a complex plan to rig a local minor match to our advantage.",
             choices: [
                 { text: "Agree", outcome: { chance: 0.4, gold: 1000, news: "The plan worked! You made a killing.", alt_news: "The authorities caught wind of the scheme!", alt_gold: -1000 } },
-                { text: "Reject", outcome: { news: "You played it safe." } }
+                { text: "Reject", outcome: { hp: -15, news: "You played it safe." } }
             ]
         }
     ],
@@ -860,7 +860,7 @@ const TRAIT_EVENTS = {
             description: "$NAME insists they need a 'performance bonus' to stay focused on the next match.",
             choices: [
                 { text: "Pay them (150 G)", outcome: { gold: -150, stat: { str: 2 }, news: "$NAME's loyalty was bought... for today." } },
-                { text: "Refuse", outcome: { news: "$NAME is doing the bare minimum." } }
+                { text: "Refuse", outcome: { stat: { dex: 1 }, news: "$NAME is doing the bare minimum." } }
             ]
         },
         {
@@ -903,20 +903,20 @@ const TRAIT_EVENTS = {
             description: "$NAME was caught stealing from the team's medical supplies to sell them.",
             choices: [
                 { text: "Lash them", outcome: { hp: -100, news: "You punished $NAME for their betrayal." } },
-                { text: "Banish them", outcome: { remove: true, news: "You kicked $NAME off the team." } }
+                { text: "Banish them", outcome: { gold: -25, remove: true, news: "You kicked $NAME off the team." } }
             ]
         },
         {
             id: "treacherous_leak",
             title: "Loose Lips",
             description: "$NAME sold our tactical secrets to a rival for a pint of ale.",
-            outcome: { news: "Our secrets have been exposed by $NAME." }
+            outcome: { stat: { con: 1 }, news: "Our secrets have been exposed by $NAME." }
         },
         {
             id: "treacherous_shadow",
             title: "Shady Deal",
             description: "$NAME was seen talking to a known assassin. They claim it was 'nothing'.",
-            outcome: { news: "$NAME's behavior is highly suspicious." }
+            outcome: { gold: 25, news: "$NAME's behavior is highly suspicious." }
         }
     ],
     "idealistic": [
@@ -946,7 +946,7 @@ const TRAIT_EVENTS = {
             description: "You found a stash of gold $NAME had been hiding from the team's shared purse.",
             choices: [
                 { text: "Seize it (400 G)", outcome: { gold: 400, news: "You reclaimed the team's gold." } },
-                { text: "Let them keep it", outcome: { news: "You let $NAME's greed slide." } }
+                { text: "Let them keep it", outcome: { gold: 25, news: "You let $NAME's greed slide." } }
             ]
         },
         {
@@ -959,7 +959,7 @@ const TRAIT_EVENTS = {
             id: "greedy_scraps",
             title: "Bottom Line",
             description: "$NAME refused to share their high-quality whetstone with the team.",
-            outcome: { news: "$NAME's selfishness is causing friction." }
+            outcome: { stat: { wis: 1 }, news: "$NAME's selfishness is causing friction." }
         }
     ],
     "selfless": [
@@ -973,7 +973,7 @@ const TRAIT_EVENTS = {
             id: "selfless_training",
             title: "Mentor",
             description: "$NAME spent their free time training the newest recruit instead of resting.",
-            outcome: { news: "$NAME's selflessness is improving the roster." }
+            outcome: { stat: { int: 1 }, news: "$NAME's selflessness is improving the roster." }
         },
         {
             id: "selfless_risk",
@@ -1067,13 +1067,13 @@ const TRAIT_EVENTS = {
             id: "rebellious_refusal",
             title: "I Won't",
             description: "$NAME refused to clean the stables, leading to a loud argument with the coach.",
-            outcome: { news: "$NAME is challenging authority again." }
+            outcome: { stat: { str: 1 }, news: "$NAME is challenging authority again." }
         },
         {
             id: "rebellious_shave",
             title: "Non-Conformist",
             description: "$NAME dyed their hair a bright, garish color just to annoy the team owner.",
-            outcome: { news: "$NAME's defiance is visible for all to see." }
+            outcome: { hp: 15, news: "$NAME's defiance is visible for all to see." }
         },
         {
             id: "rebellious_escape",
@@ -1107,13 +1107,13 @@ const TRAIT_EVENTS = {
             id: "principled_refusal",
             title: "Clean Hands",
             description: "$NAME refused to use a poisoned blade during training, even though it was allowed.",
-            outcome: { news: "$NAME's principles are more important than victory." }
+            outcome: { stat: { cha: 1 }, news: "$NAME's principles are more important than victory." }
         },
         {
             id: "principled_stand",
             title: "The Right Choice",
             description: "$NAME spoke out against a cruel punishment being given to a local slave.",
-            outcome: { news: "$NAME's moral compass is strong." }
+            outcome: { gold: -25, news: "$NAME's moral compass is strong." }
         },
         {
             id: "principled_trust",
@@ -1139,7 +1139,7 @@ const TRAIT_EVENTS = {
             id: "selfish_theft",
             title: "Private Stash",
             description: "$NAME was caught hiding medical supplies for their own exclusive use.",
-            outcome: { news: "$NAME is only looking out for themselves." }
+            outcome: { stat: { wis: 1 }, news: "$NAME is only looking out for themselves." }
         }
     ],
     "ambitious": [
@@ -1147,7 +1147,7 @@ const TRAIT_EVENTS = {
             id: "ambitious_networking",
             title: "Climbing the Ladder",
             description: "$NAME spent the evening talking to several high-profile arena scouts.",
-            outcome: { news: "$NAME is looking to make a name for themselves." }
+            outcome: { hp: 15, news: "$NAME is looking to make a name for themselves." }
         },
         {
             id: "ambitious_training",
@@ -1160,8 +1160,8 @@ const TRAIT_EVENTS = {
             title: "Power Play",
             description: "$NAME suggested a way to undermine a rival team's leader.",
             choices: [
-                { text: "Approve", outcome: { chance: 0.5, news: "The plan worked! Rival weakened.", alt_news: "The plan failed and backfired." } },
-                { text: "Dismiss", outcome: { news: "You rejected $NAME's shady ambition." } }
+                { text: "Approve", outcome: { stat: { cha: 1 }, chance: 0.5, news: "The plan worked! Rival weakened.", alt_news: "The plan failed and backfired." } },
+                { text: "Dismiss", outcome: { gold: 25, news: "You rejected $NAME's shady ambition." } }
             ]
         }
     ],
@@ -1170,7 +1170,7 @@ const TRAIT_EVENTS = {
             id: "stoical_loyalty_silent",
             title: "Unspoken Vow",
             description: "$NAME stood in the rain to guard the equipment while others were at the tavern.",
-            outcome: { con: 1, news: "$NAME's quiet loyalty is a blessing." }
+            outcome: { hp: -15, con: 1, news: "$NAME's quiet loyalty is a blessing." }
         },
         {
             id: "stoical_loyalty_blow",
@@ -1182,7 +1182,7 @@ const TRAIT_EVENTS = {
             id: "stoical_loyalty_steady",
             title: "Rock of the Team",
             description: "$NAME's steady presence prevented a team argument from escalating into a fight.",
-            outcome: { news: "$NAME's loyalty kept the team together." }
+            outcome: { stat: { wis: 1 }, news: "$NAME's loyalty kept the team together." }
         }
     ],
     "corruptible": [
@@ -1192,7 +1192,7 @@ const TRAIT_EVENTS = {
             description: "A shady man offered $NAME gold to leak our training schedule. They look tempted.",
             choices: [
                 { text: "Match the bribe (200 G)", outcome: { gold: -200, news: "You bought $NAME's silence." } },
-                { text: "Ignore it", outcome: { chance: 0.6, news: "$NAME resisted the temptation.", alt_news: "$NAME sold the info!" } }
+                { text: "Ignore it", outcome: { hp: 15, chance: 0.6, news: "$NAME resisted the temptation.", alt_news: "$NAME sold the info!" } }
             ]
         },
         {
@@ -1205,7 +1205,7 @@ const TRAIT_EVENTS = {
             id: "corruptible_betrayal",
             title: "Greener Pastures",
             description: "$NAME was seen talking to a recruiter for a rival team.",
-            outcome: { news: "$NAME's loyalty is clearly for sale." }
+            outcome: { gold: -25, news: "$NAME's loyalty is clearly for sale." }
         }
     ],
     "righteous": [
@@ -1213,7 +1213,7 @@ const TRAIT_EVENTS = {
             id: "righteous_judgment",
             title: "Moral Stand",
             description: "$NAME refused to work with a teammate they consider 'unclean' or 'sinful'.",
-            outcome: { news: "$NAME's rigid morality is causing friction." }
+            outcome: { hp: -15, news: "$NAME's rigid morality is causing friction." }
         },
         {
             id: "righteous_crusade",
@@ -1225,7 +1225,7 @@ const TRAIT_EVENTS = {
             id: "righteous_aid",
             title: "Blessed Hands",
             description: "$NAME spent the day tending the poor in the city's slums. A noble act.",
-            outcome: { news: "$NAME's righteousness brought us goodwill." }
+            outcome: { stat: { wis: 1 }, news: "$NAME's righteousness brought us goodwill." }
         }
     ],
     "empathetic": [
@@ -1268,8 +1268,8 @@ const TRAIT_EVENTS = {
             title: "Double or Nothing",
             description: "$NAME wants to bet our next match's winnings for a chance at double the prize.",
             choices: [
-                { text: "Accept Bet", outcome: { chance: 0.5, news: "You're in! High stakes ahead.", alt_news: "Risky move, but you're committed." } },
-                { text: "Decline", outcome: { news: "You played it safe." } }
+                { text: "Accept Bet", outcome: { stat: { cha: 1 }, chance: 0.5, news: "You're in! High stakes ahead.", alt_news: "Risky move, but you're committed." } },
+                { text: "Decline", outcome: { stat: { dex: 1 }, news: "You played it safe." } }
             ]
         }
     ],
@@ -1310,7 +1310,7 @@ const TRAIT_EVENTS = {
             id: "insomniac_watch",
             title: "Eagle Eyes",
             description: "Because $NAME was awake all night, they caught a thief trying to enter the barracks.",
-            outcome: { news: "$NAME's insomnia kept us safe." }
+            outcome: { stat: { str: 1 }, news: "$NAME's insomnia kept us safe." }
         }
     ],
     "superstitious": [
@@ -1410,7 +1410,7 @@ const TRAIT_EVENTS = {
             id: "night_owl_morning",
             title: "Late Start",
             description: "$NAME is completely useless in the morning and missed the early briefing.",
-            outcome: { news: "$NAME is struggling with the early schedule." }
+            outcome: { hp: 15, news: "$NAME is struggling with the early schedule." }
         }
     ],
     "neat_freak": [
@@ -1430,7 +1430,7 @@ const TRAIT_EVENTS = {
             id: "neat_freak_clash",
             title: "Messy Teammate",
             description: "$NAME got into a heated argument with a teammate about a dirty pair of boots.",
-            outcome: { news: "$NAME's obsession with neatness caused some friction." }
+            outcome: { stat: { agi: 1 }, news: "$NAME's obsession with neatness caused some friction." }
         }
     ],
     "slovenly": [
@@ -1438,7 +1438,7 @@ const TRAIT_EVENTS = {
             id: "slovenly_rust",
             title: "Rusty Blade",
             description: "$NAME forgot to oil their sword and it's starting to rust. It's less effective now.",
-            outcome: { news: "$NAME's neglect is showing on their gear." }
+            outcome: { stat: { cha: 1 }, news: "$NAME's neglect is showing on their gear." }
         },
         {
             id: "slovenly_nap",
@@ -1464,7 +1464,7 @@ const TRAIT_EVENTS = {
             id: "talkative_distraction",
             title: "Mouth Running",
             description: "$NAME wouldn't stop talking during the tactical meeting. No one could focus.",
-            outcome: { news: "$NAME's talking is becoming a distraction." }
+            outcome: { stat: { con: 1 }, news: "$NAME's talking is becoming a distraction." }
         },
         {
             id: "talkative_friend",
@@ -1490,7 +1490,7 @@ const TRAIT_EVENTS = {
             id: "laconic_mystery",
             title: "Stone Face",
             description: "$NAME refused to explain why they were late. They just pointed at their sharpening stone and grunted.",
-            outcome: { news: "$NAME is as mysterious as ever." }
+            outcome: { stat: { int: 1 }, news: "$NAME is as mysterious as ever." }
         }
     ],
     "jinxed": [
@@ -1524,7 +1524,7 @@ const TRAIT_EVENTS = {
             id: "lucky_miss",
             title: "The Near Miss",
             description: "A training blade snapped and nearly hit $NAME, but they had just leaned over to tie their shoe.",
-            outcome: { news: "$NAME's luck is almost supernatural." }
+            outcome: { gold: -25, news: "$NAME's luck is almost supernatural." }
         },
         {
             id: "lucky_find",
@@ -1564,7 +1564,7 @@ const TRAIT_EVENTS = {
             id: "forgetful_orders",
             title: "What Now?",
             description: "$NAME completely forgot the training schedule and spent the day doing nothing.",
-            outcome: { news: "$NAME's memory is failing them." }
+            outcome: { stat: { con: 1 }, news: "$NAME's memory is failing them." }
         },
         {
             id: "forgetful_surprise",
@@ -1590,7 +1590,7 @@ const TRAIT_EVENTS = {
             id: "fastidious_delay",
             title: "Too Slow",
             description: "$NAME spent so long checking their armor straps that the practice session was over.",
-            outcome: { news: "$NAME's perfectionism is slowing things down." }
+            outcome: { stat: { wis: 1 }, news: "$NAME's perfectionism is slowing things down." }
         }
     ],
     "bibliophile": [
@@ -1624,7 +1624,7 @@ const TRAIT_EVENTS = {
             id: "wanderer_absence",
             title: "Gone Fishin'",
             description: "$NAME disappeared for several hours and missed a crucial drill.",
-            outcome: { state: { dex: -1 }, news: "$NAME's restless feet are causing problems." }
+            outcome: { gold: -25, state: { dex: -1 }, news: "$NAME's restless feet are causing problems." }
         },
         {
             id: "wanderer_gift",
@@ -1650,7 +1650,7 @@ const TRAIT_EVENTS = {
             id: "stout_broken_chair",
             title: "Timber!",
             description: "$NAME sat on a training stool and it splintered into a thousand pieces.",
-            outcome: { state: { con: 1 }, news: "$NAME's size is a bit much for the furniture." }
+            outcome: { stat: { con: 1 }, state: { con: 1 }, news: "$NAME's size is a bit much for the furniture." }
         }
     ],
 
@@ -1706,7 +1706,7 @@ const TRAIT_EVENTS = {
             id: "orphan_stealing",
             title: "Old Habits",
             description: "$NAME was caught 'borrowing' a loaf of bread from a vendor.",
-            outcome: { news: "$NAME is struggling to leave the street life behind." }
+            outcome: { hp: -15, news: "$NAME is struggling to leave the street life behind." }
         },
         {
             id: "orphan_resilience",
@@ -1726,7 +1726,7 @@ const TRAIT_EVENTS = {
             id: "scholar_distracted",
             title: "Head in the Clouds",
             description: "$NAME was so busy thinking about philosophy they nearly got hit in the head during practice.",
-            outcome: { news: "$NAME is a bit too academic for the pits." }
+            outcome: { stat: { int: 1 }, news: "$NAME is a bit too academic for the pits." }
         },
         {
             id: "scholar_invention",
@@ -1766,7 +1766,7 @@ const TRAIT_EVENTS = {
             id: "hermit_isolation",
             title: "Silence Please",
             description: "$NAME hasn't spoken in three days. The other gladiators find it unnerving.",
-            outcome: { news: "$NAME is being particularly quiet." }
+            outcome: { gold: -25, news: "$NAME is being particularly quiet." }
         },
         {
             id: "hermit_instinct",
@@ -1786,13 +1786,13 @@ const TRAIT_EVENTS = {
             id: "sailor_mouth",
             title: "Sea Shanty",
             description: "$NAME's foul language and loud songs kept the tavern awake half the night.",
-            outcome: { news: "$NAME is as rowdy as a storm at sea." }
+            outcome: { stat: { agi: 1 }, news: "$NAME is as rowdy as a storm at sea." }
         },
         {
             id: "sailor_weather",
             title: "Weather Vane",
             description: "$NAME correctly predicted the afternoon storm, allowing the team to move the equipment indoors.",
-            outcome: { news: "$NAME's sea-sense saved the gear from a soaking." }
+            outcome: { stat: { cha: 1 }, news: "$NAME's sea-sense saved the gear from a soaking." }
         }
     ],
     "thief": [
@@ -1846,7 +1846,7 @@ const TRAIT_EVENTS = {
             id: "pacifist_hesitation",
             title: "Weak Hand",
             description: "$NAME hesitated during a finishing strike, failing the assessment.",
-            outcome: { state: { str: -2, wis: 2 }, news: "$NAME's heart isn't in the killing business." }
+            outcome: { hp: -15, state: { str: -2, wis: 2 }, news: "$NAME's heart isn't in the killing business." }
         },
         {
             id: "pacifist_comfort",
@@ -1932,7 +1932,7 @@ const TRAIT_EVENTS = {
             id: "tribal_clash",
             title: "Cultural Difference",
             description: "$NAME got into a fight about 'civilized' behavior.",
-            outcome: { news: "$NAME is struggling to adapt to the city." }
+            outcome: { gold: -25, news: "$NAME is struggling to adapt to the city." }
         }
     ],
     "exiled": [
@@ -2046,7 +2046,7 @@ const TRAIT_EVENTS = {
             id: "redeemed_guilt",
             title: "Weight of the Past",
             description: "$NAME is struggling with the memories of things they've done.",
-            outcome: { news: "$NAME is having a difficult day emotionally." }
+            outcome: { stat: { cha: 1 }, news: "$NAME is having a difficult day emotionally." }
         },
         {
             id: "redeemed_training",

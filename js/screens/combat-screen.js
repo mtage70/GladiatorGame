@@ -26,7 +26,9 @@ let combatState = {
     opponentTeamId: null,
     healingDampener: 100,
     timeMultiplier: 1,
-    isPaused: false
+    isPaused: false,
+    manualActionUsedThisRound: false,
+    manualTargetId: null
 };
 
 // Initialize Combat Controls
@@ -116,6 +118,8 @@ function initializeCombat(playerFormation, opponentFormation, saveContext, oppon
     combatState.healingDampener = 100;
     combatState.timeMultiplier = 1;
     combatState.isPaused = false;
+    combatState.manualActionUsedThisRound = false;
+    combatState.manualTargetId = null;
 
     // Reset Controls UI
     const pauseBtn = document.getElementById('combatPauseBtn');
@@ -313,24 +317,61 @@ function renderCombatSide(side) {
         // Use the shared square widget builder
         card.innerHTML = buildSquareGladiatorCard(glad, 'combat-');
 
-        // Add click listener to show details and pause combat
+        // Add click listener for manual action OR showing details
         card.addEventListener('click', () => {
             if (!combatState.isCombatActive) return;
 
-            // Pause combat if it's not already paused
-            if (!combatState.isPaused) {
-                combatState.isPaused = true;
-                const pauseBtn = document.getElementById('combatPauseBtn');
-                if (pauseBtn) {
-                    pauseBtn.innerHTML = '<span class="material-icons">play_arrow</span>';
-                    pauseBtn.classList.add('paused');
+            // Player can click once per round to buff friendly or target enemy
+            if (!combatState.manualActionUsedThisRound) {
+                combatState.manualActionUsedThisRound = true;
+
+                // Update UI Indicator
+                const statusText = document.getElementById('manualActionStatusText');
+                const progressBar = document.getElementById('manualActionProgressBar');
+                if (statusText) {
+                    statusText.textContent = 'USED';
+                    statusText.style.color = 'var(--color-accent-danger)';
                 }
+                if (progressBar) {
+                    progressBar.style.width = '0%';
+                    progressBar.style.backgroundColor = 'var(--color-accent-danger)';
+                    progressBar.style.boxShadow = '0 0 5px var(--color-accent-danger)';
+                }
+
+                if (side === 'player') {
+                    // Buff Friendly
+                    glad.hasRoundBuff = true;
+                    // Primary stat boost (+10 stat, +10 base damage)
+                    // (We don't actually need to modify stats obj, just modifying baseDamage works,
+                    // but we can increase both if we want to affect dodging etc.)
+                    glad.baseDamage += 10;
+                    glad.stats.str += 10; glad.stats.dex += 10; glad.stats.int += 10; glad.stats.wis += 10;
+
+                    showFloatingText(glad.id, 'Buffed!', 'heal');
+                    logCombat(`<strong>${glad.name}</strong> was <span style="color:#4caf50">Rallied</span>! (+Primary Stat, Half Damage)`);
+
+                    // Show Icon
+                    const buffIcon = document.getElementById(`combat-buff-icon-${glad.id}`);
+                    if (buffIcon) buffIcon.style.display = 'block';
+
+                } else {
+                    // Target Enemy
+                    combatState.manualTargetId = glad.id;
+                    showFloatingText(glad.id, 'Targeted!', 'damage');
+                    logCombat(`<strong>${glad.name}</strong> has been <span style="color:#ff4444">Marked as Target</span>!`);
+
+                    // Display all target icons to be safe then only show current
+                    document.querySelectorAll('.combat-target-icon').forEach(icon => icon.style.display = 'none');
+                    const targetIcon = document.getElementById(`combat-target-icon-${glad.id}`);
+                    if (targetIcon) targetIcon.style.display = 'block';
+                }
+                return; // Stop here, don't pause or open details
+            } else {
+                // Feature is on cooldown, fallback to pause & open details like before (if requested, though user asked to remove details behavior. Leaving empty as requested)
+                // "remove the openGladiatorDetails() behavior"
+                // So do nothing.
             }
 
-            // Open gladiator details
-            if (typeof openGladiatorDetails === 'function') {
-                openGladiatorDetails(glad);
-            }
         });
 
         slotDiv.appendChild(card);
@@ -425,10 +466,57 @@ function getValidTargets(attacker, allCombatants) {
 async function executeTurn() {
     if (!combatState.isCombatActive) return;
 
+    // Check if a new round has started
+    if (combatState.turnIndex === 0) {
+        // Reset manual action
+        combatState.manualActionUsedThisRound = false;
+        combatState.manualTargetId = null;
+
+        // Reset UI Indicator
+        const statusText = document.getElementById('manualActionStatusText');
+        const progressBar = document.getElementById('manualActionProgressBar');
+        if (statusText) {
+            statusText.textContent = 'READY';
+            statusText.style.color = 'var(--color-accent-success)';
+        }
+        if (progressBar) {
+            progressBar.style.width = '100%';
+            progressBar.style.backgroundColor = 'var(--color-accent-success)';
+            progressBar.style.boxShadow = '0 0 5px var(--color-accent-success)';
+        }
+
+        // Hide all target icons
+        document.querySelectorAll('.combat-target-icon').forEach(icon => icon.style.display = 'none');
+
+        // Remove buffs
+        combatState.combatants.forEach(c => {
+            if (c.hasRoundBuff) {
+                c.hasRoundBuff = false;
+                c.baseDamage -= 10;
+                c.stats.str -= 10; c.stats.dex -= 10; c.stats.int -= 10; c.stats.wis -= 10;
+
+                const buffIcon = document.getElementById(`combat-buff-icon-${c.id}`);
+                if (buffIcon) buffIcon.style.display = 'none';
+            }
+        });
+    }
+
     const attacker = combatState.combatants[combatState.turnIndex];
 
     // Cycle turn index for next time
     combatState.turnIndex = (combatState.turnIndex + 1) % combatState.combatants.length;
+
+    // Increment Progress Bar by fractional amount based on Turn Index (purely visual for within-round)
+    // Only if action has been used
+    if (combatState.manualActionUsedThisRound) {
+        const progressBar = document.getElementById('manualActionProgressBar');
+        if (progressBar) {
+            // If turnIndex just wrapped around to 0, it means 100% of the current round is complete
+            const displayIndex = combatState.turnIndex === 0 ? combatState.combatants.length : combatState.turnIndex;
+            const pct = Math.floor((displayIndex / combatState.combatants.length) * 100);
+            progressBar.style.width = `${pct}%`;
+        }
+    }
 
     // Skip turn if actor is dead
     if (attacker.isDead) {
@@ -597,6 +685,13 @@ async function executeTurn() {
         ? combatState.combatants.filter(c => c.side === targetSide && !c.isDead)
         : getValidTargets(attacker, combatState.combatants);
 
+    // Apply manual targeting if applicable
+    let forcedTarget = null;
+    if (attacker.side === 'player' && combatState.manualTargetId) {
+        // Find if manualTargetId is within validTargets
+        forcedTarget = validTargets.find(t => t.id === combatState.manualTargetId);
+    }
+
     // Determine Action
     let actionType = 'attack';
     let target = null;
@@ -622,7 +717,11 @@ async function executeTurn() {
     }
 
     if (actionType === 'attack') {
-        target = validTargets[Math.floor(Math.random() * validTargets.length)];
+        if (forcedTarget) {
+            target = forcedTarget;
+        } else {
+            target = validTargets[Math.floor(Math.random() * validTargets.length)];
+        }
         const variance = (0.8 + (Math.random() * 0.4));
 
         // If a Cleric is attacking, override baseDamage to use STR instead of WIS
@@ -741,7 +840,8 @@ async function executeTurn() {
 
             // Intelligence Mitigation
             const targetMitigation = Math.floor(target.stats.int / 10);
-            const finalTargetDmg = Math.max(1, splitDamage - targetMitigation);
+            let finalTargetDmg = Math.max(1, splitDamage - targetMitigation);
+            if (target.hasRoundBuff) finalTargetDmg = Math.max(1, Math.ceil(finalTargetDmg / 2));
 
             target.hp -= finalTargetDmg;
             showFloatingText(target.id, `-${finalTargetDmg}`, 'damage');
@@ -766,7 +866,8 @@ async function executeTurn() {
 
                 // Intelligence Mitigation for splash targets
                 const stMitigation = Math.floor(st.stats.int / 10);
-                const finalStDmg = Math.max(1, splitDamage - stMitigation);
+                let finalStDmg = Math.max(1, splitDamage - stMitigation);
+                if (st.hasRoundBuff) finalStDmg = Math.max(1, Math.ceil(finalStDmg / 2));
 
                 st.hp -= finalStDmg;
                 showFloatingText(st.id, `-${finalStDmg}`, 'damage');
@@ -798,9 +899,13 @@ async function executeTurn() {
                 logCombat(`<strong>${attacker.name}</strong> shoots an arrow at <strong>${target.name}</strong>, but they <em>dodged</em> it!`, 'normal');
             } else {
                 if (targetCard) targetCard.classList.add('taking-damage');
-                target.hp -= effectAmount;
-                showFloatingText(target.id, `-${effectAmount}`, 'damage');
-                logCombat(`<strong>${attacker.name}</strong> shoots an arrow at <strong>${target.name}</strong> for ${effectAmount} damage!`);
+
+                let finalDamage = effectAmount;
+                if (target.hasRoundBuff) finalDamage = Math.max(1, Math.ceil(finalDamage / 2));
+
+                target.hp -= finalDamage;
+                showFloatingText(target.id, `-${finalDamage}`, 'damage');
+                logCombat(`<strong>${attacker.name}</strong> shoots an arrow at <strong>${target.name}</strong> for ${finalDamage} damage!`);
 
                 if (applyLethalCheck(target)) {
                     logCombat(`--> <strong>${target.name}</strong> was shot down!`, 'death');
@@ -844,9 +949,12 @@ async function executeTurn() {
                 showFloatingText(target.id, 'Dodge!', 'dodge');
                 logCombat(`<strong>${attacker.name}</strong> attacks <strong>${target.name}</strong>, but they <em>dodged</em> the blow!`, 'normal');
             } else {
-                if (targetCard) targetCard.classList.add('taking-damage');
-                target.hp -= splitDamage;
-                showFloatingText(target.id, `-${splitDamage}`, 'damage');
+                // Check Damage Reduction Buff
+                let finalDamage = splitDamage;
+                if (target.hasRoundBuff) finalDamage = Math.max(1, Math.ceil(finalDamage / 2));
+
+                target.hp -= finalDamage;
+                showFloatingText(target.id, `-${finalDamage}`, 'damage');
                 if (applyLethalCheck(target)) {
                     logCombat(`--> <strong>${target.name}</strong> has been struck down!`, 'death');
                 }
@@ -855,9 +963,12 @@ async function executeTurn() {
 
             cleaveTargets.forEach(ct => {
                 const ctCard = document.getElementById(`combatant-${ct.id}`);
-                if (ctCard) ctCard.classList.add('taking-damage');
-                ct.hp -= splitDamage;
-                showFloatingText(ct.id, `-${splitDamage}`, 'damage');
+                // Check Damage Reduction Buff
+                let finalDamage = splitDamage;
+                if (ct.hasRoundBuff) finalDamage = Math.max(1, Math.ceil(finalDamage / 2));
+
+                ct.hp -= finalDamage;
+                showFloatingText(ct.id, `-${finalDamage}`, 'damage');
                 if (applyLethalCheck(ct)) {
                     logCombat(`--> <strong>${ct.name}</strong> was caught in the cleave and died!`, 'death');
                 }
@@ -886,13 +997,16 @@ async function executeTurn() {
             } else {
                 if (targetCard) targetCard.classList.add('taking-damage');
 
-                target.hp -= effectAmount;
+                let finalDamage = effectAmount;
+                if (target.hasRoundBuff) finalDamage = Math.max(1, Math.ceil(finalDamage / 2));
+
+                target.hp -= finalDamage;
                 let dmgType = actionType === 'rogue_crit' ? 'crit' : 'damage';
-                showFloatingText(target.id, `-${effectAmount}`, dmgType);
+                showFloatingText(target.id, `-${finalDamage}`, dmgType);
                 if (actionType === 'rogue_crit') {
-                    logCombat(`<strong>${attacker.name}</strong> <span style="color:#ffd700">CRITICAL STRIKES</span> <strong>${target.name}</strong> for <span style="color:#ff6666">${effectAmount} damage</span>!`, 'critical');
+                    logCombat(`<strong>${attacker.name}</strong> <span style="color:#ffd700">CRITICAL STRIKES</span> <strong>${target.name}</strong> for <span style="color:#ff6666">${finalDamage} damage</span>!`, 'critical');
                 } else {
-                    logCombat(`<strong>${attacker.name}</strong> attacks <strong>${target.name}</strong> for ${effectAmount} damage!`);
+                    logCombat(`<strong>${attacker.name}</strong> attacks <strong>${target.name}</strong> for ${finalDamage} damage!`);
                 }
 
                 if (applyLethalCheck(target)) {

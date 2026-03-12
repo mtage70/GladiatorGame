@@ -85,27 +85,7 @@
     background: rgba(0, 0, 0, 0.9);
 }
 
-.combat-card-hover-stats {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: calc(100% - 30px);
-    background: rgba(0, 0, 0, 0.8);
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    gap: 4px;
-    opacity: 0;
-    transition: opacity 0.2s ease;
-    font-size: 0.8rem;
-    color: var(--color-gold-light);
-}
 
-.combatant-card.full-slot:hover .combat-card-hover-stats {
-    opacity: 1;
-}
 
 .combat-card-name {
     font-size: 0.75rem;

@@ -143,11 +143,7 @@ screen and (max-width: 950px) {
         font-size: 0.5rem !important;
     }
 
-    .combat-card-hover-stats {
-        font-size: 0.55rem !important;
-        padding: 0.1rem !important;
-        line-height: 1 !important;
-    }
+
 
     .panel {
         padding: 0.25rem !important;

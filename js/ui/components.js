@@ -18,13 +18,15 @@ function buildSquareGladiatorCard(glad, prefix = '') {
         ${portraitImg}
         <div class="card-ovr-badge ${glad.class.toLowerCase()}">${ovr}</div>
         ${battlesBadge}
-        <div class="combat-card-hover-stats">
-            <div>STR: ${glad.stats.str}</div>
-            <div>DEX: ${glad.stats.dex}</div>
-            <div>INT: ${glad.stats.int}</div>
-            <div>WIS: ${glad.stats.wis}</div>
-            <div>CON: ${glad.stats.con || 25}</div>
+        
+        <!-- Target & Buff Icons (Hidden by default) -->
+        <div id="${prefix}target-icon-${glad.id}" class="combat-target-icon" style="display: none; position: absolute; top: -8px; left: 50%; transform: translateX(-50%); color: #ff4444; font-size: 1.5rem; text-shadow: 0 0 5px black; z-index: 10;">
+            <span class="material-icons">my_location</span>
         </div>
+        <div id="${prefix}buff-icon-${glad.id}" class="combat-buff-icon" style="display: none; position: absolute; top: 0; right: 0; color: #4caf50; font-size: 1.2rem; text-shadow: 0 0 5px black; z-index: 10;">
+            <span class="material-icons" style="font-size: 1.2rem;">shield</span>
+        </div>
+
         <div class="combat-card-overlay">
             <div class="combat-card-name">${glad.name}</div>
             <div class="hp-bar-container" style="height: 12px;">
