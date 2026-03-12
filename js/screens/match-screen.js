@@ -561,6 +561,10 @@ function startCombat() {
         return g;
     });
 
+    // Start battle music
+    if (typeof stopBackgroundMusic === 'function') stopBackgroundMusic();
+    if (typeof playBattleMusic === 'function') playBattleMusic();
+
     // Call global initializeCombat
     initializeCombat(
         pForm,

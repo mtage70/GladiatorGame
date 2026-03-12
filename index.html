@@ -28,6 +28,10 @@
 
 <body>
 
+    <!-- Start Overlay for Audio Autoplay Policy -->
+    <div id="startOverlay" class="start-overlay">
+        <h2>Click to Start</h2>
+    </div>
 
     <div class="pan-background" id="panBackground" style="background-image: url('assets/ui/colosseum.png');"></div>
 
@@ -44,6 +48,10 @@
             </button>
             <button class="menu-btn primary" data-action="new-game">
                 <span class="btn-text">New Game</span>
+                <div class="btn-glow"></div>
+            </button>
+            <button class="menu-btn" data-action="how-to-play">
+                <span class="btn-text">How To Play</span>
                 <div class="btn-glow"></div>
             </button>
             <button class="menu-btn danger" data-action="exit">
@@ -68,11 +76,117 @@
         </button>
     </div>
 
+    <!-- How To Play Screen -->
+    <div class="team-selection-screen hidden" id="howToPlayScreen">
+        <h1 class="game-title" style="font-size: 2rem; margin-bottom: 0;">How To Play</h1>
+
+        <div
+            style="display: flex; gap: 2rem; width: 100%; max-width: 1200px; height: calc(100vh - 120px); margin: 0 auto; margin-top: 1rem;">
+
+            <!-- Content Area -->
+            <main class="home-content panel"
+                style="flex: 1; overflow-y: auto; text-align: left; background: rgba(0,0,0,0.85); box-shadow: 0 0 20px rgba(0,0,0,0.8); border: 1px solid var(--color-gold-dark); padding: 2rem;">
+
+                <!-- Basics Tab -->
+                <div id="htp-basics" class="htp-tab-content" style="display: block;">
+                    <h2
+                        style="color: var(--color-gold); border-bottom: 1px solid var(--color-gold-dark); padding-bottom: 0.5rem; margin-bottom: 1rem;">
+                        The Basics</h2>
+                    <p style="margin-bottom: 1.5rem; line-height: 1.6; font-size: 1.1rem;">Welcome, Manager. Your goal
+                        is to lead your team of gladiators to victory in the arena. You start with a roster of 5
+                        gladiators and 2500 Gold.</p>
+                    <p style="margin-bottom: 1.5rem; line-height: 1.6; font-size: 1.1rem;">Manage your team from the
+                        Home screen. From there, you can view your roster, recruit new fighters, check the league
+                        standings, and advance time to the next match or event.</p>
+                </div>
+
+                <!-- Combat Tab -->
+                <div id="htp-combat" class="htp-tab-content" style="display: none;">
+                    <h2
+                        style="color: var(--color-gold); border-bottom: 1px solid var(--color-gold-dark); padding-bottom: 0.5rem; margin-bottom: 1rem;">
+                        Combat & Strategy</h2>
+                    <p style="margin-bottom: 1rem; line-height: 1.6; font-size: 1.1rem;">Combat is completely autonomous
+                        and turn-based. Turn order is determined by each gladiator's <strong>Dexterity (DEX)</strong>
+                        stat.</p>
+                    <ul style="margin-bottom: 1.5rem; line-height: 1.6; padding-left: 1.5rem; font-size: 1.1rem;">
+                        <li style="margin-bottom: 0.5rem;"><strong>Frontline & Backline:</strong> Gladiators in the
+                            front slots are targeted first by melee attacks. Protect your vulnerable classes (like Mages
+                            and Clerics) by putting them in the backline behind sturdy Warriors and Paladins.</li>
+                        <li><strong>Manual Action:</strong> Once per round, you can manually intervene as the manager.
+                            Click a friendly gladiator to cast <strong>Rally</strong> (buffing their stats for the
+                            current round), or click an enemy to <strong>Mark them as Target</strong>, forcing your team
+                            to focus all their attacks on that specific gladiator.</li>
+                    </ul>
+                </div>
+
+                <!-- Classes Tab -->
+                <div id="htp-classes" class="htp-tab-content" style="display: none;">
+                    <h2
+                        style="color: var(--color-gold); border-bottom: 1px solid var(--color-gold-dark); padding-bottom: 0.5rem; margin-bottom: 1rem;">
+                        Classes & Mechanics</h2>
+                    <p style="margin-bottom: 1rem; line-height: 1.6; font-size: 1.1rem;">Each class brings unique
+                        mechanics and stat scalings to the arena.</p>
+                    <ul style="margin-bottom: 1.5rem; line-height: 1.6; padding-left: 1.5rem; font-size: 1.1rem;">
+                        <li style="margin-bottom: 0.5rem;"><strong
+                                style="color: var(--color-accent-danger);">Warrior:</strong> High Strength and
+                            Constitution. Sturdy frontline fighter. Damage scales with STR.</li>
+                        <li style="margin-bottom: 0.5rem;"><strong style="color: #ffd700;">Paladin:</strong> High
+                            Constitution. Has a <strong>Divine Shield</strong> that prevents death from a lethal blow
+                            once per battle. Damage scales with STR.</li>
+                        <li style="margin-bottom: 0.5rem;"><strong style="color: #4caf50;">Rogue:</strong> High
+                            Dexterity. High chance to <strong>Dodge</strong> attacks, and can land critical hits for
+                            double damage. Damage scales with DEX.</li>
+                        <li style="margin-bottom: 0.5rem;"><strong style="color: #8bc34a;">Hunter:</strong> High
+                            Dexterity. Uses a bow to attack <strong>any target</strong>, bypassing frontline priority
+                            entirely. Damage scales with DEX.</li>
+                        <li style="margin-bottom: 0.5rem;"><strong style="color: #ff9800;">Mage:</strong> High
+                            Intelligence. Casts Fireballs that deal <strong>splash damage</strong> to adjacent enemies.
+                            Damage scales with INT.</li>
+                        <li><strong style="color: #2196f3;">Cleric:</strong> High Wisdom. Intermittently
+                            <strong>heals</strong> injured allies during combat instead of attacking. Healing scales
+                            with WIS.
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Recruiting Tab -->
+                <div id="htp-recruiting" class="htp-tab-content" style="display: none;">
+                    <h2
+                        style="color: var(--color-gold); border-bottom: 1px solid var(--color-gold-dark); padding-bottom: 0.5rem; margin-bottom: 1rem;">
+                        Recruiting & Permadeath</h2>
+                    <p style="margin-bottom: 1.5rem; line-height: 1.6; font-size: 1.1rem;">The arena is unforgiving.
+                        When a gladiator's HP reaches 0, they are <strong>permanently dead</strong>. Their legacy is
+                        recorded in the graveyard, but you must fight on.</p>
+                    <p style="margin-bottom: 1.5rem; line-height: 1.6; font-size: 1.1rem;">You can recruit new
+                        gladiators from your Home screen for <strong>500 Gold</strong>. Keep a healthy reserve of coin
+                        to replace the fallen, or you'll be forced to forfeit matches if you can't field a team.</p>
+                </div>
+            </main>
+
+            <!-- Sidebar Navigation -->
+            <div class="widget-toggles"
+                style="display: flex; flex-direction: column; width: 16rem; flex-shrink: 0; justify-content: flex-start; gap: 0.5rem;">
+                <button class="menu-btn danger" id="closeHowToPlayBtn"
+                    style="margin-bottom: 1.5rem; width: 100%; opacity: 1 !important;">
+                    <span class="btn-text">Return to Menu</span>
+                    <div class="btn-glow"></div>
+                </button>
+
+                <button class="tab-btn active" data-target="htp-basics">The Basics</button>
+                <button class="tab-btn" data-target="htp-combat">Combat & Strategy</button>
+                <button class="tab-btn" data-target="htp-classes">Classes</button>
+                <button class="tab-btn" data-target="htp-recruiting">Recruiting & Death</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Home Screen -->
     <div id="homeScreen" class="home-screen hidden" style="background-image: url('assets/ui/colosseum_interior.png');">
         <header class="home-header">
             <h2 class="home-title">Arena Manager</h2>
             <div class="header-stats">
+                <span class="stat-item hidden" id="trophyDisplay" style="color: var(--color-gold);"><span
+                        class="stat-icon">🏆</span> <span id="trophyCount">0</span></span>
                 <span class="stat-item" id="goldDisplay"><span class="stat-icon">💰</span> 1000 G</span>
                 <span class="stat-item" id="recordDisplay"><span class="stat-icon">⚔️</span> 0-0</span>
             </div>
@@ -278,14 +392,23 @@
             style="position: absolute; bottom: 4.5rem; left: 50%; transform: translateX(-50%); z-index: 10; font-size: 1.5rem; padding: 1rem 3rem;">END
             BATTLE</button>
 
-        <div id="combatIndicatorsContainer" style="position: absolute; bottom: 0.5rem; left: 50%; transform: translateX(-50%); z-index: 9; display: flex; gap: 1rem; align-items: flex-end;">
-            
+        <div id="combatIndicatorsContainer"
+            style="position: absolute; bottom: 0.5rem; left: 50%; transform: translateX(-50%); z-index: 9; display: flex; gap: 1rem; align-items: flex-end;">
+
             <!-- Manual Action Indicator -->
-            <div id="manualActionDisplay" style="text-align: center; background: rgba(0,0,0,0.7); padding: 0.4rem 0.8rem; border-radius: 4px; border: 1px solid var(--color-gold-dark);">
-                <div style="color: var(--color-gold-light); font-weight: bold; font-size: 0.9rem; line-height: 1.1; margin-bottom: 4px;">Manual Action</div>
-                <div id="manualActionStatusText" style="color: var(--color-accent-success); font-size: 0.75rem; font-weight: bold; margin-bottom: 4px;">READY</div>
-                <div style="width: 100%; height: 6px; background: #333; border-radius: 3px; overflow: hidden; border: 1px solid #111;">
-                    <div id="manualActionProgressBar" style="width: 100%; height: 100%; background: var(--color-accent-success); transition: width 0.3s linear, background-color 0.3s; box-shadow: 0 0 5px var(--color-accent-success);"></div>
+            <div id="manualActionDisplay"
+                style="text-align: center; background: rgba(0,0,0,0.7); padding: 0.4rem 0.8rem; border-radius: 4px; border: 1px solid var(--color-gold-dark);">
+                <div
+                    style="color: var(--color-gold-light); font-weight: bold; font-size: 0.9rem; line-height: 1.1; margin-bottom: 4px;">
+                    Manual Action</div>
+                <div id="manualActionStatusText"
+                    style="color: var(--color-accent-success); font-size: 0.75rem; font-weight: bold; margin-bottom: 4px;">
+                    READY</div>
+                <div
+                    style="width: 100%; height: 6px; background: #333; border-radius: 3px; overflow: hidden; border: 1px solid #111;">
+                    <div id="manualActionProgressBar"
+                        style="width: 100%; height: 100%; background: var(--color-accent-success); transition: width 0.3s linear, background-color 0.3s; box-shadow: 0 0 5px var(--color-accent-success);">
+                    </div>
                 </div>
             </div>
 
@@ -501,12 +624,17 @@
     <!-- Random Event Popup -->
     <div id="eventOverlay" class="glad-details-overlay hidden">
         <div id="eventModal" class="event-modal">
-            <div class="event-header" id="eventHeader">
-                <span class="event-category" id="eventCategory">Trait Event</span>
-                <h2 class="event-title" id="eventTitle">Event Title</h2>
+            <div class="event-header" id="eventHeader"
+                style="display: flex; align-items: center; gap: 1rem; text-align: left;">
+                <div id="eventGladiatorInfo" class="event-gladiator-info"
+                    style="margin: 0; padding: 0; background: none; border: none;">
+                    <!-- Avatar injected here -->
+                </div>
+                <div style="flex: 1;">
+                    <h2 class="event-title" id="eventTitle">Event Title</h2>
+                </div>
             </div>
             <div class="event-content">
-                <div id="eventGladiatorInfo" class="event-gladiator-info"></div>
                 <div class="event-body" id="eventDescription">
                     <p>Something happened in the barracks today...</p>
                 </div>

@@ -110,7 +110,7 @@ const EventEngine = {
         }
 
         // Populate Content
-        category.textContent = `Event: ${glad.name}`;
+        if (category) category.textContent = '';
         title.textContent = event.title;
         desc.textContent = event.description.replace(/\$NAME/g, glad.name);
 

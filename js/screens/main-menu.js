@@ -14,6 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Check for save data
     const continueBtn = document.querySelector('[data-action="continue"]');
     const newGameBtn = document.querySelector('[data-action="new-game"]');
+    const howToPlayBtn = document.querySelector('[data-action="how-to-play"]');
 
     const hasSaveData = localStorage.getItem('gladiatorSaveContext') !== null;
     if (!hasSaveData && continueBtn) {
@@ -26,26 +27,36 @@ document.addEventListener('DOMContentLoaded', () => {
     let introTimeout;
     let isIntroPlaying = false;
 
-    // Execute intro immediately
-    isIntroPlaying = true;
+    // Handle Start Overlay Click
+    if (startOverlay) {
+        startOverlay.addEventListener('click', (e) => {
+            e.stopPropagation(); // Don't let this bubbled click instantly skip the intro
+            startOverlay.classList.add('hidden');
 
-    try {
-        // Start background music immediately
-        playBackgroundMusic();
-    } catch (e) {
-        console.warn("Audio autoplay blocked by browser until user interacts");
+            isIntroPlaying = true;
+
+            try {
+                // Start background music now that user has interacted
+                playBackgroundMusic();
+            } catch (e) {
+                console.warn("Audio autoplay blocked by browser until user interacts");
+            }
+
+            // Start pan animation
+            panBackground.classList.add('animate-pan');
+
+            // Show main menu after a delay to match pan
+            introTimeout = setTimeout(() => {
+                if (isIntroPlaying) {
+                    isIntroPlaying = false;
+                    mainContainer.classList.add('show-menu');
+                }
+            }, 6500);
+        });
+    } else {
+        // Fallback if overlay is missing
+        mainContainer.classList.add('show-menu');
     }
-
-    // Start pan animation
-    panBackground.classList.add('animate-pan');
-
-    // Show main menu after a delay to match pan
-    introTimeout = setTimeout(() => {
-        if (isIntroPlaying) {
-            isIntroPlaying = false;
-            mainContainer.classList.add('show-menu');
-        }
-    }, 6500);
 
     // Skip intro pan animation if clicking anywhere on the document
     document.addEventListener('click', () => {
@@ -66,6 +77,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const teamGrid = document.getElementById('teamGrid');
     const cancelTeamSelectBtn = document.getElementById('cancelTeamSelectBtn');
 
+    const howToPlayScreen = document.getElementById('howToPlayScreen');
+    const closeHowToPlayBtn = document.getElementById('closeHowToPlayBtn');
+
     if (newGameBtn) {
         newGameBtn.addEventListener('click', () => {
             mainContainer.classList.remove('show-menu');
@@ -76,6 +90,52 @@ document.addEventListener('DOMContentLoaded', () => {
     if (cancelTeamSelectBtn) {
         cancelTeamSelectBtn.addEventListener('click', () => {
             teamSelectionScreen.classList.add('hidden');
+            mainContainer.classList.add('show-menu');
+        });
+    }
+
+    if (howToPlayBtn) {
+        howToPlayBtn.addEventListener('click', () => {
+            mainContainer.classList.remove('show-menu');
+            if (howToPlayScreen) {
+                howToPlayScreen.classList.remove('hidden');
+
+                // Reset to first tab
+                const htpTabBtns = howToPlayScreen.querySelectorAll('.tab-btn');
+                const htpTabContents = howToPlayScreen.querySelectorAll('.htp-tab-content');
+
+                htpTabBtns.forEach(btn => btn.classList.remove('active'));
+                htpTabContents.forEach(content => content.style.display = 'none');
+
+                if (htpTabBtns.length > 0) htpTabBtns[0].classList.add('active');
+                if (htpTabContents.length > 0) htpTabContents[0].style.display = 'block';
+            }
+        });
+    }
+
+    // Set up HTP Tabs
+    if (howToPlayScreen) {
+        const htpTabBtns = howToPlayScreen.querySelectorAll('.tab-btn');
+        htpTabBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                // Remove active state from all HTP tab buttons & hide all HTP tabs
+                htpTabBtns.forEach(b => b.classList.remove('active'));
+                howToPlayScreen.querySelectorAll('.htp-tab-content').forEach(tc => tc.style.display = 'none');
+
+                // Activate clicked button & show target tab
+                btn.classList.add('active');
+                const targetId = btn.getAttribute('data-target');
+                const targetSection = document.getElementById(targetId);
+                if (targetSection) {
+                    targetSection.style.display = 'block';
+                }
+            });
+        });
+    }
+
+    if (closeHowToPlayBtn) {
+        closeHowToPlayBtn.addEventListener('click', () => {
+            if (howToPlayScreen) howToPlayScreen.classList.add('hidden');
             mainContainer.classList.add('show-menu');
         });
     }
@@ -166,6 +226,9 @@ function handleMenuAction(action) {
             // Logic handled by event listener above
             break;
         case 'new-game':
+            // Logic handled by event listener above
+            break;
+        case 'how-to-play':
             // Logic handled by event listener above
             break;
         case 'settings':

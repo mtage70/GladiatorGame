@@ -35,6 +35,9 @@ function renderRoster() {
 
     const goldDisplay = document.getElementById('goldDisplay');
     const recordDisplay = document.getElementById('recordDisplay');
+    const trophyDisplay = document.getElementById('trophyDisplay');
+    const trophyCount = document.getElementById('trophyCount');
+
     if (goldDisplay) goldDisplay.innerHTML = `<span class="stat-icon">💰</span> ${saveContext.gold} G`;
 
     // Compute and display player W/L record
@@ -42,6 +45,18 @@ function renderRoster() {
     const wins = matchResults.filter(r => r.won).length;
     const losses = matchResults.filter(r => !r.won).length;
     if (recordDisplay) recordDisplay.innerHTML = `<span class="stat-icon">⚔️</span> ${wins}W - ${losses}L`;
+
+    // Compute and display trophies
+    const achievements = saveContext.achievements || [];
+    const aowanCups = achievements.filter(a => a === 'Aowan Cup Champion').length;
+    if (trophyDisplay && trophyCount) {
+        if (aowanCups > 0) {
+            trophyCount.textContent = aowanCups;
+            trophyDisplay.classList.remove('hidden');
+        } else {
+            trophyDisplay.classList.add('hidden');
+        }
+    }
 
     tbody.innerHTML = ''; // Clear current table body
 

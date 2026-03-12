@@ -1046,6 +1046,9 @@ function endCombat(winningSide) {
 function finishCombatTransition() {
     document.getElementById('combatScreen').classList.add('hidden');
 
+    if (typeof stopBackgroundMusic === 'function') stopBackgroundMusic();
+    if (typeof playBackgroundMusic === 'function') playBackgroundMusic();
+
     // Create a news log about the combat
     const newsList = document.getElementById('newsList');
     if (newsList) {
