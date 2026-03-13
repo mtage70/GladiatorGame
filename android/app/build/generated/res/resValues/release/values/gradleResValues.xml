@@ -36,7 +36,7 @@
     <!-- Value from default config. -->
     <string name="launchUrl" translatable="false">https://mtage70.github.io/GladiatorGame/index.html</string>
     <!-- Value from default config. -->
-    <string name="launcherName" translatable="false">Gladiator</string>
+    <string name="launcherName" translatable="false">Arena Manager</string>
     <!-- Value from default config. -->
     <string name="orientation" translatable="false">landscape</string>
     <!-- Value from default config. -->

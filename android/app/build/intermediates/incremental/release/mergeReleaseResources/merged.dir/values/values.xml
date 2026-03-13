@@ -369,7 +369,7 @@
     <string name="generatorApp" translatable="false">bubblewrap-cli</string>
     <string name="hostName" translatable="false">mtage70.github.io</string>
     <string name="launchUrl" translatable="false">https://mtage70.github.io/GladiatorGame/index.html</string>
-    <string name="launcherName" translatable="false">Gladiator</string>
+    <string name="launcherName" translatable="false">Arena Manager</string>
     <string name="manage_space_no_data_toast">This app holds no browsing data.</string>
     <string name="manage_space_not_supported_toast">This app\'s data is stored in %1$s.</string>
     <string name="no_provider_toast">Please install Chrome Stable 72 or later.</string>

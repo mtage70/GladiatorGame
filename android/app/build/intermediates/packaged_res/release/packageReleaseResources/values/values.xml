@@ -27,7 +27,7 @@
     <string name="generatorApp" translatable="false">bubblewrap-cli</string>
     <string name="hostName" translatable="false">mtage70.github.io</string>
     <string name="launchUrl" translatable="false">https://mtage70.github.io/GladiatorGame/index.html</string>
-    <string name="launcherName" translatable="false">Gladiator</string>
+    <string name="launcherName" translatable="false">Arena Manager</string>
     <string name="orientation" translatable="false">landscape</string>
     <string name="providerAuthority" translatable="false">io.github.mtage70.twa.fileprovider</string>
     <string name="webManifestUrl" translatable="false">https://mtage70.github.io/GladiatorGame/manifest.json</string>
