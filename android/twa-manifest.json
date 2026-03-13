@@ -2,7 +2,7 @@
   "packageId": "io.github.mtage70.twa",
   "host": "mtage70.github.io",
   "name": "Arena Manager",
-  "launcherName": "Gladiator",
+  "launcherName": "Arena Manager",
   "display": "fullscreen",
   "themeColor": "#222222",
   "themeColorDark": "#000000",

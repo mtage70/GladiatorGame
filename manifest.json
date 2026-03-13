@@ -1,6 +1,6 @@
 {
   "name": "Arena Manager",
-  "short_name": "Gladiator",
+  "short_name": "Arena Manager",
   "description": "Manage your team of gladiators and dominate the arena!",
   "start_url": "./index.html",
   "display": "standalone",
