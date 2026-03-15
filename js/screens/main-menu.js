@@ -243,12 +243,6 @@ function handleMenuAction(action) {
         case 'settings':
             alert('Opening settings... (Not implemented yet)');
             break;
-        case 'exit':
-            if (confirm('Are you sure you want to abandon the arena?')) {
-                // In a true desktop wrapper this would close the process
-                alert('Game closed. (This would exit the app)');
-            }
-            break;
         default:
             console.warn('Unknown action:', action);
     }
