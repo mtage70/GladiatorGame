@@ -1,3 +1,65 @@
+/* === Tablet (Medium Screens) === */
+@media screen and (max-width: 1200px) {
+
+    /* Match and Combat Screens */
+    .match-main,
+    .combat-main {
+        gap: 1rem !important;
+        justify-content: center !important;
+    }
+
+    .match-content {
+        gap: 1rem !important;
+        justify-content: center !important;
+    }
+
+    .team-side {
+        flex: 0 1 auto !important;
+        min-width: 0 !important;
+        padding: 0.5rem !important;
+    }
+
+    .formation-grid {
+        grid-gap: 0.5rem !important;
+        margin-top: 0.25rem !important;
+    }
+
+    .formation-slot {
+        width: 110px !important;
+        height: 150px !important;
+    }
+
+    /* Make the combat center log absolute so teams can be closer */
+    .combat-center-panel {
+        left: 50% !important;
+        transform: translateX(-50%) !important;
+        width: 260px !important;
+        margin-top: 0 !important;
+        top: 3.5rem !important;
+        height: calc(100vh - 8rem) !important;
+        z-index: 100 !important;
+        background: rgba(15, 16, 20, 0.9) !important;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.9) !important;
+    }
+
+    .versus-divider {
+        gap: 0.5rem !important;
+    }
+
+    .versus-divider h1 {
+        font-size: 2rem !important;
+    }
+
+    .combat-card-name {
+        font-size: 0.6rem !important;
+    }
+
+    .hp-text {
+        font-size: 0.5rem !important;
+    }
+}
+
+
 /* === Responsive / Mobile Landscape === */
 @media screen and (max-height: 550px) and (orientation: landscape),
 screen and (max-width: 950px) {
