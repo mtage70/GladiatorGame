@@ -1,7 +1,7 @@
 // js/engine/iap.js
 
 const PREMIUM_SKU = 'premium_upgrade';
-let isPremiumUser = false;
+let isPremiumUser = true;
 
 // Basic mocked Digital Goods service for local testing
 const mockDigitalGoodsService = {
@@ -16,7 +16,8 @@ const mockDigitalGoodsService = {
 };
 
 async function checkPremiumStatus() {
-    isPremiumUser = localStorage.getItem('isPremium') === 'true';
+    isPremiumUser = true;
+    localStorage.setItem('isPremium', 'true');
     applyPremiumUI();
 
     // If not premium locally, verify with Play Billing if available
